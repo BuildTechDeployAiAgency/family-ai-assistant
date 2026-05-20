@@ -161,13 +161,86 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | — | Pending |
+| SEC-01 | Phase 1 | Pending |
+| SEC-02 | Phase 1 | Pending |
+| SEC-03 | Phase 1 | Pending |
+| SEC-04 | Phase 1 | Pending |
+| SEC-05 | Phase 1 | Pending |
+| SEC-06 | Phase 1 | Pending |
+| SEC-07 | Phase 1 | Pending |
+| SEC-08 | Phase 1 | Pending |
+| SEC-09 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| DATA-05 | Phase 1 | Pending |
+| DATA-06 | Phase 1 | Pending |
+| DATA-07 | Phase 1 | Pending |
+| DATA-08 | Phase 1 | Pending |
+| DATA-09 | Phase 1 | Pending |
+| DATA-10 | Phase 1 | Pending |
+| DATA-11 | Phase 1 | Pending |
+| FE-01 | Phase 2 | Pending |
+| FE-02 | Phase 2 | Pending |
+| FE-03 | Phase 2 | Pending |
+| FE-04 | Phase 2 | Pending |
+| FE-05 | Phase 2 | Pending |
+| LLM-01 | Phase 3 | Pending |
+| LLM-02 | Phase 3 | Pending |
+| LLM-03 | Phase 3 | Pending |
+| LLM-04 | Phase 3 | Pending |
+| LLM-05 | Phase 3 | Pending |
+| LLM-06 | Phase 3 | Pending |
+| LLM-07 | Phase 3 | Pending |
+| LLM-08 | Phase 3 | Pending |
+| LLM-09 | Phase 3 | Pending |
+| DOCS-01 | Phase 3 | Pending |
+| DOCS-02 | Phase 3 | Pending |
+| DOCS-03 | Phase 3 | Pending |
+| DOCS-04 | Phase 3 | Pending |
+| DOCS-05 | Phase 3 | Pending |
+| DOCS-06 | Phase 3 | Pending |
+| DOCS-07 | Phase 3 | Pending |
+| DOCS-08 | Phase 3 | Pending |
+| DOCS-09 | Phase 3 | Pending |
+| DOCS-10 | Phase 3 | Pending |
+| DOCS-11 | Phase 3 | Pending |
+| SCH-01 | Phase 4 | Pending |
+| SCH-02 | Phase 4 | Pending |
+| SCH-03 | Phase 4 | Pending |
+| SCH-04 | Phase 4 | Pending |
+| SCH-05 | Phase 4 | Pending |
+| SCH-06 | Phase 4 | Pending |
+| SCH-07 | Phase 4 | Pending |
+| SCH-08 | Phase 4 | Pending |
+| TG-01 | Phase 4 | Pending |
+| TG-02 | Phase 4 | Pending |
+| TG-03 | Phase 4 | Pending |
+| TG-04 | Phase 4 | Pending |
+| TG-05 | Phase 4 | Pending |
+| TG-06 | Phase 4 | Pending |
+| TG-07 | Phase 4 | Pending |
+| TG-08 | Phase 4 | Pending |
+| TG-09 | Phase 4 | Pending |
+| TG-10 | Phase 4 | Pending |
+| TG-11 | Phase 4 | Pending |
+| OPS-01 | Phase 4 | Pending |
+| OPS-02 | Phase 4 | Pending |
+| OPS-03 | Phase 4 | Pending |
+| OPS-04 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 57 total
-- Mapped to phases: 0 (pending roadmapper)
-- Unmapped: 57 ⚠️
+- v1 requirements: 68 total
+- Mapped to phases: 68 (100%)
+- Unmapped: 0 ✓
+
+**Per-phase counts:**
+- Phase 1 (Security & Backend Foundation): 20 requirements (SEC-01..09, DATA-01..11)
+- Phase 2 (Frontend Modularization): 5 requirements (FE-01..05)
+- Phase 3 (LLM Router + Drive + Document Vault): 20 requirements (LLM-01..09, DOCS-01..11)
+- Phase 4 (Telegram, Reminders, School Hub & Production): 23 requirements (SCH-01..08, TG-01..11, OPS-01..04)
 
 ---
 *Requirements defined: 2026-05-20*
-*Last updated: 2026-05-20 after initial definition*
+*Last updated: 2026-05-20 — traceability populated by roadmapper*
