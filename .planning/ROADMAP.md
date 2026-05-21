@@ -33,7 +33,11 @@ When a document is dropped in the family folder or a school email is forwarded, 
   4. Every domain table (`documents`, `emails`, `tasks`, plus new `families`, `family_members`, `children`, `drive_connections`, `telegram_chats`, `reminders`, `llm_audit_log`) has `family_id NOT NULL` and is queried only through `server/db/repos/*` repository functions that require `familyId`
   5. `server.js` is decomposed into `adapters/rest.js`, `routes/`, `middleware/`, `db/`, `services/`; auth + AI endpoints are rate-limited, helmet headers and a tightened CORS allowlist are applied, all request bodies validated with `zod`, and `pino` structured logs redact PII/secrets
 
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 01-01-PLAN.md — Reconcile docs to Supabase+Vercel pivot; provision Supabase/Vercel/Upstash; scrub stale runtime state; move Hassan fixtures to DEV-only; rotate OpenRouter key
+- [ ] 01-02-PLAN.md — Initial Supabase migration with RLS for families/family_members/children/documents/emails/tasks; lib/env, lib/supabase, lib/today, lib/db/* repo wrappers; single RLS denial integration test
+- [ ] 01-03-PLAN.md — Vercel serverless functions under api/ replacing server.js; vercel.json security headers; zod request validation; pino structured logs with PII redaction; @upstash/ratelimit on /api/ai/*; Supabase Auth replaces custom JWT in src/App.jsx; OpenRouter proxied server-side; deploy + smoke test
+
 
 ### Phase 2: Frontend Modularization
 
