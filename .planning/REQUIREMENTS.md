@@ -7,7 +7,7 @@
 
 ### Security & Foundation
 
-- [ ] **SEC-01**: All sensitive runtime config (`OPENROUTER_API_KEY`, `JWT_SECRET`, `GOOGLE_CLIENT_SECRET`, `TELEGRAM_BOT_TOKEN`) loaded from env at boot via `envalid`; missing keys fail startup
+- [ ] **SEC-01**: All sensitive runtime config (`OPENROUTER_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) loaded from env at boot via `envalid`; missing keys fail startup. `GOOGLE_CLIENT_SECRET` deferred to Phase 3, `TELEGRAM_BOT_TOKEN` deferred to Phase 4.
 - [ ] **SEC-02**: `.env*` (except `.env.example`) and `server/database.db` are gitignored; any previously committed secrets rotated
 - [ ] **SEC-03**: OpenRouter API key is NEVER exposed to the client — all LLM calls go through server-side `/api/ai/*` proxy
 - [ ] **SEC-04**: `helmet` security headers + tightened CORS allowlist applied on all responses
@@ -15,21 +15,21 @@
 - [ ] **SEC-06**: All API request bodies validated with `zod` schemas before reaching handlers
 - [ ] **SEC-07**: Structured logging via `pino` + `pino-http` with PII/secret redaction
 - [ ] **SEC-08**: Hassan family seed data removed from production paths; only loaded behind a `DEV` flag
-- [ ] **SEC-09**: JWT secret fallback removed; boot fails if `JWT_SECRET` not set
+- [ ] ~~**SEC-09**: JWT secret fallback removed; boot fails if `JWT_SECRET` not set~~ — **OBSOLETE** under Supabase Auth pivot (D-11). Replaced by SEC-01 expansion to cover `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
 
 ### Data Model & Backend Skeleton
 
-- [ ] **DATA-01**: `families` table introduced as primary tenancy unit; existing `users` records linked to one family
+- [ ] **DATA-01**: `families` table introduced in Supabase Postgres as primary tenancy unit; existing `users` records (now Supabase Auth users) linked to one family
 - [ ] **DATA-02**: `family_members` table (replaces ad-hoc family-member columns) with role + profile per person
 - [ ] **DATA-03**: `children` table (subset of family_members marked as kids) with aliases array for school-comms disambiguation
-- [ ] **DATA-04**: `family_id NOT NULL` FK added to every domain table (`documents`, `emails`, `tasks`, plus new tables)
-- [ ] **DATA-05**: Repository pattern in `server/db/repos/` — every query takes `familyId`; no raw SQL outside repos
-- [ ] **DATA-06**: Migrations folder (`server/migrations/`) with idempotent SQL files run at boot
+- [ ] **DATA-04**: `family_id NOT NULL` FK added to every domain table + Postgres RLS policy gating family membership (per D-07)
+- [ ] **DATA-05**: Thin `lib/db/{resource}.js` wrappers around the Supabase JS client (`@supabase/supabase-js`); Supabase RLS is the security boundary, not `WHERE family_id = ?` predicates (per D-09)
+- [ ] **DATA-06**: Supabase CLI migrations under `supabase/migrations/` (per D-05)
 - [ ] **DATA-07**: `drive_connections` table stores per-family OAuth tokens, watched folder ID, `start_page_token`, last_sync_at
 - [ ] **DATA-08**: `telegram_chats` table binds `chat_id` to `family_id` + optional `member_id`
 - [ ] **DATA-09**: `reminders` table with unique `(member_id, doc_or_task_id, kind, scheduled_date)` and `sent_at` for claim-then-send
 - [ ] **DATA-10**: `llm_audit_log` table records every router call (family_id, source, model, tokens, cost, decision)
-- [ ] **DATA-11**: `server.js` decomposed into `adapters/rest.js`, `routes/`, `middleware/`, `db/`, `services/`
+- [ ] **DATA-11**: Vercel serverless functions under `api/` replace `server.js`; shared code under `lib/` (per RESEARCH "Recommended Project Structure")
 
 ### Frontend Modularization
 
@@ -154,7 +154,9 @@
 | Two-way calendar sync in v1 | Read-only or no calendar in v1; sync is v2 |
 | Native PDF storage on our servers | Drive is source of truth; we keep metadata only |
 | LangChain / Vercel AI SDK | Abstractions for problems we don't have |
-| Postgres migration in v1 | SQLite + Litestream sufficient for one family |
+| ~~Postgres migration in v1~~ | ~~SQLite + Litestream sufficient for one family~~ [^d01] |
+
+[^d01]: Reversed by Phase 1 CONTEXT D-01 (full Supabase pivot).
 | TypeScript migration in v1 | Stack stability over migration cost in POC |
 
 ## Traceability

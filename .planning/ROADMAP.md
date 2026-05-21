@@ -14,7 +14,7 @@ When a document is dropped in the family folder or a school email is forwarded, 
 - [ ] **Phase 1: Security & Backend Foundation** — Lock down secrets, harden API, evolve data model to family-scoped repos
 - [ ] **Phase 2: Frontend Modularization** — Decompose 3,643-line `App.jsx` into feature modules with router + query layer
 - [ ] **Phase 3: LLM Router + Drive + Document Vault** — Thesis-validating core: file dropped in Drive → classified, dated, assigned, persisted
-- [ ] **Phase 4: Telegram, Reminders, School Hub & Production** — Close the value loop end-to-end and ship to a real family on Fly + Vercel
+- [ ] **Phase 4: Telegram, Reminders, School Hub & Production** — Close the value loop end-to-end and ship to a real family on Vercel + Supabase + Upstash
 
 ## Phase Details
 
@@ -28,10 +28,12 @@ When a document is dropped in the family folder or a school email is forwarded, 
 
 **Success Criteria** (what must be TRUE):
   1. The OpenRouter API key is provably absent from the client bundle — all LLM calls go through `/api/ai/*` proxy with JWT auth
-  2. Starting the server with any required secret (`JWT_SECRET`, `OPENROUTER_API_KEY`, `GOOGLE_CLIENT_SECRET`, `TELEGRAM_BOT_TOKEN`) missing fails fast with a clear error; no source-level fallbacks remain
+  2. Starting any Vercel function with required env (`OPENROUTER_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`) missing fails fast via `envalid` with a clear error; no source-level fallbacks remain
   3. `.env*` and `server/database.db` are gitignored, prior leaked secrets have been rotated, and `git log` confirms no secrets in history
-  4. Every domain table (`documents`, `emails`, `tasks`, plus new `families`, `family_members`, `children`, `drive_connections`, `telegram_chats`, `reminders`, `llm_audit_log`) has `family_id NOT NULL` and is queried only through `server/db/repos/*` repository functions that require `familyId`
-  5. `server.js` is decomposed into `adapters/rest.js`, `routes/`, `middleware/`, `db/`, `services/`; auth + AI endpoints are rate-limited, helmet headers and a tightened CORS allowlist are applied, all request bodies validated with `zod`, and `pino` structured logs redact PII/secrets
+  4. Every Phase-1 domain table (`families`, `family_members`, `children`, `documents`, `emails`, `tasks`) has `family_id NOT NULL` and access is mediated by Postgres RLS policies (D-07) plus thin `lib/db/{resource}.js` wrappers (D-09). The downstream Drive / Telegram / reminder / audit-log tables are OWNED BY LATER PHASES per D-05 and RESEARCH Open Q #5 (RESOLVED) — not part of Phase 1 scope.[^ph1-sc4]
+  5. Vercel serverless functions under `api/` replace Express; shared code under `lib/{env,supabase,schemas,db,logger,ratelimit}`; helmet replaced by `vercel.json` headers; CORS unnecessary for same-origin browser→`/api/*` (allowlist remains for external webhooks); `zod` validates each function entry; `pino` structured logs with PII redaction; `@upstash/ratelimit` on `/api/ai/*`
+
+[^ph1-sc4]: Ownership reallocation per CONTEXT.md D-05 and RESEARCH.md Open Q #5 (RESOLVED).
 
 **Plans**: 3 plans
 - [ ] 01-01-PLAN.md — Reconcile docs to Supabase+Vercel pivot; provision Supabase/Vercel/Upstash; scrub stale runtime state; move Hassan fixtures to DEV-only; rotate OpenRouter key
@@ -90,7 +92,7 @@ When a document is dropped in the family folder or a school email is forwarded, 
   2. The `croner` scheduler running every minute fires reminders via `telegramSender` using claim-then-send (`UPDATE reminders SET sent_at WHERE sent_at IS NULL` affecting 1 row before the API call), queries `scheduled_at <= now() AND sent_at IS NULL` (not tick-window) so downtime catches up, respects per-family quiet hours (default 22:00–08:00) and timezone with no DST drift, and groups same-day items into one daily digest by default
   3. User can create/edit/delete child profiles with name + aliases + grade; pasting or uploading a school communication (UI or Telegram) extracts task + due_date + child_id (from family-children enum) + priority, with ambiguous-child cases flagged for confirmation
   4. The per-child dashboard surfaces open tasks ordered by due date; tasks reuse the reminder pipeline, can be marked complete/dismissed (both timestamped), and each task links back to its source communication
-  5. A new user can complete first-run onboarding end-to-end (create family → add members + children → connect Drive → pair Telegram) on a production Fly.io app (`count=1`, persistent volume, WAL-mode SQLite, healthcheck, Litestream backups to R2/Tigris with a documented restore drill) talking to a Vercel-hosted frontend whose CORS allowlist matches the deployed origin
+  5. A new user can complete first-run onboarding end-to-end (create family → add members + children → connect Drive → pair Telegram) on a Vercel project deployed (frontend + `api/` functions), Supabase project healthy, Upstash Redis configured, `.env.example` matches deployed env, manual restore drill from Supabase point-in-time recovery documented
 
 **Plans**: TBD
 

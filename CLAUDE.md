@@ -9,12 +9,12 @@ An AI-powered family operations assistant that watches a shared cloud drive fold
 
 ### Constraints
 
-- **Tech stack**: Vite + React 19, Express 5, SQLite — keep current stack for POC; pivot to Postgres only when multi-tenant
-- **Hosting**: Vercel (frontend) + Fly.io (backend + SQLite volume)
+- **Tech stack**: Vite + React 19 (frontend), Vercel serverless functions under `api/` (backend), Supabase Postgres + Auth + RLS, Upstash Redis for rate-limiting
+- **Hosting**: Vercel (frontend + `api/` serverless functions), Supabase (managed Postgres + Auth), Upstash (Redis)
 - **AI provider**: OpenRouter (already wired); model choice flexible
 - **Chat platform**: Telegram only for v1
 - **Cloud drive**: Google Drive only for v1
-- **Auth**: email/password (no OAuth providers in v1)
+- **Auth**: Supabase Auth, email/password (no OAuth providers in v1)
 - **Scope**: single-family POC — no multi-tenant isolation work in v1, but data model should not block it later
 - **Security**: Phase 1 must fix all critical concerns from `.planning/codebase/CONCERNS.md` before any feature work
 <!-- GSD:project-end -->
