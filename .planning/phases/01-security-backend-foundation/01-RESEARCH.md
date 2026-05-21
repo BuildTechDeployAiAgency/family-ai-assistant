@@ -844,32 +844,32 @@ All material claims in this research are either VERIFIED via direct tool calls (
 | A6 | "One family per user" enforcement at the policy level (D-08) means making `family_members` `unique(user_id)` for v1 — and lifting it for v2 multi-family | DATA-02 | Could instead just rely on policy logic without unique constraint. **Planner picks.** Recommend the unique constraint for v1 — easier to drop later than to add. |
 | A7 | The single RLS denial test is the right test depth for Phase 1 | Validation | If planner believes more tests are cheap, add auth flow + happy-path CRUD. CONTEXT.md "Test scaffolding" deferred to planner. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Cookie auth vs localStorage for Supabase session**
    - What we know: Supabase Auth defaults to localStorage. `@supabase/ssr` enables cookies. Cookies reduce XSS theft risk but complicate Vite-without-Next-Router setup.
    - What's unclear: Whether v1 attack surface justifies the integration cost.
-   - Recommendation: Stay localStorage in v1. Document as known tradeoff. Revisit in Phase 2 frontend modularization if cookie support is trivial via `@supabase/ssr` on a Vite SPA.
+   - RESOLVED: **localStorage** — v1 ships with Supabase default localStorage session storage. XSS attack surface deemed low for single-family POC; documented tradeoff (see T-03-09). Revisit in Phase 2.
 
 2. **Should we delete `dist/` and `server/database.db` from disk as part of Phase 1?**
    - What we know: Both are gitignored. Both contain old runtime state.
    - What's unclear: Whether deletion is in-scope for an automated plan task or a manual operator step.
-   - Recommendation: Include both as plan tasks (`rm -rf dist/` and `rm server/database.db`) — they're trivial and ensure clean baseline.
+   - RESOLVED: **Delete both as plan tasks** — Plan 01-01 Task 2 deletes `dist/`, `server/database.db`, and `.chrome-profile/` as part of the runtime-state scrub.
 
 3. **OpenRouter key rotation — automate or document?**
    - What we know: Current key was never published. Rotation is hygiene-only.
    - What's unclear: Whether to wire automated rotation or just emit a "rotate this key when Supabase setup complete" checklist item.
-   - Recommendation: Manual checklist item. Add a `checkpoint:human-verify` task that prompts the operator to rotate via OpenRouter dashboard and update Vercel env, then confirm with a test call.
+   - RESOLVED: **Manual checkpoint** — Plan 01-01 Task 3 is a `checkpoint:human-action` that includes OpenRouter key rotation as step 4 in the operator runbook.
 
 4. **Log sink: Vercel runtime logs vs Logtail/Better Stack**
    - What we know: Vercel logs are searchable in the dashboard with a 1-hour retention on hobby, longer on pro.
    - What's unclear: Whether 1-hour retention is enough for incident triage in v1.
-   - Recommendation: Defer per CONTEXT.md. Ship Vercel runtime logs in Phase 1; revisit when first incident demands longer retention.
+   - RESOLVED: **Vercel runtime logs** — Phase 1 ships pino → Vercel runtime logs. Logtail/Better Stack deferred. Revisit when first incident demands longer retention. Documented in Plan 01-03 SUMMARY callout.
 
 5. **DATA-07..DATA-10 schema timing** (drive_connections, telegram_chats, reminders, llm_audit_log)
    - What we know: Each is owned by a later phase (Phase 3 or 4).
    - What's unclear: Whether to land the empty tables now (cheap) or in their owning phases.
-   - Recommendation: **Defer to owning phase.** Adds zero value to ship empty tables; risks freezing wrong column types. Phase 1 owns only what Phase 1 features need: families, family_members, children, documents, emails, tasks.
+   - RESOLVED: **Defer DATA-07/08/09/10 to owning phases.** DATA-07 (drive_connections) and DATA-10 (llm_audit_log) move to Phase 3. DATA-08 (telegram_chats) and DATA-09 (reminders) move to Phase 4. ROADMAP Phase 1 Success Criterion #4 updated by Plan 01-01 Task 1 to strike these four tables with a footnote referencing D-05 and this resolution. Phase 1 owns only: families, family_members, children, documents, emails, tasks.
 
 ## Environment Availability
 
