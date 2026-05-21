@@ -6,376 +6,23 @@ import React, { useState, useEffect } from 'react'
 
 const REFERENCE_DATE = '2026-05-19';
 
-const FAMILY_MEMBERS = {
-  Ahmed: { name: 'Ahmed', role: 'Parent 1', avatar: '👨‍💼', color: 'bg-indigo-50 border-indigo-100 text-indigo-750', initials: 'A' },
-  Sara: { name: 'Sara', role: 'Parent 2', avatar: '👩‍⚕️', color: 'bg-rose-50 border-rose-100 text-rose-750', initials: 'S' },
-  Yusuf: { name: 'Yusuf', role: 'Child 1 (9)', avatar: '👦', color: 'bg-amber-50 border-amber-100 text-amber-750', initials: 'Y' },
-  Layla: { name: 'Layla', role: 'Child 2 (6)', avatar: '👧', color: 'bg-emerald-50 border-emerald-100 text-emerald-750', initials: 'L' },
-  Family: { name: 'Family', role: 'Household', avatar: '🏡', color: 'bg-teal-50 border-teal-100 text-teal-750', initials: 'F' }
-};
+// Demo fixtures — only loaded in dev (SEC-08). Vite replaces
+// `import.meta.env.DEV` with the literal `false` at build time, so Rollup
+// dead-code-eliminates this block and src/fixtures/hassan.js is never bundled.
+let FAMILY_MEMBERS = Object.create(null)
+let INITIAL_DOCUMENTS = Array()
+let INITIAL_EMAILS = Array()
+let MOCK_AI_RESPONSES = Object.create(null)
+let DEFAULT_RENEWAL_PLANS = Object.create(null)
+if (import.meta.env.DEV) {
+  const m = await import('./fixtures/hassan.js')
+  FAMILY_MEMBERS = m.FAMILY_MEMBERS
+  INITIAL_DOCUMENTS = m.INITIAL_DOCUMENTS
+  INITIAL_EMAILS = m.INITIAL_EMAILS
+  MOCK_AI_RESPONSES = m.MOCK_AI_RESPONSES
+  DEFAULT_RENEWAL_PLANS = m.DEFAULT_RENEWAL_PLANS
+}
 
-const INITIAL_DOCUMENTS = [
-  { id: 'doc-1', name: 'UAE Passport', number: 'N1234567', expiryDate: '2024-11-15', owner: 'Ahmed', category: 'Identity', progress: 0 },
-  { id: 'doc-2', name: 'UAE Driving Licence', number: 'DL-99887', expiryDate: '2026-07-01', owner: 'Ahmed', category: 'Driving', progress: 85 },
-  { id: 'doc-3', name: 'UAE Passport', number: 'N7654321', expiryDate: '2027-09-20', owner: 'Sara', category: 'Identity', progress: 100 },
-  { id: 'doc-4', name: 'UK Passport', number: 'GB-887766', expiryDate: '2025-06-10', owner: 'Sara', category: 'Identity', progress: 0 },
-  { id: 'doc-5', name: 'UAE Passport', number: 'N2468101', expiryDate: '2026-08-05', owner: 'Yusuf', category: 'Identity', progress: 75 },
-  { id: 'doc-6', name: 'School ID', number: 'SCH-998', expiryDate: '2026-06-30', owner: 'Yusuf', category: 'Education', progress: 65 },
-  { id: 'doc-7', name: 'UAE Passport', number: 'N1357911', expiryDate: '2027-03-12', owner: 'Layla', category: 'Identity', progress: 100 },
-  { id: 'doc-8', name: 'Health Insurance Card', number: 'CIG-8833', expiryDate: '2025-05-31', owner: 'Layla', category: 'Health', progress: 0 },
-  { id: 'doc-9', name: 'Home Contents Insurance', number: 'HC-9922', expiryDate: '2026-07-15', owner: 'Family', category: 'Finance', progress: 80 },
-  { id: 'doc-10', name: 'Car Insurance', number: 'CI-3344', expiryDate: '2026-07-22', owner: 'Family', category: 'Driving', progress: 82 }
-];
-
-const INITIAL_EMAILS = [
-  {
-    id: 'email-1',
-    from: 'Greenwood International School <admin@greenwood.sch.ae>',
-    subject: 'Weekly Newsletter: Parent-Teacher Meetings & Book Fair Deadline',
-    date: '2026-05-18',
-    icon: '🏫',
-    category: 'Education',
-    body: 'Dear Parents,\n\nPlease note that the Parent-Teacher meetings are scheduled for next Tuesday, May 26. Individual slots must be booked via the portal.\n\nAlso, the deadline to register for the annual Book Fair and submit reading selections is this Friday, May 22.\n\nFinally, the consent and permission slip for the Year 4 field trip must be returned signed by Friday afternoon.\n\nBest regards,\nGreenwood Admin',
-    read: false
-  },
-  {
-    id: 'email-2',
-    from: 'AllStars Football Academy <coach.marcus@allstars.ae>',
-    subject: 'Training Schedule Change & Tournament Registration',
-    date: '2026-05-17',
-    icon: '⚽',
-    category: 'Sports',
-    body: 'Hello families,\n\nPlease note training this Saturday (May 23) is moved to 8:00 AM due to the forecasted heat. Please ensure the kids bring plenty of water.\n\nAlso, registration for the Summer Cup tournament closes in exactly 5 days (May 22). Please complete the kit order form at your earliest convenience to secure the new jerseys.\n\nBest,\nCoach Marcus',
-    read: false
-  },
-  {
-    id: 'email-3',
-    from: "King's College Hospital Clinic <pediatrics@kingsclinic.ae>",
-    subject: 'Annual Pediatric Health Check Reminder',
-    date: '2026-05-19',
-    icon: '🩺',
-    category: 'Health',
-    body: 'Dear Sara,\n\nThis is a reminder that Yusuf and Layla are due for their annual pediatric health check. Keeping up with annual checks is important for their school health records.\n\nPlease use the link below to book their slots for next week. Remember to bring your valid health insurance card and Emirates ID to the appointment.\n\nWarm regards,\nPediatric Team',
-    read: false
-  },
-  {
-    id: 'email-4',
-    from: 'Emirates Airlines <booking@emirates.com>',
-    subject: 'Flight Confirmation: Dubai to London Heathrow',
-    date: '2026-05-15',
-    icon: '✈️',
-    category: 'Travel',
-    body: 'Thank you for booking with Emirates.\n\nYour flight EK007 from DXB to LHR is confirmed for July 5, 2026 (in 47 days). Departure is at 09:40 AM.\n\nPlease ensure you update your passport details in the manage booking portal at least 7 days before departure. Note that Sara\'s British passport must be valid for travel.',
-    read: true
-  },
-  {
-    id: 'email-5',
-    from: 'Cigna Global Health <renewals@cigna.com>',
-    subject: 'URGENT: Family Health Insurance Renewal Notice',
-    date: '2026-05-19',
-    icon: '🛡️',
-    category: 'Insurance',
-    body: 'Dear Ahmed,\n\nYour family health insurance policy (Policy #CG-998877) will renew in exactly 30 days on June 18, 2026.\n\nAction is required to confirm your current plan benefits or switch plans before the automatic renewal date. Failure to respond may lead to a temporary gap in coverage or premium increase.\n\nSincerely,\nCigna Renewals Team',
-    read: false
-  },
-  {
-    id: 'email-6',
-    from: 'Greenwood Accounts Office <finance@greenwood.sch.ae>',
-    subject: 'Term 3 Tuition Fees Invoice - Due in 14 Days',
-    date: '2026-05-18',
-    icon: '💵',
-    category: 'Finance',
-    body: 'Dear Parents,\n\nThe Term 3 tuition fees invoice for Yusuf and Layla Hassan has been generated.\n\nThe total amount due is AED 24,500, payable by June 2, 2026 (in 14 days). Please use our online payment portal to settle this invoice. A 5% late fee applies to payments received after the deadline.\n\nGreenwood Finance',
-    read: false
-  },
-  {
-    id: 'email-7',
-    from: 'GDRFA Dubai <no-reply@gdrfad.gov.ae>',
-    subject: 'Residency Visa Renewal Appointment Confirmed',
-    date: '2026-05-19',
-    icon: '🛂',
-    category: 'Admin',
-    body: 'Dear Ahmed Hassan,\n\nYour residency visa renewal biometrics appointment is confirmed for May 24, 2026, at 9:00 AM at the Al Manara Centre.\n\nPlease bring:\n1) Original Passport\n2) 4 passport-sized photos with white background\n3) Signed NOC letter from your sponsor\n\nThank you,\nGDRFA Support',
-    read: false
-  },
-  {
-    id: 'email-8',
-    from: 'Dubai Active Summer Camps <info@dubaiactive.com>',
-    subject: 'Summer Camp Registration Opens Monday!',
-    date: '2026-05-16',
-    icon: '🏕️',
-    category: 'Activities',
-    body: 'Get ready for summer!\n\nSummer Camp registration opens next Monday, May 25. Our early bird discount (15% off) ends in 10 days on May 29.\n\nSpaces are strictly limited and will be allocated on a first-come, first-served basis. Sign up Layla and Yusuf today to guarantee their places!\n\nWarmly,\nDubai Active Team',
-    read: true
-  },
-  {
-    id: 'email-9',
-    from: 'Pearl Dental Clinic Dubai <reception@pearldental.ae>',
-    subject: '6-Month Dental Checkup Overdue Notice',
-    date: '2026-05-12',
-    icon: '🦷',
-    category: 'Health',
-    body: 'Hi Sara,\n\nOur records show that Yusuf and Layla\'s routine 6-month dental cleaning and checkup are now overdue. Regular checks help prevent cavities!\n\nPlease call our reception desk at 04-333-2211 to book an appointment this week so we can maintain their smiles.\n\nBest,\nPearl Dental Clinic',
-    read: true
-  },
-  {
-    id: 'email-10',
-    from: 'Greenwood Year 4 Coordinator <y4trip@greenwood.sch.ae>',
-    subject: 'Year 4 Adventure Camp - Consent and Payment Due Next Wednesday',
-    date: '2026-05-17',
-    icon: '⛺',
-    category: 'Education',
-    body: 'Hi Parents,\n\nDetails for the Year 4 overnight trip to Hatta are attached. The total cost is AED 250 (£45 equivalent) and is due by next Wednesday, May 27.\n\nPlease submit the signed physical consent form and the completed medical conditions questionnaire to the class teacher.\n\nThanks,\nMs. Henderson',
-    read: false
-  },
-  {
-    id: 'email-11',
-    from: 'AXA Gulf Insurance <quotes@axagulf.ae>',
-    subject: 'Car Insurance Renewal Quote - Policy #AX-4433',
-    date: '2026-05-18',
-    icon: '🚗',
-    category: 'Insurance',
-    body: 'Dear Ahmed,\n\nYour comprehensive car insurance policy for your SUV will expire on June 15, 2026.\n\nYour renewal quote is attached with a 20% premium adjustment due to market rates. Please respond within 7 days (by May 25) to lock in this rate and avoid a lapse of registration.\n\nBest regards,\nAXA Team',
-    read: false
-  },
-  {
-    id: 'email-12',
-    from: 'Hamilton Aquatics Dubai <lessons@hamiltonaquatics.ae>',
-    subject: 'Swimming Lesson Level Assessment - Saturday May 23',
-    date: '2026-05-19',
-    icon: '🏊',
-    category: 'Sports',
-    body: 'Hi Sara,\n\nYusuf\'s swimming level assessment is scheduled for this coming Saturday, May 23, at 10:30 AM at the Hamdan Sports Complex.\n\nPlease ensure he arrives 15 minutes early and brings his goggles, swim cap, and dry towel.\n\nRegards,\nHamilton Coaching Team',
-    read: false
-  },
-  {
-    id: 'email-13',
-    from: 'Tiny Tots Nursery Dubai <accounts@tinytots.ae>',
-    subject: 'Monthly Nursery Fees Invoice - June 2026',
-    date: '2026-05-19',
-    icon: '🧸',
-    category: 'Finance',
-    body: 'Dear Parents,\n\nThe monthly tuition invoice for Layla\'s morning nursery sessions for June 2026 is AED 3,200.\n\nPayment is due in full by June 1, 2026. Please transfer to the bank details enclosed in the attached invoice PDF.\n\nWarm regards,\nTiny Tots Finance',
-    read: true
-  },
-  {
-    id: 'email-14',
-    from: 'British Embassy Dubai <consular.dubai@fcdo.gov.uk>',
-    subject: 'Important consular update: UK Passport renewal times',
-    date: '2026-05-10',
-    icon: '🇬🇧',
-    category: 'Admin',
-    body: 'Dear British Citizens,\n\nPlease be advised that the current processing time for UK passport renewals submitted from overseas is now running at 8 to 10 weeks due to seasonal demand.\n\nWe strongly advise applying early for summer travel. Do not book travel until you have your new passport.\n\nBritish Consular Services',
-    read: true
-  },
-  {
-    id: 'email-15',
-    from: 'Greenwood Portal <notifications@greenwood.portal.ae>',
-    subject: 'New message from Class Teacher Ms. Henderson',
-    date: '2026-05-19',
-    icon: '📝',
-    category: 'Education',
-    body: 'Notification:\n\nA new message has been posted on the Greenwood Parent Portal.\n\nMs. Henderson has requested all parents of Year 4 students to verify and submit the English reading homework log by this Thursday, May 21.\n\nGreenwood Portal',
-    read: false
-  }
-];
-
-// High-fidelity pre-computed live fallbacks for single email AI analysis
-const MOCK_AI_RESPONSES = {
-  'email-1': {
-    events: [{ date: '2026-05-26', description: 'Parent-Teacher Meetings' }],
-    actionItems: [
-      { action: 'Book Parent-Teacher meeting slot in school portal', owner: 'Both', deadline: '2026-05-25' },
-      { action: 'Register for annual Book Fair and submit reading selections', owner: 'Sara', deadline: '2026-05-22' },
-      { action: 'Return signed Year 4 trip permission consent slip', owner: 'Ahmed', deadline: '2026-05-22' }
-    ],
-    documentsNeeded: ['Consent Slip (signed)'],
-    deadlines: [
-      { item: 'Field trip consent due', date: '2026-05-22', urgency: 'high' },
-      { item: 'Book Fair registry due', date: '2026-05-22', urgency: 'high' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Book Parent-Teacher meeting slots, submit Book Fair registry, and return signed field trip consent form by Friday.'
-  },
-  'email-2': {
-    events: [{ date: '2026-05-23 08:00 AM', description: 'AllStars Football Training (heat adjustment)' }],
-    actionItems: [
-      { action: 'Pack extra water bottles for kids football training', owner: 'Both', deadline: '2026-05-23' },
-      { action: 'Complete Summer Cup registration and order kit', owner: 'Ahmed', deadline: '2026-05-22' }
-    ],
-    documentsNeeded: ['Football kit size details'],
-    deadlines: [
-      { item: 'Tournament registration due', date: '2026-05-22', urgency: 'high' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Kids football training rescheduled to 8:00 AM this Saturday due to heat. Kit ordering closes Friday.'
-  },
-  'email-3': {
-    events: [{ date: '2026-05-27 (Suggested)', description: 'Annual Pediatric Health Check' }],
-    actionItems: [
-      { action: 'Book clinic appointments for Yusuf and Layla health checks', owner: 'Sara', deadline: '2026-05-24' }
-    ],
-    documentsNeeded: ['Health Insurance Card', 'Emirates ID'],
-    deadlines: [
-      { item: 'Health Check Booking', date: '2026-05-24', urgency: 'medium' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Book Yusuf and Layla\'s annual pediatric checkups at King\'s College Clinic. Bring insurance and Emirates IDs.'
-  },
-  'email-4': {
-    events: [{ date: '2026-07-05 09:40 AM', description: 'Flight EK007 DXB to LHR' }],
-    actionItems: [
-      { action: 'Update passport information in Emirates booking portal', owner: 'Sara', deadline: '2026-06-28' },
-      { action: 'Verify Sara\'s UK passport validity status', owner: 'Sara', deadline: '2026-06-28' }
-    ],
-    documentsNeeded: ['Sara UK Passport'],
-    deadlines: [
-      { item: 'Manage Booking passport entry', date: '2026-06-28', urgency: 'medium' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Flight DXB to LHR confirmed for July 5. Update passport details in manage booking at least 7 days before departure.'
-  },
-  'email-5': {
-    events: [],
-    actionItems: [
-      { action: 'Review and confirm family health insurance renewal options', owner: 'Ahmed', deadline: '2026-06-18' }
-    ],
-    documentsNeeded: ['Cigna Health Insurance Card'],
-    deadlines: [
-      { item: 'Insurance Renewal Deadline', date: '2026-06-18', urgency: 'high' }
-    ],
-    needsReply: true,
-    draftReply: 'Dear Cigna Renewals Team,\n\nI would like to review our renewal options for Policy #CG-998877. Could you please send over the premium options for confirming the current benefits versus switching plans?\n\nBest regards,\nAhmed Hassan',
-    summary: 'Review and renew family health insurance plan within 30 days to avoid a coverage gap.'
-  },
-  'email-6': {
-    events: [],
-    actionItems: [
-      { action: 'Pay school tuition fees for Term 3 (Yusuf & Layla)', owner: 'Ahmed', deadline: '2026-06-02' }
-    ],
-    documentsNeeded: ['Tuition invoice PDF'],
-    deadlines: [
-      { item: 'Tuition fees due date', date: '2026-06-02', urgency: 'high' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Greenwood school fees of AED 24,500 due by June 2. 5% late fee applies after the deadline.'
-  },
-  'email-7': {
-    events: [{ date: '2026-05-24 09:00 AM', description: 'Residency Visa Renewal Biometrics Appointment' }],
-    actionItems: [
-      { action: 'Attend Residency Visa Renewal Biometrics Appointment at Al Manara Centre', owner: 'Ahmed', deadline: '2026-05-24' },
-      { action: 'Prepare Original Passport, 4 photos, and signed NOC sponsor letter', owner: 'Ahmed', deadline: '2026-05-23' }
-    ],
-    documentsNeeded: ['Original Passport', 'NOC sponsor letter', '4 passport-sized photos'],
-    deadlines: [
-      { item: 'Biometrics Appointment', date: '2026-05-24', urgency: 'high' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Attend biometrics visa appointment on May 24, bringing original passport, photos, and NOC sponsor letter.'
-  },
-  'email-10': {
-    events: [{ date: '2026-06-04', description: 'Year 4 Adventure Camp overnight trip to Hatta' }],
-    actionItems: [
-      { action: 'Submit AED 250 payment for Year 4 overnight camp', owner: 'Ahmed', deadline: '2026-05-27' },
-      { action: 'Submit signed physical consent and medical questionnaire to Ms. Henderson', owner: 'Sara', deadline: '2026-05-27' }
-    ],
-    documentsNeeded: ['Signed Consent Form', 'Medical Questionnaire'],
-    deadlines: [
-      { item: 'Camp payment & form deadline', date: '2026-05-27', urgency: 'medium' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Year 4 overnight Hatta trip consent, medical form, and AED 250 payment due next Wednesday, May 27.'
-  },
-  'email-11': {
-    events: [],
-    actionItems: [
-      { action: 'Review car insurance renewal quote and lock rate', owner: 'Ahmed', deadline: '2026-05-25' }
-    ],
-    documentsNeeded: ['AXA Quote details'],
-    deadlines: [
-      { item: 'AXA lock-in rate window', date: '2026-05-25', urgency: 'medium' }
-    ],
-    needsReply: true,
-    draftReply: 'Dear AXA Team,\n\nI received our comprehensive car insurance renewal quote (#AX-4433) for the SUV. Could you confirm if there are any loyalty discounts available to adjust the premium rates before we lock it in?\n\nBest regards,\nAhmed Hassan',
-    summary: 'SUV car insurance renewal quote received. Respond by May 25 to secure the rate and avoid a lapse.'
-  },
-  'email-12': {
-    events: [{ date: '2026-05-23 10:30 AM', description: 'Yusuf Swimming Assessment' }],
-    actionItems: [
-      { action: 'Bring Yusuf to Hamdan Sports Complex for swim assessment (15 min early)', owner: 'Sara', deadline: '2026-05-23' },
-      { action: 'Pack swim goggles, cap, and dry towel for assessment', owner: 'Sara', deadline: '2026-05-23' }
-    ],
-    documentsNeeded: ['Swim cap & goggles'],
-    deadlines: [
-      { item: 'Swimming Assessment date', date: '2026-05-23', urgency: 'medium' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Yusuf swim assessment scheduled for Saturday, May 23 at Hamdan Sports Complex at 10:30 AM.'
-  },
-  'email-15': {
-    events: [],
-    actionItems: [
-      { action: 'Verify and submit Year 4 English reading homework log', owner: 'Sara', deadline: '2026-05-21' }
-    ],
-    documentsNeeded: ['Reading log book'],
-    deadlines: [
-      { item: 'English reading log submission', date: '2026-05-21', urgency: 'high' }
-    ],
-    needsReply: false,
-    draftReply: null,
-    summary: 'Verify and submit Year 4 English reading homework log on parent portal by Thursday, May 21.'
-  }
-};
-
-// Custom premium localized step-by-step renewal plans (UAE specific)
-const DEFAULT_RENEWAL_PLANS = {
-  'UAE Passport': [
-    { title: 'Submit ICP Portal Request', details: 'Log in to the ICP Smart Channels app or website using UAE PASS. Fill in the online form, upload bio details and a compliant biometric photo.', fee: 'AED 150', location: 'ICP Portal / App' },
-    { title: 'Settle Renewal Fees', details: 'Pay the application and delivery fees securely online to initiate immediate processing.', fee: 'AED 150', location: 'Online Payment Gateway' },
-    { title: 'Courier Delivery', details: 'The new unified UAE Passport will be printed and dispatched via Zajel or Emirates Post directly to your registered family address.', fee: 'Free (Included)', location: 'Home Delivery' }
-  ],
-  'UAE Driving Licence': [
-    { title: 'Perform RTA Eye Test', details: 'Visit an RTA authorized optical shop (e.g. Al Jaber, Yateem) to undergo the mandatory eye test. Results sync immediately to RTA.', fee: 'AED 150', location: 'Authorized Optician Shop' },
-    { title: 'Clear Pending Traffic Fines', details: 'All pending Dubai Police or RTA traffic fines must be settled in full to unlock the licence renewal application.', fee: 'Depends on fines', location: 'Dubai Police App / RTA' },
-    { title: 'Submit Renewal on RTA Portal', details: 'Access the RTA app or website, upload your digital profile photo, and pay the renewal fee. Instant digital licence is generated.', fee: 'AED 320', location: 'RTA Smart App' },
-    { title: 'Receive Physical Card', details: 'Receive your high-fidelity smart driving licence card via RTA smart kiosks or standard courier delivery.', fee: 'AED 20 courier', location: 'RTA Kiosk / Delivery' }
-  ],
-  'UK Passport': [
-    { title: 'Submit HMPO Online Application', details: 'Access the official Her Majesty\'s Passport Office portal for overseas applications. Complete the application form and pay overseas fees.', fee: '£105.50 (approx AED 490)', location: 'HMPO Online Portal' },
-    { title: 'Submit Digital Photo', details: 'Take a professional passport photo at a studio and upload the digital photo code or high-resolution file that meets strict UK standards.', fee: 'AED 50', location: 'Trusted Photo Studio' },
-    { title: 'Courier Original Passport', details: 'Mail your old UK passport securely via DHL Express to the HMPO processing hub in Newcastle, UK.', fee: 'AED 150 courier', location: 'DHL Express Centre' },
-    { title: 'Wait for Verification & Dispatch', details: 'HMPO processes renewals in 8-10 weeks. The new biometric passport and your cancelled old passport are delivered via separate DHL packages.', fee: 'Free (Included)', location: 'Secure Courier' }
-  ],
-  'School ID': [
-    { title: 'Log in to Parent Portal', details: 'Access the Greenwood School Parent Portal and go to the Student Profile Management tab.', fee: 'Free', location: 'Greenwood Portal' },
-    { title: 'Upload New Student Photo', details: 'Upload a recent, high-contrast, front-facing profile photo of your child in school uniform against a white background.', fee: 'Free', location: 'Portal Upload' },
-    { title: 'Settle Printing Fee', details: 'Settle the nominal plastic card printing fee via the parent portal online checkout.', fee: 'AED 50', location: 'School Payment Portal' },
-    { title: 'Collect from Admin Office', details: 'New smart school IDs are distributed to class teachers. Yusuf can collect it directly or you can pick it up from front reception.', fee: 'Free', location: 'Greenwood Admin Desk' }
-  ],
-  'Health Insurance Card': [
-    { title: 'Request Cigna Quotes', details: 'Contact your dedicated corporate accounts representative or log into Cigna portal to receive renewal quotes with the latest coverage schedules.', fee: 'Free', location: 'Cigna Portal' },
-    { title: 'Verify Medical Declarations', details: 'Review and sign updated family medical declarations and pre-existing condition reports on behalf of Ahmed, Sara, Yusuf, and Layla.', fee: 'Free', location: 'Online Sign Tool' },
-    { title: 'Approve & Settle Premium', details: 'Authorize premium payment or confirm corporate sponsorship allocations to ensure zero lapse in continuity.', fee: 'Paid by Sponsor / Custom', location: 'Payment Portal' },
-    { title: 'Download Digital Cards', details: 'Cards are generated instantly. Sync new policy details to the Cigna app and Apple Wallet to utilize health networks immediately.', fee: 'Free', location: 'Cigna App / Apple Wallet' }
-  ],
-  'Home Contents Insurance': [
-    { title: 'Declare Household Valuations', details: 'Evaluate and declare updated values for furniture, electronic devices, appliances, and high-value family personal assets.', fee: 'Free', location: 'Insurance portal' },
-    { title: 'Submit Premium Renewal', details: 'Confirm coverage benefits (up to AED 250,000 protection) and pay the annual premium fee online.', fee: 'AED 450', location: 'Payment Gateway' }
-  ],
-  'Car Insurance': [
-    { title: 'Vehicle Passing Inspection', details: 'For cars older than 3 years, drive to a Tasjeel center to undergo the mandatory RTA vehicle safety passing inspection test.', fee: 'AED 170', location: 'Tasjeel RTA Centre' },
-    { title: 'Renew AXA Policy', details: 'Settle the comprehensive car insurance renewal premium. Cover details are electronically uploaded to the RTA traffic file immediately.', fee: 'AED 1,650', location: 'AXA Portal / App' },
-    { title: 'Renew RTA Mulkiya', details: 'Log in to RTA app, check traffic file for passing certificate and insurance upload, settle RTA renewal fee, and generate electronic Mulkiya.', fee: 'AED 350', location: 'RTA Smart App' }
-  ]
-};
 
 // ==========================================
 // 2. HELPER FUNCTIONS
@@ -612,7 +259,7 @@ const generateMockDocumentImage = (type) => {
     ctx.font = 'bold 11px system-ui, sans-serif';
     ctx.fillText('PARENTAL AUTHORIZATION & SIGNATURE SLIP', 55, nextY + 90);
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillText('Student Name: Zayd Hassan (Year 4-A)', 55, nextY + 110);
+    ctx.fillText('Student Name: Demo Student (Year 4-A)', 55, nextY + 110);
     
     // Draw school seal stamp (aesthetic red stamp)
     ctx.strokeStyle = 'rgba(186, 26, 26, 0.45)';
@@ -631,7 +278,7 @@ const generateMockDocumentImage = (type) => {
     ctx.textAlign = 'left';
     ctx.fillStyle = '#1a365d';
     ctx.font = 'italic 16px serif';
-    ctx.fillText('Sara Hassan', 55, nextY + 145);
+    ctx.fillText('Demo Signature', 55, nextY + 145);
     ctx.strokeStyle = '#718096';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -651,8 +298,10 @@ export default function App() {
   // Navigation & Settings State
   const [activeTab, setActiveTab] = useState('documents');
   const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(() => import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openrouter_api_key') || '');
-  const [apiModel] = useState(() => import.meta.env.VITE_OPENROUTER_MODEL || 'google/gemini-3.5-flash');
+  // OpenRouter key sourced from localStorage only — VITE_-prefixed env removed per D-15
+  // (Phase 3 moves OpenRouter calls server-side and removes this client-held key entirely.)
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('openrouter_api_key') || '');
+  const [apiModel] = useState(() => 'google/gemini-3.5-flash');
   const [tempKey, setTempKey] = useState(apiKey);
   const [notification, setNotification] = useState('');
   const [docScanState, setDocScanState] = useState('idle');
@@ -755,7 +404,7 @@ export default function App() {
     progress: 100
   });
 
-  // Sync initial Hassan family mock data or local storage migrations
+  // Sync initial demo data or local storage migrations
   const syncInitialData = async (authToken, currentDocs = INITIAL_DOCUMENTS, currentEmails = INITIAL_EMAILS) => {
     try {
       // 1. Sync documents
@@ -884,9 +533,9 @@ export default function App() {
           tsks = await taskRes.json();
         }
 
-        // If completely empty, seed standard Hassan Family dashboard data
+        // If completely empty, seed demo dashboard data
         if (docs.length === 0 && ems.length === 0) {
-          console.log("Empty user profile detected. Migrating local or preloading initial Hassan Family mock data...");
+          console.log("Empty user profile detected. Migrating local or preloading initial demo data...");
           
           const localDocs = localStorage.getItem('family_documents');
           const finalDocs = localDocs ? JSON.parse(localDocs) : INITIAL_DOCUMENTS;
@@ -1778,7 +1427,7 @@ Ahmed and Sara are parents. Yusuf and Layla are children. Map owner names correc
                 <div className="space-y-2">
                   <label className="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider block">Active Credentials</label>
                   <div className="w-full bg-[#fff8f1] border border-outline-variant/20 rounded-xl py-3 px-4 text-xs font-mono text-stone-600 flex justify-between items-center select-none">
-                    <span>sk-or-v1-••••••••••••••••••••••••</span>
+                    <span>OpenRouter key ••••••••••••••••••••••••</span>
                     <span className="material-symbols-outlined text-emerald-600 text-[18px]">verified_user</span>
                   </div>
                 </div>
@@ -2207,7 +1856,7 @@ Ahmed and Sara are parents. Yusuf and Layla are children. Map owner names correc
                   <section className="text-left">
                     <div className="flex flex-col gap-1">
                       <span className="font-label-md text-on-surface-variant text-[13px] font-semibold uppercase tracking-wider">
-                        The {user?.familyName || user?.family_name || 'Hassan'} Family
+                        The {user?.familyName || user?.family_name || 'Your'} Family
                       </span>
                       <h2 className="font-headline-lg-mobile text-[28px] font-bold text-primary leading-none mt-1">Document Vault</h2>
                       <p className="font-label-sm text-outline text-[11.5px] font-bold mt-1.5">
@@ -3548,7 +3197,7 @@ function Lockscreen({ onLogin }) {
                   <input 
                     type="text" 
                     required 
-                    placeholder="e.g. Hassan" 
+                    placeholder="e.g. Your family" 
                     value={familyName}
                     onChange={(e) => setFamilyName(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 focus:border-white/30 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white focus:outline-none placeholder-white/30 transition-colors"
