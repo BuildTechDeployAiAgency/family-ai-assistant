@@ -1,9 +1,11 @@
 import {
   REFERENCE_DATE,
+  FAMILY_MEMBERS,
   INITIAL_EMAILS,
   MOCK_AI_RESPONSES,
   type ActionItem,
   type Deadline,
+  type MemberKey,
 } from '@/data/fixtures';
 
 export interface DocStatus {
@@ -87,4 +89,59 @@ export const aggregateActions = (): AggregatedAction[] => {
     if (byUrg !== 0) return byUrg;
     return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
   });
+};
+
+// Children = family members whose role marks them as a child.
+export const CHILDREN: MemberKey[] = (Object.keys(FAMILY_MEMBERS) as MemberKey[]).filter((k) =>
+  FAMILY_MEMBERS[k].role.toLowerCase().includes('child')
+);
+
+export interface ChildTask {
+  id: string;
+  action: string;
+  deadline: string;
+  urgency: Deadline['urgency'];
+  emailId: string;
+  emailSubject: string;
+}
+
+// Generic mentions that imply all children.
+const GROUP_TERMS = /\b(kids?|children|both|year 4|students?)\b/i;
+
+// Build per-child task lists by scanning AI action items + source email text
+// for each child's name (and group terms that imply every child).
+export const childTasks = (): Record<MemberKey, ChildTask[]> => {
+  const result = {} as Record<MemberKey, ChildTask[]>;
+  CHILDREN.forEach((c) => (result[c] = []));
+
+  for (const email of INITIAL_EMAILS) {
+    const analysis = MOCK_AI_RESPONSES[email.id];
+    if (!analysis) continue;
+    const haystackBase = `${email.subject} ${email.body} ${analysis.summary}`;
+
+    analysis.actionItems.forEach((item, i) => {
+      const text = `${haystackBase} ${item.action}`;
+      const isGroup = GROUP_TERMS.test(text);
+      const dl = analysis.deadlines.find((d) => d.date === item.deadline) ?? analysis.deadlines[0];
+      const task: Omit<ChildTask, 'id'> = {
+        action: item.action,
+        deadline: item.deadline,
+        urgency: dl?.urgency ?? 'medium',
+        emailId: email.id,
+        emailSubject: email.subject,
+      };
+      CHILDREN.forEach((c) => {
+        const named = new RegExp(`\\b${FAMILY_MEMBERS[c].name}\\b`, 'i').test(text);
+        if (named || isGroup) {
+          result[c].push({ ...task, id: `${email.id}-${c}-${i}` });
+        }
+      });
+    });
+  }
+
+  // sort each child's tasks by deadline
+  CHILDREN.forEach((c) =>
+    result[c].sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+  );
+  return result;
 };

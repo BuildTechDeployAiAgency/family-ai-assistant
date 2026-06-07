@@ -13,9 +13,22 @@ export default function ActionsScreen() {
   const router = useRouter();
   const actions = useMemo(() => aggregateActions(), []);
   const [done, setDone] = useState<Record<string, boolean>>({});
+  const [owner, setOwner] = useState<string>('All');
+  const [urgency, setUrgency] = useState<string>('All');
+
+  const owners = useMemo(() => ['All', ...Array.from(new Set(actions.map((a) => a.owner)))], [actions]);
+  const urgencies = ['All', 'high', 'medium', 'low'];
+
+  const visible = useMemo(
+    () =>
+      actions.filter(
+        (a) => (owner === 'All' || a.owner === owner) && (urgency === 'All' || a.urgency === urgency)
+      ),
+    [actions, owner, urgency]
+  );
 
   const toggle = (id: string) => setDone((p) => ({ ...p, [id]: !p[id] }));
-  const remaining = actions.filter((a) => !done[a.id]).length;
+  const remaining = visible.filter((a) => !done[a.id]).length;
 
   return (
     <ScrollView
@@ -31,9 +44,18 @@ export default function ActionsScreen() {
         </Text>
       </Card>
 
+      <View style={{ gap: 8 }}>
+        <FilterRow options={owners} value={owner} onChange={setOwner} />
+        <FilterRow options={urgencies} value={urgency} onChange={setUrgency} cap />
+      </View>
+
       <SectionLabel>To do · by priority</SectionLabel>
 
-      {actions.map((a) => {
+      {visible.length === 0 && (
+        <Card><Text style={styles.noneText}>No actions match these filters.</Text></Card>
+      )}
+
+      {visible.map((a) => {
         const isDone = !!done[a.id];
         return (
           <Card key={a.id} style={[styles.actionCard, isDone && styles.doneCard]}>
@@ -67,8 +89,42 @@ export default function ActionsScreen() {
   );
 }
 
+function FilterRow({
+  options,
+  value,
+  onChange,
+  cap,
+}: {
+  options: string[];
+  value: string;
+  onChange: (v: string) => void;
+  cap?: boolean;
+}) {
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+      {options.map((opt) => {
+        const active = opt === value;
+        const label = cap && opt !== 'All' ? opt.charAt(0).toUpperCase() + opt.slice(1) : opt;
+        return (
+          <Pressable key={opt} onPress={() => onChange(opt)} style={[styles.filterChip, active && styles.filterChipActive]}>
+            <Text style={[styles.filterText, active && styles.filterTextActive]}>{label}</Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bgBase },
+  filterChip: {
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
+    backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border,
+  },
+  filterChipActive: { backgroundColor: Brand.accent, borderColor: Brand.accent },
+  filterText: { color: Brand.muted, fontSize: 13, fontWeight: '600' },
+  filterTextActive: { color: '#04121f' },
+  noneText: { color: Brand.muted, fontSize: 13 },
   banner: { gap: 8 },
   bannerValue: { color: Brand.accent, fontSize: 34, fontWeight: '800' },
   bannerLabel: { color: Brand.muted, fontSize: 13, marginTop: -4 },
