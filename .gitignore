@@ -36,3 +36,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Graphify regenerable caches (keep graph.json / reports, drop caches)
+graphify-out/cache/
+.planning/graphify-out/cache/

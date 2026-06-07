@@ -1,0 +1,207 @@
+{
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/vite.config.js": {
+    "mtime": 1779282405.6817145,
+    "ast_hash": "2672f8f517579c4a635e7a62acc2b199",
+    "semantic_hash": "2672f8f517579c4a635e7a62acc2b199"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/package.json": {
+    "mtime": 1779341989.3148372,
+    "ast_hash": "8aa5c80fd25b5b483fde2f2a8b606895",
+    "semantic_hash": "8aa5c80fd25b5b483fde2f2a8b606895"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/eslint.config.js": {
+    "mtime": 1779248027.2496068,
+    "ast_hash": "3aa4b57d7f08181d86bde52a4dcb7f22",
+    "semantic_hash": "3aa4b57d7f08181d86bde52a4dcb7f22"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/server/server.js": {
+    "mtime": 1779283138.0321262,
+    "ast_hash": "a2b8df2067bd88793ddf16413c98585b",
+    "semantic_hash": "a2b8df2067bd88793ddf16413c98585b"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/server/db.js": {
+    "mtime": 1779282589.7188842,
+    "ast_hash": "40b2cd1014727d9595ef7c9605b6f814",
+    "semantic_hash": "40b2cd1014727d9595ef7c9605b6f814"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/server/middleware.js": {
+    "mtime": 1779282395.4376163,
+    "ast_hash": "2c3a673be77554881b56527a2f99866f",
+    "semantic_hash": "2c3a673be77554881b56527a2f99866f"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/config.json": {
+    "mtime": 1779296217.4327946,
+    "ast_hash": "25912c8ff02dd45e474fdc182276509f",
+    "semantic_hash": "25912c8ff02dd45e474fdc182276509f"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/src/main.jsx": {
+    "mtime": 1779248027.2540493,
+    "ast_hash": "e13723e2574429d9a6d849727e3ff695",
+    "semantic_hash": "e13723e2574429d9a6d849727e3ff695"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/src/App.jsx": {
+    "mtime": 1779342382.8089194,
+    "ast_hash": "39e131eeea2dd856f769af51c4277f8b",
+    "semantic_hash": "39e131eeea2dd856f769af51c4277f8b"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/src/fixtures/hassan.js": {
+    "mtime": 1779342152.4325204,
+    "ast_hash": "42cb46c2df0c6e65ae92a2f05b8ef604",
+    "semantic_hash": "42cb46c2df0c6e65ae92a2f05b8ef604"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/index.html": {
+    "mtime": 1779280202.4313927,
+    "ast_hash": "0655608417be8f326fc143a91b5b5812",
+    "semantic_hash": "0655608417be8f326fc143a91b5b5812"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/README.md": {
+    "mtime": 1779248027.2489526,
+    "ast_hash": "a28dc4cb878325f3e9e5649f3e1469ac",
+    "semantic_hash": "a28dc4cb878325f3e9e5649f3e1469ac"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/CLAUDE.md": {
+    "mtime": 1779341847.5220203,
+    "ast_hash": "714998cefe1e8471d4429bfd5cce8c01",
+    "semantic_hash": "714998cefe1e8471d4429bfd5cce8c01"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.github/dependabot.yml": {
+    "mtime": 1779342010.7107663,
+    "ast_hash": "112260368aadb88730659215147b65e6",
+    "semantic_hash": "112260368aadb88730659215147b65e6"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/REQUIREMENTS.md": {
+    "mtime": 1779341887.3613954,
+    "ast_hash": "8900db8b1008805ecb0c6c8fadf491c5",
+    "semantic_hash": "8900db8b1008805ecb0c6c8fadf491c5"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/PROJECT.md": {
+    "mtime": 1779295825.0699086,
+    "ast_hash": "e6389919e432fd9280fdc5165fb3d4e9",
+    "semantic_hash": "e6389919e432fd9280fdc5165fb3d4e9"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/STATE.md": {
+    "mtime": 1779341707.3149345,
+    "ast_hash": "151693e24d2fa51fb2ec110e4badda67",
+    "semantic_hash": "151693e24d2fa51fb2ec110e4badda67"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/ROADMAP.md": {
+    "mtime": 1779341908.3609116,
+    "ast_hash": "48e6b77d923d414829385a69e322e78d",
+    "semantic_hash": "48e6b77d923d414829385a69e322e78d"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/research/STACK.md": {
+    "mtime": 1779296441.469776,
+    "ast_hash": "99313ceecc6fc33212b49f5197107c42",
+    "semantic_hash": "99313ceecc6fc33212b49f5197107c42"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/research/ARCHITECTURE.md": {
+    "mtime": 1779296429.7757187,
+    "ast_hash": "3fd831daa2dc76df71626a615e74e9a8",
+    "semantic_hash": "3fd831daa2dc76df71626a615e74e9a8"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/research/PITFALLS.md": {
+    "mtime": 1779296482.8072758,
+    "ast_hash": "4dbf957242a8dc7fe28f2eaf804a164c",
+    "semantic_hash": "4dbf957242a8dc7fe28f2eaf804a164c"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/research/SUMMARY.md": {
+    "mtime": 1779296789.1155422,
+    "ast_hash": "948eb8ba1fbe069cdd4ba9424e33fd73",
+    "semantic_hash": "948eb8ba1fbe069cdd4ba9424e33fd73"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/research/FEATURES.md": {
+    "mtime": 1779296411.802352,
+    "ast_hash": "ac583fef3704b86fdc3b546a5fc644d4",
+    "semantic_hash": "ac583fef3704b86fdc3b546a5fc644d4"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/STACK.md": {
+    "mtime": 1779285511.9854648,
+    "ast_hash": "aac2cfb47f7f8a9eb58ad6124d763166",
+    "semantic_hash": "aac2cfb47f7f8a9eb58ad6124d763166"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/ARCHITECTURE.md": {
+    "mtime": 1779285615.4165895,
+    "ast_hash": "b2ae444ae9fc99c14dcd3efcfc064d8d",
+    "semantic_hash": "b2ae444ae9fc99c14dcd3efcfc064d8d"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/STRUCTURE.md": {
+    "mtime": 1779285656.664448,
+    "ast_hash": "6a3578324dc5cedd4e626344f8513bdd",
+    "semantic_hash": "6a3578324dc5cedd4e626344f8513bdd"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/CONVENTIONS.md": {
+    "mtime": 1779285546.6061158,
+    "ast_hash": "fcb9ebef62c9343fd41e516d0127d078",
+    "semantic_hash": "fcb9ebef62c9343fd41e516d0127d078"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/INTEGRATIONS.md": {
+    "mtime": 1779285538.7260675,
+    "ast_hash": "c6fa4bdf71527b830b7fbf6363f7ea4a",
+    "semantic_hash": "c6fa4bdf71527b830b7fbf6363f7ea4a"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/TESTING.md": {
+    "mtime": 1779285565.072169,
+    "ast_hash": "3a3fef528ab9713fa2e9bb09616b00f7",
+    "semantic_hash": "3a3fef528ab9713fa2e9bb09616b00f7"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/codebase/CONCERNS.md": {
+    "mtime": 1779285614.9569488,
+    "ast_hash": "ef95498dff7de0efc0c274814ff23dfc",
+    "semantic_hash": "ef95498dff7de0efc0c274814ff23dfc"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/phases/01-security-backend-foundation/01-02-PLAN.md": {
+    "mtime": 1779332075.656624,
+    "ast_hash": "26b122ef1b1267110d4f01bec63de5fa",
+    "semantic_hash": "26b122ef1b1267110d4f01bec63de5fa"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/phases/01-security-backend-foundation/01-RESEARCH.md": {
+    "mtime": 1779332037.631215,
+    "ast_hash": "ed013e79c79d6912f82ece31c508a677",
+    "semantic_hash": "ed013e79c79d6912f82ece31c508a677"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/phases/01-security-backend-foundation/01-03-PLAN.md": {
+    "mtime": 1779332179.3156507,
+    "ast_hash": "bbb443249af7cce78d8d42d44dec0d53",
+    "semantic_hash": "bbb443249af7cce78d8d42d44dec0d53"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/phases/01-security-backend-foundation/01-DISCUSSION-LOG.md": {
+    "mtime": 1779327763.254549,
+    "ast_hash": "bf7efe50e62bb65be0bfe48a35404432",
+    "semantic_hash": "bf7efe50e62bb65be0bfe48a35404432"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/phases/01-security-backend-foundation/01-01-PLAN.md": {
+    "mtime": 1779332064.9950976,
+    "ast_hash": "d15fd1b7426ac753cae327af248b5f41",
+    "semantic_hash": "d15fd1b7426ac753cae327af248b5f41"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/.planning/phases/01-security-backend-foundation/01-CONTEXT.md": {
+    "mtime": 1779327742.6714513,
+    "ast_hash": "0bf3386b9a04385355470a4188179463",
+    "semantic_hash": "0bf3386b9a04385355470a4188179463"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/public/icons.svg": {
+    "mtime": 1779248027.2510676,
+    "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": "3b4fcfcf393eca4d264dca4a4663bc37"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/public/favicon.svg": {
+    "mtime": 1779248027.25062,
+    "ast_hash": "7e840862161341271697daa99a40d76b",
+    "semantic_hash": "7e840862161341271697daa99a40d76b"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/src/assets/hero.png": {
+    "mtime": 1779248027.252722,
+    "ast_hash": "aead493361b27e7510691c5d7072dfc1",
+    "semantic_hash": "aead493361b27e7510691c5d7072dfc1"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/src/assets/vite.svg": {
+    "mtime": 1779248027.253548,
+    "ast_hash": "9960a24288958394ac50e57ff638b036",
+    "semantic_hash": "9960a24288958394ac50e57ff638b036"
+  },
+  "/Users/diogoppedro/Build Tech Team/projects/family-ai-assistant/src/assets/react.svg": {
+    "mtime": 1779248027.253174,
+    "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": "f0402b67b6ce880f65666bb49e841696"
+  }
+}

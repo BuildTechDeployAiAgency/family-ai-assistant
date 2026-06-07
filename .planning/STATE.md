@@ -37,8 +37,8 @@ Plan: 1 of 3
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 1 | Security & Backend Foundation | Ready to discuss |
-| 2 | Frontend Modularization | Not started |
+| 1 | Security & Backend Foundation | Executing (blocked at 01-01 human checkpoint) |
+| 2 | Expo Native Client *(pivoted 2026-06-02)* | Not started — depends on Phase 1 |
 | 3 | LLM Router + Drive + Document Vault | Not started |
 | 4 | Telegram, Reminders, School Hub & Production | Not started |
 
@@ -55,15 +55,17 @@ Plan: 1 of 3
 
 | Decision | Rationale |
 |----------|-----------|
-| Keep current stack (Vite+React+Express+SQLite+OpenRouter) | Avoid rewrite cost on POC; existing scaffolding usable |
+| Stack pivot: Supabase+Vercel+Upstash replacing Express+SQLite+Fly.io | D-01..D-16 in 01-CONTEXT.md |
 | Single-family POC before multi-tenant SaaS | Validate value with one family before infra investment |
 | Google Drive as primary input, Telegram as secondary | Privacy-friendly vs email OAuth; both push to same LLM router |
 | Single LLM router for file + chat events | One pipeline, one prompt surface, easier to reason about |
 | Phase 1 = security hardening before any feature work | Cannot ship with client-side API key + leaked secrets |
 | Telegram only (defer WhatsApp), Drive only (defer iCloud/Dropbox) | POC simplicity |
 | Email connector deferred to v2 | User privacy concern; Drive folder covers POC |
-| Stay JavaScript ESM (no TypeScript migration in v1) | Stack stability over migration cost |
-| Stay SQLite + Litestream (no Postgres in v1) | Sufficient for one family |
+| TypeScript in mobile/ (Expo), JS in api/ (Vercel) | Expo ecosystem is TS-native; api/ already JS, not worth migrating |
+| Phase 2 = Expo native client (not web SPA modularization) | Real-user phone testing > clean web code. Decided 2026-06-02. |
+| Expo Go distribution (no EAS/App Store for MVP) | Instant testing, no build queue, no review wait |
+| GLM + Kimi for code generation, Claude Sonnet as orchestrator | Reduce orchestrator token cost; GLM/Kimi good at TypeScript scaffolding |
 
 ### Open TODOs (carried into planning)
 

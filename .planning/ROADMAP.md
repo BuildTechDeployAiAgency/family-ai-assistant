@@ -12,7 +12,7 @@ When a document is dropped in the family folder or a school email is forwarded, 
 ## Phases
 
 - [ ] **Phase 1: Security & Backend Foundation** — Lock down secrets, harden API, evolve data model to family-scoped repos
-- [ ] **Phase 2: Frontend Modularization** — Decompose 3,643-line `App.jsx` into feature modules with router + query layer
+- [ ] **Phase 2: Expo Native Client** — Build iOS/Android/Web app with Expo Router + Supabase auth + Document Vault + School Hub screens; distribute via Expo Go for real-family testing (replaces web SPA modularization — decision 2026-06-02)
 - [ ] **Phase 3: LLM Router + Drive + Document Vault** — Thesis-validating core: file dropped in Drive → classified, dated, assigned, persisted
 - [ ] **Phase 4: Telegram, Reminders, School Hub & Production** — Close the value loop end-to-end and ship to a real family on Vercel + Supabase + Upstash
 
@@ -41,22 +41,34 @@ When a document is dropped in the family folder or a school email is forwarded, 
 - [ ] 01-03-PLAN.md — Vercel serverless functions under api/ replacing server.js; vercel.json security headers; zod request validation; pino structured logs with PII redaction; @upstash/ratelimit on /api/ai/*; Supabase Auth replaces custom JWT in src/App.jsx; OpenRouter proxied server-side; deploy + smoke test
 
 
-### Phase 2: Frontend Modularization
+### Phase 2: Expo Native Client *(PIVOTED 2026-06-02)*
 
-**Goal**: The React SPA is a routed, query-driven, feature-modular app instead of a 3,643-line monolith — ready to host new screens for Drive, Telegram, and School Hub without further inflating one file.
+**Goal**: A native iOS + Android app built with Expo that real family members can install via Expo Go (no App Store), covering Document Vault, School Hub, and Actions — backed by the live Vercel `api/` deployed in Phase 1.
 
-**Depends on**: Phase 1 (needs the new `/api/*` shape and AI proxy)
+**Decision rationale**: Web SPA modularization deferred. Expo enables real-user testing on phones in 2 weeks without App Store. Backend is client-agnostic.
 
-**Requirements**: FE-01, FE-02, FE-03, FE-04, FE-05
+**Depends on**: Phase 1 complete (live Vercel `api/` + Supabase + Upstash)
+
+**Requirements**: FE-01, FE-02, FE-03, DOCS-01, DOCS-02, DOCS-03, DOCS-07, SCH-01, SCH-02, SCH-03, SCH-04
 
 **Success Criteria** (what must be TRUE):
-  1. `src/App.jsx` is under 200 lines and acts purely as a shell (auth gate, router, layout)
-  2. Each feature (`auth`, `docs`, `school`, `settings`) lives under `src/features/*` with no cross-feature imports — verified by a lint or grep rule
-  3. Hassan and other mock/fixture data has been moved to `src/fixtures/` and is only imported under `import.meta.env.DEV` — production bundles do not contain it
-  4. `react-router-dom` controls navigation; deep links to a specific tab/document survive a page refresh (no more "always lands on Documents")
-  5. `@tanstack/react-query` owns server-state fetching/mutations; loading and error states are visible in the UI for every list and form, replacing optimistic-fire-and-forget
+  1. A family member with Expo Go installed on their phone scans a QR code and reaches a working app within 30s
+  2. They can log in with Supabase Auth, session persists across app restarts (SecureStore)
+  3. They can scan a document photo → AI extracts title/category/expiry → they confirm → document appears in list
+  4. They can view school tasks per child and mark them complete
+  5. All screens have loading + error states; no blank/crash on network failure
+  6. QA pass complete: 0 open bugs in `02-04-BUG-LOG.md`
 
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 02-01-PLAN.md — Expo project init in `mobile/`; Supabase auth with SecureStore; root layout + auth gate; 3-tab shell (Documents / School / Actions)
+- [ ] 02-02-PLAN.md — Document Vault screens: list, detail, scan/upload with AI extraction flow
+- [ ] 02-03-PLAN.md — School Hub (per-child task lists) + Actions screen (all pending with filters)
+- [ ] 02-04-PLAN.md — QA pass: device testing regression matrix, bug fix round, Expo Go distribution prep
+
+**Model delegation**:
+- GLM: UI component scaffolding, screen layouts
+- Kimi: API clients, auth flows, data hooks
+- Orchestrator (Claude Sonnet): plan verification, bug triage, architectural decisions
 
 **UI hint**: yes
 
