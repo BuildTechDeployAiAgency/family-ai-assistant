@@ -4,13 +4,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar, Card, Pill, ProgressBar, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { DEFAULT_RENEWAL_PLANS, FAMILY_MEMBERS, INITIAL_DOCUMENTS } from '@/data/fixtures';
+import { DEFAULT_RENEWAL_PLANS, FAMILY_MEMBERS } from '@/data/fixtures';
 import { categoryColor, getDocumentStatus } from '@/lib/helpers';
+import { useDocuments } from '@/store/documents';
 
 export default function DocumentDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const doc = INITIAL_DOCUMENTS.find((d) => d.id === id);
+  const { getDocument } = useDocuments();
+  const doc = getDocument(id);
 
   if (!doc) {
     return (

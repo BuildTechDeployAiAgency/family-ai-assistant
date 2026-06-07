@@ -29,6 +29,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Family AI uses your photos to read and file documents.",
+          "cameraPermission": "Family AI uses the camera to scan documents."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#0f172a",

@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
+import { DocumentsProvider } from '@/store/documents';
 
 const navTheme = {
   ...DarkTheme,
@@ -23,17 +24,20 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider value={navTheme}>
-          <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerStyle: { backgroundColor: Brand.surface },
-              headerTintColor: Brand.text,
-              contentStyle: { backgroundColor: Brand.bgBase },
-            }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
-            <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
-          </Stack>
+          <DocumentsProvider>
+            <StatusBar style="light" />
+            <Stack
+              screenOptions={{
+                headerStyle: { backgroundColor: Brand.surface },
+                headerTintColor: Brand.text,
+                contentStyle: { backgroundColor: Brand.bgBase },
+              }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
+              <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
+              <Stack.Screen name="scan" options={{ presentation: 'modal', title: 'Scan document' }} />
+            </Stack>
+          </DocumentsProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
