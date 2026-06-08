@@ -1,10 +1,13 @@
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
+import { AuthProvider, useAuth } from '@/store/auth';
 import { DocumentsProvider } from '@/store/documents';
 
 const navTheme = {
@@ -19,25 +22,56 @@ const navTheme = {
   },
 };
 
+function RootNav() {
+  const { session, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+    const inAuthGroup = segments[0] === '(auth)';
+    if (!session && !inAuthGroup) {
+      router.replace('/(auth)/login');
+    } else if (session && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+  }, [session, loading, segments, router]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Brand.bgBase }}>
+        <ActivityIndicator color={Brand.accent} size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: Brand.surface },
+        headerTintColor: Brand.text,
+        contentStyle: { backgroundColor: Brand.bgBase },
+      }}>
+      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
+      <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
+      <Stack.Screen name="scan" options={{ presentation: 'modal', title: 'Scan document' }} />
+    </Stack>
+  );
+}
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider value={navTheme}>
-          <DocumentsProvider>
-            <StatusBar style="light" />
-            <Stack
-              screenOptions={{
-                headerStyle: { backgroundColor: Brand.surface },
-                headerTintColor: Brand.text,
-                contentStyle: { backgroundColor: Brand.bgBase },
-              }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
-              <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
-              <Stack.Screen name="scan" options={{ presentation: 'modal', title: 'Scan document' }} />
-            </Stack>
-          </DocumentsProvider>
+          <StatusBar style="light" />
+          <AuthProvider>
+            <DocumentsProvider>
+              <RootNav />
+            </DocumentsProvider>
+          </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
