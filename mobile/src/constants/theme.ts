@@ -68,6 +68,14 @@ export const Fonts = Platform.select({
   },
 });
 
+// Brand typeface (BTD = Inter). Loaded in app/_layout.tsx via useFonts.
+export const FontFamily = {
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semibold: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+} as const;
+
 export const Spacing = {
   half: 2,
   one: 4,
