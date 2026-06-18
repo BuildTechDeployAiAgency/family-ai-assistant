@@ -27,6 +27,9 @@ export interface ChatResult {
 
 // Single server-side OpenRouter call. The AI key NEVER leaves the server.
 export async function chat(opts: ChatOptions): Promise<ChatResult> {
+  if (!env.OPENROUTER_API_KEY) {
+    throw new Error('OPENROUTER_API_KEY not configured — set it to enable AI features.');
+  }
   const res = await fetch(BASE, {
     method: 'POST',
     headers: {

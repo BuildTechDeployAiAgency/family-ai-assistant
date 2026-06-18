@@ -5,7 +5,7 @@ export const env = cleanEnv(process.env, {
   SUPABASE_URL: str(),
   SUPABASE_ANON_KEY: str(), // publishable / anon key (RLS path uses the user's JWT)
   SUPABASE_SERVICE_ROLE_KEY: str({ default: '' }), // unused this MVP; needed for Phase 3 ingestion
-  OPENROUTER_API_KEY: str(),
+  OPENROUTER_API_KEY: str({ default: '' }), // optional: CRUD works without it; ai/* errors until set
   OPENROUTER_MODEL_AGENT: str({ default: 'openai/gpt-4o-mini' }),   // must support tool-calling
   OPENROUTER_MODEL_EXTRACT: str({ default: 'openai/gpt-4o-mini' }), // cheap, vision + json mode
   // Upstash optional in dev — rate limiting becomes a no-op when absent.
