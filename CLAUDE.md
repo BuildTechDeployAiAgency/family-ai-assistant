@@ -1,3 +1,39 @@
+# ⚡ Session-start protocol (do this FIRST, every new session)
+
+A fresh Claude must be able to resume with zero context loss. In order:
+
+1. **Read `documentation/HANDOFF.md`** (gitignored, local) if it exists — the latest detailed handoff: exact next action (§6), open questions (§7), recent decisions (§8). This is the live working edge.
+2. **Project memory auto-loads** (claude-mem + the file memory index) — trust it for durable, slow-changing truth: live URLs, Supabase/Vercel refs, demo logins, what's built, roadmap, constraints. Don't re-derive from code what memory already states.
+3. **Active mode hooks** — this session runs **Caveman mode (full)**: terse replies, drop articles/filler; code/commits/security written normally. (Toggle: "stop caveman".)
+
+## What this project IS
+**Family AI Assistant** — a mobile-first (Expo/React Native) family ops assistant. Organizes household documents, tracks expiries/renewals, surfaces per-child school tasks, and answers natural-language questions via a server-side tool-calling AI agent grounded ONLY in the family's own data. Single-family POC now; multi-tenant SaaS later. Backend = Vercel `api/` serverless + Supabase Postgres (RLS) + OpenRouter. Legacy `src/App.jsx` + `server/` (Vite/Express/SQLite) is **throwaway** — do not build on it.
+
+## Hard rules — NEVER break these (invariants)
+- **Family isolation is sacred.** Every domain row is `family_id`-scoped; RLS via `auth_family_id()`. The #1 invariant: any service-role / server query that bypasses RLS MUST add an explicit `family_id` filter derived from a **verified source** (JWT / channel link), NEVER from the request body. Reverting this leaks one family's data to another. A cross-family read returning >0 rows is a P0.
+- **The AI key is server-only.** `OPENROUTER_API_KEY` lives in Vercel/`.env`, never with a `VITE_`/`EXPO_PUBLIC_` prefix, never in the client bundle. All model calls go through `api/ai/*`.
+- **`auth_family_id()` must keep `EXECUTE` granted to `authenticated`** — RLS policies call it; revoking it returns 0 rows everywhere (see migration 0004; this already bit us once).
+- **MVP data path = user-JWT + RLS only.** Service-role is reserved for future ingestion. Don't introduce service-role reads on the request path.
+- **`REFERENCE_DATE` (2026-05-19)** is the deterministic "today" for the POC (env + seed). Expiry/urgency math depends on it; keep it consistent across client + server.
+- **`EXPO_PUBLIC_*` are baked at build time** — changing them needs a new EAS build, not a redeploy.
+- **Design direction is LOCKED: Calm Concierge** (light tonal, clay accent `#B5654A`, Fraunces serif headings + Inter, Phosphor icons). Don't reintroduce the old dark + cyan theme.
+
+## Run / build / ship
+- **Mobile (dev):** `cd mobile && SOCKET_CLI_ACCEPT_RISKS=1 npx expo start --lan` → Expo Go at `exp://<LAN-ip>:8081`. (npm is behind Socket CLI — always prefix `SOCKET_CLI_ACCEPT_RISKS=1` for installs.)
+- **Backend:** Vercel project `family-ai-assistant`; prod alias `https://family-ai-assistant-livid.vercel.app`. Deploy latest code: `npx vercel deploy --prod --yes`. Env vars live on the Vercel project (persist there, NOT via `-e` flags which are deployment-scoped and vanish on dashboard redeploys).
+- **DB:** Supabase project `lldbxyadiprsgtftduhe`; migrations in `supabase/migrations/`, applied via the Supabase MCP `apply_migration`. Verify RLS with MCP `get_advisors`.
+- **Before shipping:** verify invariants (family isolation holds; AI key not in bundle), then commit + push. Work happens on branch `feat/01-backend-foundation-ai-agent` (PR #1).
+
+## Secrets (by location only — never write values here)
+- `OPENROUTER_API_KEY` → Vercel project env + local `mobile`/root `.env` (gitignored).
+- `SUPABASE_SERVICE_ROLE_KEY` → Supabase dashboard (unused in MVP).
+- Supabase URL + publishable/anon key are public (safe in `.env.example`). Demo logins are in `documentation/HANDOFF.md` §11.
+
+## Context discipline
+Watch context usage. Tell the user at **~70% used**; refresh `documentation/HANDOFF.md` at **~60%** so work is never lost to a cutoff. HANDOFF.md §6 ("exact next action") is non-negotiable — always leave it pointing at the literal next step.
+
+---
+
 <!-- GSD:project-start source:PROJECT.md -->
 ## Project
 
