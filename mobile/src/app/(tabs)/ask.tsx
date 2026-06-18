@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -12,9 +11,10 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ArrowBendUpRight, ArrowUp, Sparkle } from 'phosphor-react-native';
 
 import { Markdown } from '@/components/Markdown';
-import { Brand, FontFamily } from '@/constants/theme';
+import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { api } from '@/lib/api';
 
 interface Turn {
@@ -23,7 +23,7 @@ interface Turn {
 }
 
 const SUGGESTIONS = [
-  "Whose passport expires soon?",
+  "Are our passports OK for the summer trip?",
   "How did Bella do in her latest results?",
   'What do we need to do for Ayla?',
   "What's most urgent this week?",
@@ -63,49 +63,49 @@ export default function AskScreen() {
       keyboardVerticalOffset={90}>
       <ScrollView
         ref={scrollRef}
-        contentContainerStyle={{ padding: 16, paddingBottom: 16, gap: 14 }}
+        contentContainerStyle={{ padding: 18, paddingBottom: 18, gap: 13 }}
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}>
-        {turns.length === 0 && (
+        {turns.length === 0 ? (
           <View style={styles.empty}>
             <View style={styles.orb}>
-              <Ionicons name="sparkles" size={26} color={Brand.accent} />
+              <Sparkle size={28} color="#fff" weight="fill" />
             </View>
-            <Text style={styles.emptyTitle}>Ask about your family</Text>
-            <Text style={styles.emptySub}>Documents, expiries, school results, tasks — grounded in your real data.</Text>
+            <Text style={styles.emptyTitle}>How can I help your family?</Text>
+            <Text style={styles.emptySub}>Ask about documents, expiries, school results or tasks — answered from your real data.</Text>
             <View style={styles.suggestWrap}>
               {SUGGESTIONS.map((s) => (
                 <Pressable key={s} style={styles.suggestChip} onPress={() => send(s)}>
-                  <Ionicons name="arrow-forward-circle-outline" size={16} color={Brand.accent} />
+                  <ArrowBendUpRight size={16} color={Brand.accent} weight="bold" />
                   <Text style={styles.suggestText}>{s}</Text>
                 </Pressable>
               ))}
             </View>
           </View>
-        )}
-
-        {turns.map((t, i) =>
-          t.role === 'user' ? (
-            <View key={i} style={[styles.bubble, styles.user]}>
-              <Text style={styles.userText}>{t.text}</Text>
-            </View>
-          ) : (
-            <View key={i} style={styles.assistantWrap}>
-              <View style={styles.assistantLabel}>
-                <Ionicons name="sparkles" size={11} color={Brand.accent} />
-                <Text style={styles.assistantLabelText}>Assistant</Text>
+        ) : (
+          turns.map((t, i) =>
+            t.role === 'user' ? (
+              <View key={i} style={[styles.bubble, styles.user]}>
+                <Text style={styles.userText}>{t.text}</Text>
               </View>
-              <View style={[styles.bubble, styles.assistant]}>
-                <Markdown text={t.text} />
+            ) : (
+              <View key={i} style={styles.assistantWrap}>
+                <View style={styles.aiLabel}>
+                  <Sparkle size={12} color={Brand.accent} weight="fill" />
+                  <Text style={styles.aiLabelText}>Concierge</Text>
+                </View>
+                <View style={[styles.bubble, styles.assistant]}>
+                  <Markdown text={t.text} />
+                </View>
               </View>
-            </View>
+            )
           )
         )}
 
         {loading && (
           <View style={styles.assistantWrap}>
-            <View style={styles.assistantLabel}>
-              <Ionicons name="sparkles" size={11} color={Brand.accent} />
-              <Text style={styles.assistantLabelText}>Assistant</Text>
+            <View style={styles.aiLabel}>
+              <Sparkle size={12} color={Brand.accent} weight="fill" />
+              <Text style={styles.aiLabelText}>Concierge</Text>
             </View>
             <View style={[styles.bubble, styles.assistant, styles.thinking]}>
               <ActivityIndicator color={Brand.accent} size="small" />
@@ -121,7 +121,7 @@ export default function AskScreen() {
           value={input}
           onChangeText={setInput}
           placeholder="Ask anything…"
-          placeholderTextColor={Brand.muted}
+          placeholderTextColor={Brand.faint}
           onSubmitEditing={() => send(input)}
           returnKeyType="send"
         />
@@ -129,7 +129,7 @@ export default function AskScreen() {
           style={[styles.sendBtn, (!input.trim() || loading) && styles.sendBtnDisabled]}
           onPress={() => send(input)}
           disabled={loading || !input.trim()}>
-          <Ionicons name="arrow-up" size={20} color="#04121f" />
+          <ArrowUp size={20} color="#fff" weight="bold" />
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -138,49 +138,49 @@ export default function AskScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bgBase },
-  empty: { alignItems: 'center', gap: 10, paddingVertical: 36 },
+  empty: { alignItems: 'center', gap: 10, paddingVertical: 40 },
   orb: {
-    width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center',
-    backgroundColor: 'rgba(0,194,255,0.12)', borderWidth: 1, borderColor: 'rgba(0,194,255,0.35)',
+    width: 64, height: 64, borderRadius: 22, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: Brand.accent, shadowColor: Brand.accent, shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 8 },
   },
-  emptyTitle: { color: Brand.text, fontSize: 20, fontFamily: FontFamily.bold },
-  emptySub: { color: Brand.muted, fontSize: 14, fontFamily: FontFamily.regular, textAlign: 'center', paddingHorizontal: 24, lineHeight: 20 },
-  suggestWrap: { gap: 8, marginTop: 14, width: '100%' },
+  emptyTitle: { color: Brand.text, fontSize: 22, fontFamily: FontFamily.serif, textAlign: 'center', marginTop: 4 },
+  emptySub: { color: Brand.muted, fontSize: 14, fontFamily: FontFamily.regular, textAlign: 'center', paddingHorizontal: 20, lineHeight: 21 },
+  suggestWrap: { gap: 9, marginTop: 16, width: '100%' },
   suggestChip: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border,
-    borderRadius: 14, paddingHorizontal: 14, paddingVertical: 13,
+    borderRadius: Radius.md, paddingHorizontal: 15, paddingVertical: 14,
   },
   suggestText: { color: Brand.text, fontSize: 14, fontFamily: FontFamily.medium, flex: 1 },
 
-  bubble: { maxWidth: '88%', paddingHorizontal: 14, paddingVertical: 11 },
+  bubble: { maxWidth: '86%', paddingHorizontal: 15, paddingVertical: 12 },
   user: {
     alignSelf: 'flex-end', backgroundColor: Brand.accent,
-    borderRadius: 18, borderBottomRightRadius: 5,
+    borderRadius: 20, borderBottomRightRadius: 6,
   },
-  userText: { color: '#04121f', fontSize: 15, lineHeight: 21, fontFamily: FontFamily.medium },
+  userText: { color: Brand.onAccent, fontSize: 15, lineHeight: 21, fontFamily: FontFamily.medium },
 
-  assistantWrap: { alignSelf: 'flex-start', maxWidth: '90%', gap: 4 },
-  assistantLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, marginLeft: 4 },
-  assistantLabelText: { color: Brand.muted, fontSize: 11, fontFamily: FontFamily.semibold, letterSpacing: 0.3 },
+  assistantWrap: { alignSelf: 'flex-start', maxWidth: '92%', gap: 5 },
+  aiLabel: { flexDirection: 'row', alignItems: 'center', gap: 5, marginLeft: 4 },
+  aiLabelText: { color: Brand.accent, fontSize: 11, fontFamily: FontFamily.bold, letterSpacing: 0.4 },
   assistant: {
     backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border,
-    borderRadius: 18, borderBottomLeftRadius: 5,
+    borderRadius: 20, borderBottomLeftRadius: 6,
   },
   thinking: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   thinkingText: { color: Brand.muted, fontSize: 14, fontFamily: FontFamily.regular },
 
   inputBar: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingTop: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingTop: 10,
     backgroundColor: Brand.surface, borderTopWidth: 1, borderTopColor: Brand.border,
   },
   input: {
     flex: 1, backgroundColor: Brand.bgBase, borderWidth: 1, borderColor: Brand.border,
-    borderRadius: 999, paddingHorizontal: 16, paddingVertical: 11, color: Brand.text,
+    borderRadius: Radius.pill, paddingHorizontal: 17, paddingVertical: 12, color: Brand.text,
     fontSize: 15, fontFamily: FontFamily.regular,
   },
   sendBtn: {
-    width: 40, height: 40, borderRadius: 20, backgroundColor: Brand.accent,
+    width: 42, height: 42, borderRadius: 21, backgroundColor: Brand.accent,
     alignItems: 'center', justifyContent: 'center',
   },
   sendBtnDisabled: { opacity: 0.4 },

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { House } from 'phosphor-react-native';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { useAuth } from '@/store/auth';
 
 export default function LoginScreen() {
@@ -46,7 +46,7 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
           <View style={styles.logo}>
-            <Ionicons name="home" size={30} color="#04121f" />
+            <House size={30} color={Brand.onAccent} weight="fill" />
           </View>
           <Text style={styles.title}>Family AI</Text>
           <Text style={styles.subtitle}>Your household, organized.</Text>
@@ -79,7 +79,7 @@ export default function LoginScreen() {
           {error && <Text style={styles.error}>{error}</Text>}
 
           <Pressable style={[styles.btn, busy && styles.btnBusy]} onPress={onSubmit} disabled={busy}>
-            {busy ? <ActivityIndicator color="#04121f" /> : <Text style={styles.btnText}>Sign in</Text>}
+            {busy ? <ActivityIndicator color={Brand.onAccent} /> : <Text style={styles.btnText}>Sign in</Text>}
           </Pressable>
 
           <View style={styles.footer}>
@@ -111,10 +111,10 @@ const styles = StyleSheet.create({
     width: 64, height: 64, borderRadius: 20, backgroundColor: Brand.accent,
     alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
-  title: { color: Brand.text, fontSize: 28, fontWeight: '800' },
-  subtitle: { color: Brand.muted, fontSize: 15 },
+  title: { color: Brand.text, fontSize: 30, fontFamily: FontFamily.serif },
+  subtitle: { color: Brand.muted, fontSize: 15, fontFamily: FontFamily.regular },
   form: { gap: 18 },
-  label: { color: Brand.muted, fontSize: 13, fontWeight: '700' },
+  label: { color: Brand.muted, fontSize: 13, fontFamily: FontFamily.semibold },
   input: {
     backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 13, color: Brand.text, fontSize: 16,
@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginTop: 4,
   },
   btnBusy: { opacity: 0.7 },
-  btnText: { color: '#04121f', fontSize: 16, fontWeight: '800' },
+  btnText: { color: Brand.onAccent, fontSize: 16, fontFamily: FontFamily.bold },
   footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8 },
-  footerText: { color: Brand.muted, fontSize: 14 },
-  link: { color: Brand.accent, fontSize: 14, fontWeight: '700' },
+  footerText: { color: Brand.muted, fontSize: 14, fontFamily: FontFamily.regular },
+  link: { color: Brand.accent, fontSize: 14, fontFamily: FontFamily.bold },
 });

@@ -1,5 +1,7 @@
 # Family AI Assistant — Architecture Spec & Roadmap
 
+m
+
 ## Context
 
 Goal: a per-family AI assistant (mobile-first) that ingests household docs + school
@@ -10,15 +12,17 @@ weekend activities). Must work for ONE family now but scale to hundreds without 
 The user's explicit question: **how do we host/handle the AI context at scale?**
 
 State of the repo today (two codebases, big doc-vs-reality gap):
+
 - **Legacy web** (`src/App.jsx`, 3,643 lines + `server/` Express + SQLite) — working AI
   POC but **AI key runs client-side** and a **live OpenRouter key is committed in `.env`**.
 - **Expo mobile** (`mobile/`, SDK 54, expo-router, React Context) — clean, 3 tabs
   (Documents / School / Actions), scan flow, per-child school hub — **100% mock, no backend**.
 - CLAUDE.md + `.planning/ROADMAP.md` promise Supabase + Vercel `api/` + Upstash + Telegram
-  + Drive. **None wired.** ROADMAP is authoritative; `research/ARCHITECTURE.md` (SQLite/Fly)
-  is stale — ignore its stack.
+  - Drive. **None wired.** ROADMAP is authoritative; `research/ARCHITECTURE.md` (SQLite/Fly)
+    is stale — ignore its stack.
 
 Locked scope decisions (from user):
+
 - **Mobile-only v1.** Web app = legacy/throwaway.
 - **Reactive-first.** v1 = extraction + Q&A. Proactive reminders + weekend suggestions = fast-follow.
 - **Telegram forwarding = first ingestion channel** (also the notification channel).
@@ -29,9 +33,10 @@ Locked scope decisions (from user):
 ## The AI Context Architecture (the core answer)
 
 **Don't ship the whole family blob back and forth.** Store the source of truth in
-Postgres, isolated per family, and let the model *pull* only what it needs. Three layers:
+Postgres, isolated per family, and let the model _pull_ only what it needs. Three layers:
 
 ### Layer 1 — Family Profile Card (always-on, tiny)
+
 A ~150-token structured snapshot injected into every agent system prompt: members, kids'
 ages (derived from DOB, never stale), grades, and live counts (expiring docs / open tasks /
 upcoming appts). Roster cached in Upstash (long TTL, invalidate on member change); counts
@@ -39,27 +44,29 @@ computed live (3 indexed `count(*)`). Goes in the prompt-cached prefix → near-
 Scales with family size (~6 people), **not** with history.
 
 ### Layer 2 — Tool-calling for structured facts (the workhorse)
+
 The agent answers expiry dates, grades, due dates, appointments via OpenAI-compatible
 **function-calling** against Postgres — NOT by stuffing rows into context. The model never
 sees SQL and never receives a `family_id`; the server injects it from the verified JWT.
 Tools take `member_name` (string); server resolves to `member_id` via aliases (GIN index).
 
-| Tool | Params | Returns |
-|---|---|---|
-| `get_documents` | member_name?, category?, expiring_within_days?, query? | docs w/ expiry/status |
-| `get_school_results` | child_name (req), subject?, latest_only? | results w/ grade/date |
-| `get_appointments` | member_name?, from_date?, to_date?, category? | upcoming appts |
-| `get_tasks` | member_name?, include_completed?, due_within_days? | open/closed tasks |
-| `search_communications` | query (req), member_name?, category?, limit? | **wraps pgvector (Layer 3)** |
-| `get_family_member` | name | resolves fuzzy name → canonical member (or `ambiguous`) |
+| Tool                    | Params                                                 | Returns                                                 |
+| ----------------------- | ------------------------------------------------------ | ------------------------------------------------------- |
+| `get_documents`         | member_name?, category?, expiring_within_days?, query? | docs w/ expiry/status                                   |
+| `get_school_results`    | child_name (req), subject?, latest_only?               | results w/ grade/date                                   |
+| `get_appointments`      | member_name?, from_date?, to_date?, category?          | upcoming appts                                          |
+| `get_tasks`             | member_name?, include_completed?, due_within_days?     | open/closed tasks                                       |
+| `search_communications` | query (req), member_name?, category?, limit?           | **wraps pgvector (Layer 3)**                            |
+| `get_family_member`     | name                                                   | resolves fuzzy name → canonical member (or `ambiguous`) |
 
 Request loop: JWT→family_id → rate-limit → assemble profile card → call model with tools →
 model picks tool(s) → server runs parameterized SQL `WHERE family_id=$1 AND ...` (≤50 rows) →
 feed results back → model answers or loops (cap **4 rounds**) → write `llm_audit_log`.
 
-Example — *"What's my passport expiry?"*: profile card names the adults → `get_documents{category:"Identity"}` → grounded answer. One round, indexed.
+Example — _"What's my passport expiry?"_: profile card names the adults → `get_documents{category:"Identity"}` → grounded answer. One round, indexed.
 
 ### Layer 3 — pgvector retrieval for unbounded text
+
 Only free text gets embedded: `communications.body`, doc notes, activity descriptions.
 Structured facts are NEVER embedded (answered by columns). Embedded on the **write path**
 during ingestion (chunk ~500 tok / 50 overlap; most school emails = 1 chunk). Exposed to the
@@ -74,6 +81,7 @@ pre-filtered. Full-context-dump (rejected) breaks as per-family data grows; pure
 (rejected) gives fuzzy answers for hard facts like dates.
 
 ### Model tiering (cost control)
+
 - **Extract tier** (cheap, JSON-mode): bulk doc/email extraction + classification.
 - **Agent tier** (smart, must support tool-calling): user Q&A.
 - **Embedding tier**: dedicated cheap embedding model (1536-dim → matches `vector(1536)`).
@@ -93,6 +101,7 @@ owner/adult/viewer) · `family_members` (people incl. children; `member_type`, `
 [age derived], `grade`, `aliases text[]` GIN-indexed; children have `user_id=null`).
 
 **Domain (all family_id-scoped, indexed on family_id + hot column):**
+
 - `documents` — member_id, title, category, document_number, expiry_date, status, source_channel,
   storage_path, extracted_raw jsonb, confidence. Index `(family_id, expiry_date)`.
 - `communications` — replaces `emails`; member_id, channel, sender, subject, body, category,
@@ -110,12 +119,14 @@ owner/adult/viewer) · `family_members` (people incl. children; `member_type`, `
 (`unique(source, external_id)` idempotency) · `llm_audit_log` (tokens, cost_usd, tools).
 
 **RLS** — one helper, applied uniformly:
+
 ```sql
 create function auth_family_id() returns uuid language sql stable security definer
 as $$ select family_id from public.users where id = auth.uid() $$;
 -- policy template on every domain table:
 using (family_id = auth_family_id()) with check (family_id = auth_family_id());
 ```
+
 Two access paths: **mobile→`api/` with user JWT** (RLS auto-enforced); **server ingestion/agent
 tools→service-role** (bypasses RLS → MUST add explicit `where family_id=$resolved`, id from
 verified token / `telegram_links` only, never request body). This is the #1 invariant.
@@ -144,6 +155,7 @@ Telegram → POST /api/telegram/webhook
   8. Chunk + embed body → embeddings
   9. Confirmation reply: "Filed under Yusuf · Education. 2 tasks added. Reply 'undo' to revert."
 ```
+
 **Verification guard:** `expiry_date_source_text` must be a verbatim substring of source text;
 else mark low-confidence + flag for manual review (no silent trust). **Scale escape hatch:**
 `ingestion_events` (pending) + Vercel cron / Upstash QStash drains async — config switch, not redesign.
@@ -174,19 +186,19 @@ else mark low-confidence + flag for manual review (no silent trust). **Scale esc
 **Phase 1 — Security & Backend Foundation (blocker).** Rotate key. Provision Supabase + Vercel +
 Upstash. Postgres schema + RLS + `auth_family_id()`. `api/` skeleton (auth, documents, comms,
 tasks) replacing Express/SQLite. Supabase Auth wired into mobile (`mobile/src/store/auth.tsx`).
-zod + rate-limit + env validation + logging. CI RLS denial test. *Stack migration + all CONCERNS criticals.*
+zod + rate-limit + env validation + logging. CI RLS denial test. _Stack migration + all CONCERNS criticals._
 
 **Phase 2 — Mobile on real backend.** Wire Expo stores to `api/` (replace fixtures + mockExtract).
 Documents / School / Actions reading live data. Manual scan → `api/ai/extract` (server-side vision).
-*Deliverable: app works end-to-end on real data, no mocks.*
+_Deliverable: app works end-to-end on real data, no mocks._
 
 **Phase 3 — Telegram ingestion + extraction write path.** Bot + `telegram_links` `/link` pairing.
 Webhook → cheap-model extraction → structured rows + embeddings. Confirmation/undo replies.
-*Deliverable: forward a school email → it's filed, tasks created, searchable.*
+_Deliverable: forward a school email → it's filed, tasks created, searchable._
 
 **Phase 4 — The agent (reactive Q&A).** `api/ai/ask` tool-calling loop + 6 tools + profile card +
 pgvector `search_communications`. Chat UI in mobile. `llm_audit_log` + cost cap.
-*Deliverable: "passport expiry?" / "Jolie's last result?" answered, grounded, isolated. = v1 done.*
+_Deliverable: "passport expiry?" / "Jolie's last result?" answered, grounded, isolated. = v1 done._
 
 **Phase 5+ (fast-follow, NOT v1) — Proactive engine.** Scheduler (Vercel cron) for expiry/appointment
 reminders + daily digest. Weekend suggestions (activity_log + weather API → agent). Delivery via
@@ -218,6 +230,7 @@ Telegram + Expo push. Google Drive watch as 2nd ingestion channel.
 - Run mobile via Expo Go / TestFlight; run `api/` on Vercel preview; verify with Supabase MCP (`list_tables`, `get_advisors` for RLS gaps).
 
 ## Critical files
+
 - `server/server.js`, `server/db.js` — port routes + `query` ergonomics to `api/`; drop SQLite/Express/hardcoded REFERENCE_DATE/JWT fallback.
 - `mobile/src/store/auth.tsx`, `mobile/src/store/documents.tsx`, `mobile/src/lib/mockExtract.ts`, `mobile/src/data/fixtures.ts` — swap mocks for `api/` calls.
 - `.planning/ROADMAP.md` — authoritative; supersedes `research/ARCHITECTURE.md`.

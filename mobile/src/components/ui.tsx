@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { FAMILY_MEMBERS, type MemberKey } from '@/data/fixtures';
 
 export function Card({
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     backgroundColor: Brand.surface,
     borderColor: Brand.border,
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: Radius.lg,
     padding: 16,
   },
   pill: {
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FontFamily.semibold,
   },
   avatar: {
     alignItems: 'center',
@@ -110,10 +110,10 @@ const styles = StyleSheet.create({
     backgroundColor: Brand.accent,
   },
   sectionLabel: {
-    color: Brand.muted,
+    color: Brand.faint,
     fontSize: 12,
-    fontWeight: '700',
+    fontFamily: FontFamily.bold,
     textTransform: 'uppercase',
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
   },
 });

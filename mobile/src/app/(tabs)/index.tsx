@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Camera } from 'phosphor-react-native';
 import { Link, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar, Card, Pill, ProgressBar, SectionLabel } from '@/components/ui';
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { FAMILY_MEMBERS } from '@/data/fixtures';
 import { categoryColor, getDocumentStatus } from '@/lib/helpers';
 import { useDocuments } from '@/store/documents';
@@ -82,7 +82,7 @@ export default function DocumentsScreen() {
       <Pressable
         style={[styles.fab, { bottom: insets.bottom + 16 }]}
         onPress={() => router.push('/scan')}>
-        <Ionicons name="scan" size={22} color="#04121f" />
+        <Camera size={22} color={Brand.onAccent} weight="fill" />
         <Text style={styles.fabText}>Scan</Text>
       </Pressable>
     </View>
@@ -106,17 +106,17 @@ const styles = StyleSheet.create({
     backgroundColor: Brand.accent, paddingHorizontal: 18, paddingVertical: 14, borderRadius: 999,
     shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6,
   },
-  fabText: { color: '#04121f', fontWeight: '800', fontSize: 15 },
+  fabText: { color: Brand.onAccent, fontFamily: FontFamily.bold, fontSize: 15 },
   summaryRow: { flexDirection: 'row', gap: 10 },
   statChip: { flex: 1, alignItems: 'center', paddingVertical: 14, paddingHorizontal: 6 },
-  statValue: { fontSize: 24, fontWeight: '800' },
-  statLabel: { color: Brand.muted, fontSize: 11, marginTop: 2, textAlign: 'center' },
+  statValue: { fontSize: 26, fontFamily: FontFamily.serif },
+  statLabel: { color: Brand.muted, fontSize: 11, marginTop: 2, textAlign: 'center', fontFamily: FontFamily.medium },
   docCard: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   pressed: { opacity: 0.7 },
   docBody: { flex: 1, gap: 6 },
   docTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  docName: { color: Brand.text, fontSize: 16, fontWeight: '700', flexShrink: 1 },
-  docMeta: { color: Brand.muted, fontSize: 13 },
+  docName: { color: Brand.text, fontSize: 16, fontFamily: FontFamily.semibold, flexShrink: 1 },
+  docMeta: { color: Brand.muted, fontSize: 13, fontFamily: FontFamily.regular },
   docFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
   expiry: { color: Brand.muted, fontSize: 12 },
   progressWrap: { marginTop: 6, gap: 4 },

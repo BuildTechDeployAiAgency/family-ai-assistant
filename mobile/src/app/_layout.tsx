@@ -1,11 +1,12 @@
-import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import {
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-  useFonts,
 } from '@expo-google-fonts/inter';
+import { Fraunces_500Medium, Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
+import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -13,15 +14,15 @@ import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/store/auth';
 import { DocumentsProvider } from '@/store/documents';
 import { DataProvider } from '@/store/data';
 
 const navTheme = {
-  ...DarkTheme,
+  ...DefaultTheme,
   colors: {
-    ...DarkTheme.colors,
+    ...DefaultTheme.colors,
     background: Brand.bgBase,
     card: Brand.surface,
     text: Brand.text,
@@ -56,8 +57,10 @@ function RootNav() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: Brand.surface },
+        headerStyle: { backgroundColor: Brand.bgBase },
         headerTintColor: Brand.text,
+        headerShadowVisible: false,
+        headerTitleStyle: { fontFamily: FontFamily.serif, fontSize: 18, color: Brand.text },
         contentStyle: { backgroundColor: Brand.bgBase },
       }}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -75,6 +78,8 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Fraunces_500Medium,
+    Fraunces_600SemiBold,
   });
 
   if (!fontsLoaded) {
@@ -89,7 +94,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider value={navTheme}>
-          <StatusBar style="light" />
+          <StatusBar style="dark" />
           <AuthProvider>
             <DataProvider>
               <DocumentsProvider>

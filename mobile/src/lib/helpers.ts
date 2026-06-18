@@ -24,17 +24,17 @@ export const getDaysDifference = (futureStr: string, baseStr: string): number =>
 
 export const getDocumentStatus = (expiryDate: string): DocStatus => {
   const diff = getDaysDifference(expiryDate, REFERENCE_DATE);
-  if (diff < 0) return { label: 'Expired', color: '#fb7185', bg: 'rgba(244,63,94,0.14)', icon: '🔴', urgency: 0 };
-  if (diff <= 90) return { label: `Soon · ${diff}d`, color: '#fbbf24', bg: 'rgba(245,158,11,0.14)', icon: '🟡', urgency: 1 };
-  return { label: 'Valid', color: '#34d399', bg: 'rgba(16,185,129,0.14)', icon: '🟢', urgency: 2 };
+  if (diff < 0) return { label: 'Expired', color: '#B23A48', bg: 'rgba(178,58,72,0.10)', icon: '🔴', urgency: 0 };
+  if (diff <= 90) return { label: `Soon · ${diff}d`, color: '#C79A3A', bg: 'rgba(199,154,58,0.13)', icon: '🟡', urgency: 1 };
+  return { label: 'Valid', color: '#5B8A7A', bg: 'rgba(91,138,122,0.12)', icon: '🟢', urgency: 2 };
 };
 
 const URGENCY_RANK: Record<Deadline['urgency'], number> = { high: 0, medium: 1, low: 2 };
 
 export const URGENCY_COLOR: Record<Deadline['urgency'], string> = {
-  high: '#fb7185',
-  medium: '#fbbf24',
-  low: '#34d399',
+  high: '#B23A48',
+  medium: '#C79A3A',
+  low: '#5B8A7A',
 };
 
 export const formatDate = (str: string): string => {

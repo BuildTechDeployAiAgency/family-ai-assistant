@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { House } from 'phosphor-react-native';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { useAuth } from '@/store/auth';
 
 export default function RegisterScreen() {
@@ -47,7 +47,7 @@ export default function RegisterScreen() {
         keyboardShouldPersistTaps="handled">
         <View style={styles.brand}>
           <View style={styles.logo}>
-            <Ionicons name="home" size={30} color="#04121f" />
+            <House size={30} color={Brand.onAccent} weight="fill" />
           </View>
           <Text style={styles.title}>Create your family</Text>
           <Text style={styles.subtitle}>One account for the whole household.</Text>
@@ -89,7 +89,7 @@ export default function RegisterScreen() {
           {error && <Text style={styles.error}>{error}</Text>}
 
           <Pressable style={[styles.btn, busy && styles.btnBusy]} onPress={onSubmit} disabled={busy}>
-            {busy ? <ActivityIndicator color="#04121f" /> : <Text style={styles.btnText}>Create account</Text>}
+            {busy ? <ActivityIndicator color={Brand.onAccent} /> : <Text style={styles.btnText}>Create account</Text>}
           </Pressable>
 
           <View style={styles.footer}>
@@ -121,10 +121,10 @@ const styles = StyleSheet.create({
     width: 64, height: 64, borderRadius: 20, backgroundColor: Brand.accent,
     alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
-  title: { color: Brand.text, fontSize: 26, fontWeight: '800', textAlign: 'center' },
-  subtitle: { color: Brand.muted, fontSize: 15, textAlign: 'center' },
+  title: { color: Brand.text, fontSize: 28, fontFamily: FontFamily.serif, textAlign: 'center' },
+  subtitle: { color: Brand.muted, fontSize: 15, fontFamily: FontFamily.regular, textAlign: 'center' },
   form: { gap: 18 },
-  label: { color: Brand.muted, fontSize: 13, fontWeight: '700' },
+  label: { color: Brand.muted, fontSize: 13, fontFamily: FontFamily.semibold },
   input: {
     backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 13, color: Brand.text, fontSize: 16,
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginTop: 4,
   },
   btnBusy: { opacity: 0.7 },
-  btnText: { color: '#04121f', fontSize: 16, fontWeight: '800' },
+  btnText: { color: Brand.onAccent, fontSize: 16, fontFamily: FontFamily.bold },
   footer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8 },
-  footerText: { color: Brand.muted, fontSize: 14 },
-  link: { color: Brand.accent, fontSize: 14, fontWeight: '700' },
+  footerText: { color: Brand.muted, fontSize: 14, fontFamily: FontFamily.regular },
+  link: { color: Brand.accent, fontSize: 14, fontFamily: FontFamily.bold },
 });

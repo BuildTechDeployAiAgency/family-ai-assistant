@@ -1,11 +1,11 @@
-import { Ionicons } from '@expo/vector-icons';
+import { CheckCircle, Circle } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { formatDate, URGENCY_COLOR } from '@/lib/helpers';
 import { useData } from '@/store/data';
 
@@ -73,11 +73,11 @@ export default function ActionsScreen() {
         return (
           <Card key={t.id} style={[styles.actionCard, isDone && styles.doneCard]}>
             <Pressable onPress={() => toggleTask(t.id, !isDone)} hitSlop={8} style={styles.checkbox}>
-              <Ionicons
-                name={isDone ? 'checkmark-circle' : 'ellipse-outline'}
-                size={26}
-                color={isDone ? Brand.green : Brand.muted}
-              />
+              {isDone ? (
+                <CheckCircle size={26} color={Brand.green} weight="fill" />
+              ) : (
+                <Circle size={26} color={Brand.faint} />
+              )}
             </Pressable>
             <View style={styles.actionBody}>
               <Text style={[styles.actionText, isDone && styles.doneText]}>{t.title}</Text>
@@ -139,12 +139,12 @@ const styles = StyleSheet.create({
   },
   filterChipActive: { backgroundColor: Brand.accent, borderColor: Brand.accent },
   filterText: { color: Brand.muted, fontSize: 13, fontWeight: '600' },
-  filterTextActive: { color: '#04121f' },
+  filterTextActive: { color: Brand.onAccent },
   noneText: { color: Brand.muted, fontSize: 13 },
   banner: { gap: 8 },
-  bannerValue: { color: Brand.accent, fontSize: 34, fontWeight: '800' },
-  bannerLabel: { color: Brand.muted, fontSize: 13, marginTop: -4 },
-  bannerHint: { color: Brand.muted, fontSize: 12 },
+  bannerValue: { color: Brand.accent, fontSize: 36, fontFamily: FontFamily.serif },
+  bannerLabel: { color: Brand.muted, fontSize: 13, marginTop: -2, fontFamily: FontFamily.medium },
+  bannerHint: { color: Brand.muted, fontSize: 12, fontFamily: FontFamily.regular },
   actionCard: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   doneCard: { opacity: 0.55 },
   checkbox: { paddingTop: 1 },

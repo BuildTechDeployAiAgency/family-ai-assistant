@@ -40,3 +40,7 @@ dist-ssr
 # Graphify regenerable caches (keep graph.json / reports, drop caches)
 graphify-out/cache/
 .planning/graphify-out/cache/
+.vercel
+
+# Local design/research/deploy scratch — visual bridge between Claude and Diogo, not shipped
+documentation/

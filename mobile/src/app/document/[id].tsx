@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar, Card, Pill, ProgressBar, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
 import { DEFAULT_RENEWAL_PLANS, FAMILY_MEMBERS } from '@/data/fixtures';
+import { FontFamily } from '@/constants/theme';
 import { categoryColor, getDocumentStatus } from '@/lib/helpers';
 import { useDocuments } from '@/store/documents';
 
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
   emptyText: { color: Brand.muted },
   header: { gap: 16 },
   headerTop: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  title: { color: Brand.text, fontSize: 20, fontWeight: '800' },
+  title: { color: Brand.text, fontSize: 22, fontFamily: FontFamily.serif },
   meta: { color: Brand.muted, fontSize: 13, marginTop: 2 },
   kv: { gap: 8 },
   kvRow: { flexDirection: 'row', justifyContent: 'space-between' },

@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { categoryColor, formatDate, URGENCY_COLOR } from '@/lib/helpers';
 import { useData } from '@/store/data';
 
@@ -80,11 +80,11 @@ const styles = StyleSheet.create({
   emptyText: { color: Brand.muted },
   headerRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
   icon: { fontSize: 32 },
-  subject: { color: Brand.text, fontSize: 18, fontWeight: '800', lineHeight: 24 },
+  subject: { color: Brand.text, fontSize: 19, fontFamily: FontFamily.serif, lineHeight: 25 },
   from: { color: Brand.muted, fontSize: 12, marginTop: 4 },
   tagRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   date: { color: Brand.muted, fontSize: 12 },
-  body: { color: '#cbd5e1', fontSize: 14, lineHeight: 21, marginTop: 4 },
+  body: { color: Brand.muted, fontSize: 14, lineHeight: 21, marginTop: 4 },
   actionRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
   bullet: { color: Brand.accent, fontSize: 16, lineHeight: 20 },
   actionText: { color: Brand.text, fontSize: 14, fontWeight: '600', lineHeight: 19 },

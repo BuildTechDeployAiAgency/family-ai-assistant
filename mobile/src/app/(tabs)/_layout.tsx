@@ -1,8 +1,8 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
+import { Folders, GraduationCap, ListChecks, Sparkle, SignOut } from 'phosphor-react-native';
 
-import { Brand } from '@/constants/theme';
+import { Brand, FontFamily } from '@/constants/theme';
 import { useAuth } from '@/store/auth';
 
 export default function TabsLayout() {
@@ -10,18 +10,21 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: Brand.surface },
-        headerTitleStyle: { color: Brand.text, fontWeight: '700' },
+        headerStyle: { backgroundColor: Brand.bgBase },
+        headerTitleStyle: { color: Brand.text, fontFamily: FontFamily.serif, fontSize: 20 },
         headerShadowVisible: false,
         tabBarActiveTintColor: Brand.accent,
-        tabBarInactiveTintColor: Brand.muted,
+        tabBarInactiveTintColor: Brand.faint,
+        tabBarLabelStyle: { fontFamily: FontFamily.semibold, fontSize: 11 },
         tabBarStyle: {
           backgroundColor: Brand.surface,
           borderTopColor: Brand.border,
+          height: 88,
+          paddingTop: 8,
         },
         headerRight: () => (
           <Pressable onPress={signOut} hitSlop={12} style={{ marginRight: 16 }}>
-            <Ionicons name="log-out-outline" size={22} color={Brand.muted} />
+            <SignOut size={22} color={Brand.faint} />
           </Pressable>
         ),
       }}>
@@ -29,28 +32,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Documents',
-          tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <Folders color={color} size={size} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="school"
         options={{
           title: 'School',
-          tabBarIcon: ({ color, size }) => <Ionicons name="school" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <GraduationCap color={color} size={size} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="actions"
         options={{
           title: 'Actions',
-          tabBarIcon: ({ color, size }) => <Ionicons name="checkmark-circle" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <ListChecks color={color} size={size} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="ask"
         options={{
           title: 'Ask',
-          tabBarIcon: ({ color, size }) => <Ionicons name="sparkles" color={color} size={size} />,
+          tabBarIcon: ({ color, size, focused }) => <Sparkle color={color} size={size} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
     </Tabs>

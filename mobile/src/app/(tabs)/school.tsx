@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar, Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
+import { FontFamily } from '@/constants/theme';
 import { categoryColor, formatDate, URGENCY_COLOR } from '@/lib/helpers';
 import { useData, type Communication, type Member, type Task } from '@/store/data';
 
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
   segBtn: { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: 'center' },
   segBtnActive: { backgroundColor: Brand.accent },
   segText: { color: Brand.muted, fontWeight: '700', fontSize: 14 },
-  segTextActive: { color: '#04121f' },
+  segTextActive: { color: Brand.onAccent },
   summaryRow: { flexDirection: 'row', gap: 10 },
   statChip: { flex: 1, alignItems: 'center', paddingVertical: 14, paddingHorizontal: 6 },
   statValue: { fontSize: 24, fontWeight: '800' },
@@ -177,7 +178,7 @@ const styles = StyleSheet.create({
   emailFooter: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Brand.accent, marginLeft: 'auto' },
   childHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  childName: { color: Brand.text, fontSize: 17, fontWeight: '800' },
+  childName: { color: Brand.text, fontSize: 18, fontFamily: FontFamily.serif },
   childRole: { color: Brand.muted, fontSize: 12, marginTop: 1 },
   empty: { color: Brand.muted, fontSize: 13 },
   taskCard: { flexDirection: 'row', gap: 12, alignItems: 'stretch', overflow: 'hidden' },

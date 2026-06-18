@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Camera, Check, FileText, ImageSquare } from 'phosphor-react-native';
 import { Stack, useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
 import { FAMILY_MEMBERS, type MemberKey } from '@/data/fixtures';
+import { FontFamily } from '@/constants/theme';
 import { categoryColor } from '@/lib/helpers';
 import { extractFromImage, type Extraction } from '@/lib/mockExtract';
 import { useDocuments } from '@/store/documents';
@@ -89,18 +90,18 @@ export default function ScanScreen() {
         {phase === 'capture' && (
           <>
             <View style={styles.hero}>
-              <Ionicons name="document-text-outline" size={48} color={Brand.accent} />
+              <FileText size={48} color={Brand.accent} weight="duotone" />
               <Text style={styles.heroTitle}>Add a document</Text>
               <Text style={styles.heroSub}>
                 Snap or pick a photo — the assistant reads the title, category, and expiry for you.
               </Text>
             </View>
             <Pressable style={[styles.bigBtn, styles.primaryBtn]} onPress={takePhoto}>
-              <Ionicons name="camera" size={20} color="#04121f" />
+              <Camera size={20} color={Brand.onAccent} weight="fill" />
               <Text style={styles.primaryBtnText}>Take photo</Text>
             </Pressable>
             <Pressable style={[styles.bigBtn, styles.secondaryBtn]} onPress={pickImage}>
-              <Ionicons name="image" size={20} color={Brand.text} />
+              <ImageSquare size={20} color={Brand.text} />
               <Text style={styles.secondaryBtnText}>Choose from library</Text>
             </Pressable>
           </>
@@ -161,7 +162,7 @@ export default function ScanScreen() {
                       <Pressable key={c} onPress={() => patch({ category: c })}>
                         <Pill
                           label={c}
-                          color={active ? '#04121f' : categoryColor(c)}
+                          color={active ? Brand.onAccent : categoryColor(c)}
                           bg={active ? categoryColor(c) : `${categoryColor(c)}22`}
                         />
                       </Pressable>
@@ -179,7 +180,7 @@ export default function ScanScreen() {
                       <Pressable key={o} onPress={() => patch({ owner: o })}>
                         <View style={[styles.ownerChip, active && { backgroundColor: m.color, borderColor: m.color }]}>
                           <Text style={styles.ownerEmoji}>{m.avatar}</Text>
-                          <Text style={[styles.ownerName, active && { color: '#04121f' }]}>{m.name}</Text>
+                          <Text style={[styles.ownerName, active && { color: Brand.onAccent }]}>{m.name}</Text>
                         </View>
                       </Pressable>
                     );
@@ -189,7 +190,7 @@ export default function ScanScreen() {
             </Card>
 
             <Pressable style={[styles.bigBtn, styles.primaryBtn]} onPress={save}>
-              <Ionicons name="checkmark" size={20} color="#04121f" />
+              <Check size={20} color={Brand.onAccent} weight="bold" />
               <Text style={styles.primaryBtnText}>Save to vault</Text>
             </Pressable>
             <Pressable style={styles.linkBtn} onPress={() => setPhase('capture')}>
@@ -214,11 +215,11 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bgBase },
   hero: { alignItems: 'center', gap: 10, paddingVertical: 24 },
-  heroTitle: { color: Brand.text, fontSize: 22, fontWeight: '800' },
+  heroTitle: { color: Brand.text, fontSize: 24, fontFamily: FontFamily.serif },
   heroSub: { color: Brand.muted, fontSize: 14, textAlign: 'center', lineHeight: 20, paddingHorizontal: 12 },
   bigBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 16, borderRadius: 14 },
   primaryBtn: { backgroundColor: Brand.accent },
-  primaryBtnText: { color: '#04121f', fontSize: 16, fontWeight: '800' },
+  primaryBtnText: { color: Brand.onAccent, fontSize: 16, fontFamily: FontFamily.bold },
   secondaryBtn: { backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border },
   secondaryBtnText: { color: Brand.text, fontSize: 16, fontWeight: '700' },
   analyzing: { alignItems: 'center', gap: 16, paddingVertical: 32 },
