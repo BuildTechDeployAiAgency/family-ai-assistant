@@ -8,9 +8,11 @@
     "scheme": "familyai",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon",
       "supportsTablet": true,
-      "bundleIdentifier": "com.buildtechdeploy.familyai"
+      "bundleIdentifier": "com.buildtechdeploy.familyai",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.buildtechdeploy.familyai",
