@@ -1,35 +1,66 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { INITIAL_DOCUMENTS, type FamilyDocument } from '@/data/fixtures';
+import { type FamilyDocument } from '@/data/fixtures';
+import { api } from '@/lib/api';
+import { useAuth } from './auth';
 
 interface DocumentsContextValue {
   documents: FamilyDocument[];
+  loading: boolean;
+  refresh: () => Promise<void>;
   addDocument: (doc: Omit<FamilyDocument, 'id'>) => FamilyDocument;
   getDocument: (id: string) => FamilyDocument | undefined;
 }
 
 const DocumentsContext = createContext<DocumentsContextValue | null>(null);
 
-let counter = 0;
-const nextId = () => `doc-new-${(counter += 1)}`;
-
 export function DocumentsProvider({ children }: { children: ReactNode }) {
-  const [documents, setDocuments] = useState<FamilyDocument[]>(INITIAL_DOCUMENTS);
+  const { session } = useAuth();
+  const [documents, setDocuments] = useState<FamilyDocument[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  const refresh = useCallback(async () => {
+    if (!session) {
+      setDocuments([]);
+      setLoading(false);
+      return;
+    }
+    try {
+      const { documents } = await api.documents();
+      setDocuments(documents as FamilyDocument[]);
+    } catch (err) {
+      console.error('Failed to load documents:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [session]);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  // Optimistic add: show immediately with a temp id, POST in the background,
+  // then reconcile with the server row (mirrors the app's local-first pattern).
   const addDocument = useCallback((doc: Omit<FamilyDocument, 'id'>) => {
-    const created: FamilyDocument = { ...doc, id: nextId() };
-    setDocuments((prev) => [created, ...prev]);
-    return created;
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: FamilyDocument = { ...doc, id: tempId };
+    setDocuments((prev) => [optimistic, ...prev]);
+
+    api
+      .createDocument(doc)
+      .then(({ document }) => {
+        setDocuments((prev) => prev.map((d) => (d.id === tempId ? (document as FamilyDocument) : d)));
+      })
+      .catch((err) => console.error('Failed to save document to backend:', err));
+
+    return optimistic;
   }, []);
 
-  const getDocument = useCallback(
-    (id: string) => documents.find((d) => d.id === id),
-    [documents]
-  );
+  const getDocument = useCallback((id: string) => documents.find((d) => d.id === id), [documents]);
 
   const value = useMemo(
-    () => ({ documents, addDocument, getDocument }),
-    [documents, addDocument, getDocument]
+    () => ({ documents, loading, refresh, addDocument, getDocument }),
+    [documents, loading, refresh, addDocument, getDocument]
   );
 
   return <DocumentsContext.Provider value={value}>{children}</DocumentsContext.Provider>;

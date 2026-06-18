@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Brand } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/store/auth';
 import { DocumentsProvider } from '@/store/documents';
+import { DataProvider } from '@/store/data';
 
 const navTheme = {
   ...DarkTheme,
@@ -68,9 +69,11 @@ export default function RootLayout() {
         <ThemeProvider value={navTheme}>
           <StatusBar style="light" />
           <AuthProvider>
-            <DocumentsProvider>
-              <RootNav />
-            </DocumentsProvider>
+            <DataProvider>
+              <DocumentsProvider>
+                <RootNav />
+              </DocumentsProvider>
+            </DataProvider>
           </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>

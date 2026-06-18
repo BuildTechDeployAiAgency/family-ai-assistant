@@ -41,8 +41,10 @@ export function Pill({
   );
 }
 
-export function Avatar({ owner, size = 40 }: { owner: MemberKey; size?: number }) {
-  const m = FAMILY_MEMBERS[owner];
+const FALLBACK_MEMBER = { name: 'Family', role: 'Household', avatar: '🙂', color: '#8fa3c0', initials: 'F' };
+
+export function Avatar({ owner, size = 40 }: { owner: MemberKey | string; size?: number }) {
+  const m = FAMILY_MEMBERS[owner as MemberKey] ?? FALLBACK_MEMBER;
   return (
     <View
       style={[

@@ -46,6 +46,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => <Ionicons name="checkmark-circle" color={color} size={size} />,
         }}
       />
+      <Tabs.Screen
+        name="ask"
+        options={{
+          title: 'Ask',
+          tabBarIcon: ({ color, size }) => <Ionicons name="sparkles" color={color} size={size} />,
+        }}
+      />
     </Tabs>
   );
 }

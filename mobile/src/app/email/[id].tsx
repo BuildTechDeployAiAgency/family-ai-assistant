@@ -4,13 +4,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { INITIAL_EMAILS, MOCK_AI_RESPONSES } from '@/data/fixtures';
 import { categoryColor, formatDate, URGENCY_COLOR } from '@/lib/helpers';
+import { useData } from '@/store/data';
 
 export default function EmailDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const email = INITIAL_EMAILS.find((e) => e.id === id);
+  const { communications, tasks } = useData();
+
+  const email = communications.find((e) => e.id === id);
+  const related = tasks.filter((t) => t.sourceCommId === id);
 
   if (!email) {
     return (
@@ -19,8 +22,6 @@ export default function EmailDetail() {
       </View>
     );
   }
-
-  const ai = MOCK_AI_RESPONSES[email.id];
 
   return (
     <>
@@ -43,66 +44,29 @@ export default function EmailDetail() {
           <Text style={styles.body}>{email.body}</Text>
         </Card>
 
-        {ai ? (
+        {related.length > 0 ? (
           <View style={{ gap: 12 }}>
-            <SectionLabel>✨ AI analysis</SectionLabel>
-
-            <Card style={{ gap: 6 }}>
-              <Text style={styles.blockLabel}>Summary</Text>
-              <Text style={styles.summary}>{ai.summary}</Text>
-            </Card>
-
-            {ai.actionItems.length > 0 && (
-              <Card style={{ gap: 10 }}>
-                <Text style={styles.blockLabel}>Action items</Text>
-                {ai.actionItems.map((a, i) => (
-                  <View key={i} style={styles.actionRow}>
-                    <Text style={styles.bullet}>•</Text>
-                    <View style={{ flex: 1, gap: 4 }}>
-                      <Text style={styles.actionText}>{a.action}</Text>
-                      <View style={styles.actionMeta}>
-                        <Pill label={a.owner} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
-                        <Pill label={`Due ${formatDate(a.deadline)}`} color={Brand.amber} bg="rgba(245,158,11,0.14)" />
-                      </View>
+            <SectionLabel>✨ Extracted actions</SectionLabel>
+            <Card style={{ gap: 10 }}>
+              {related.map((t) => (
+                <View key={t.id} style={styles.actionRow}>
+                  <Text style={styles.bullet}>•</Text>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text style={[styles.actionText, t.completed && styles.done]}>{t.title}</Text>
+                    <View style={styles.actionMeta}>
+                      <Pill label={t.owner} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
+                      {t.dueDate && (
+                        <Pill label={`Due ${formatDate(t.dueDate)}`} color={URGENCY_COLOR[t.priority]} bg={`${URGENCY_COLOR[t.priority]}22`} />
+                      )}
                     </View>
                   </View>
-                ))}
-              </Card>
-            )}
-
-            {ai.deadlines.length > 0 && (
-              <Card style={{ gap: 8 }}>
-                <Text style={styles.blockLabel}>Key dates</Text>
-                {ai.deadlines.map((d, i) => (
-                  <View key={i} style={styles.deadlineRow}>
-                    <Text style={styles.deadlineItem} numberOfLines={1}>{d.item}</Text>
-                    <Pill label={formatDate(d.date)} color={URGENCY_COLOR[d.urgency]} bg={`${URGENCY_COLOR[d.urgency]}22`} />
-                  </View>
-                ))}
-              </Card>
-            )}
-
-            {ai.documentsNeeded.length > 0 && (
-              <Card style={{ gap: 8 }}>
-                <Text style={styles.blockLabel}>Documents needed</Text>
-                <View style={styles.chipWrap}>
-                  {ai.documentsNeeded.map((d, i) => (
-                    <Pill key={i} label={d} color={Brand.text} bg={Brand.surfaceAlt} />
-                  ))}
                 </View>
-              </Card>
-            )}
-
-            {ai.needsReply && ai.draftReply && (
-              <Card style={{ gap: 8, borderColor: Brand.violet }}>
-                <Text style={[styles.blockLabel, { color: Brand.violet }]}>✍️ Suggested reply</Text>
-                <Text style={styles.draft}>{ai.draftReply}</Text>
-              </Card>
-            )}
+              ))}
+            </Card>
           </View>
         ) : (
           <Card>
-            <Text style={styles.noAi}>No AI analysis for this message yet.</Text>
+            <Text style={styles.noAi}>No actions extracted from this message.</Text>
           </Card>
         )}
       </ScrollView>
@@ -121,15 +85,10 @@ const styles = StyleSheet.create({
   tagRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   date: { color: Brand.muted, fontSize: 12 },
   body: { color: '#cbd5e1', fontSize: 14, lineHeight: 21, marginTop: 4 },
-  blockLabel: { color: Brand.text, fontSize: 14, fontWeight: '700' },
-  summary: { color: '#cbd5e1', fontSize: 14, lineHeight: 20 },
   actionRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
   bullet: { color: Brand.accent, fontSize: 16, lineHeight: 20 },
   actionText: { color: Brand.text, fontSize: 14, fontWeight: '600', lineHeight: 19 },
+  done: { textDecorationLine: 'line-through', color: Brand.muted },
   actionMeta: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  deadlineRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  deadlineItem: { color: '#cbd5e1', fontSize: 13, flex: 1 },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  draft: { color: '#cbd5e1', fontSize: 13, lineHeight: 20, fontStyle: 'italic' },
   noAi: { color: Brand.muted, fontSize: 13 },
 });

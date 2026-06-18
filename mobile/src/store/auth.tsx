@@ -1,12 +1,11 @@
-import * as SecureStore from 'expo-secure-store';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+
+import { supabase } from '@/lib/supabase';
 
 export interface Session {
   email: string;
   familyName: string;
-  // Placeholder token. Real Supabase access_token replaces this when the
-  // backend is wired in — swap the body of signIn/signUp/restore only.
-  token: string;
+  token: string; // real Supabase access_token
 }
 
 interface AuthContextValue {
@@ -18,50 +17,58 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const KEY = 'familyai.session';
 
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+// Map a Supabase auth session → our app Session shape.
+function toSession(s: { access_token: string; user: any } | null): Session | null {
+  if (!s) return null;
+  return {
+    email: s.user?.email ?? '',
+    familyName: (s.user?.user_metadata?.family_name as string) ?? (s.user?.email?.split('@')[0] ?? 'Family'),
+    token: s.access_token,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore persisted session on mount.
+  // Restore the persisted Supabase session on mount + subscribe to changes.
   useEffect(() => {
-    (async () => {
-      try {
-        const raw = await SecureStore.getItemAsync(KEY);
-        if (raw) setSession(JSON.parse(raw) as Session);
-      } catch {
-        // ignore — treat as logged out
-      } finally {
-        setLoading(false);
-      }
-    })();
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(toSession(data.session as any));
+      setLoading(false);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(toSession(s as any));
+    });
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  const persist = async (s: Session) => {
-    setSession(s);
-    await SecureStore.setItemAsync(KEY, JSON.stringify(s));
-  };
-
-  // Local/mock auth — no backend. Validates shape, accepts any credentials.
   const signIn = async (email: string, password: string) => {
     if (!isEmail(email)) throw new Error('Enter a valid email address.');
     if (password.length < 6) throw new Error('Password must be at least 6 characters.');
-    await persist({ email: email.trim(), familyName: email.split('@')[0], token: 'local-dev' });
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) throw new Error(error.message);
   };
 
   const signUp = async (email: string, password: string, familyName: string) => {
     if (!isEmail(email)) throw new Error('Enter a valid email address.');
     if (password.length < 6) throw new Error('Password must be at least 6 characters.');
     if (!familyName.trim()) throw new Error('Enter a family name.');
-    await persist({ email: email.trim(), familyName: familyName.trim(), token: 'local-dev' });
+    // family_name flows into the DB trigger that creates the family + seeds demo data.
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { family_name: familyName.trim() } },
+    });
+    if (error) throw new Error(error.message);
   };
 
   const signOut = async () => {
+    await supabase.auth.signOut();
     setSession(null);
-    await SecureStore.deleteItemAsync(KEY);
   };
 
   const value = useMemo(

@@ -36,12 +36,18 @@ export default function ScanScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [draft, setDraft] = useState<Extraction | null>(null);
 
-  const runExtraction = async (uri: string) => {
-    setImage(uri);
+  const runExtraction = async (asset: ImagePicker.ImagePickerAsset) => {
+    setImage(asset.uri);
     setPhase('analyzing');
-    const result = await extractFromImage();
-    setDraft(result);
-    setPhase('review');
+    try {
+      if (!asset.base64) throw new Error('Could not read the image data.');
+      const result = await extractFromImage(asset.base64, asset.mimeType ?? 'image/jpeg');
+      setDraft(result);
+      setPhase('review');
+    } catch (err) {
+      Alert.alert('Scan failed', err instanceof Error ? err.message : 'Could not read this document.');
+      setPhase('capture');
+    }
   };
 
   const takePhoto = async () => {
@@ -50,13 +56,13 @@ export default function ScanScreen() {
       Alert.alert('Camera access needed', 'Enable camera access to scan a document.');
       return;
     }
-    const res = await ImagePicker.launchCameraAsync({ quality: 0.6 });
-    if (!res.canceled) runExtraction(res.assets[0].uri);
+    const res = await ImagePicker.launchCameraAsync({ quality: 0.6, base64: true });
+    if (!res.canceled) runExtraction(res.assets[0]);
   };
 
   const pickImage = async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.6, mediaTypes: ['images'] });
-    if (!res.canceled) runExtraction(res.assets[0].uri);
+    const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.6, mediaTypes: ['images'], base64: true });
+    if (!res.canceled) runExtraction(res.assets[0]);
   };
 
   const save = () => {

@@ -1,34 +1,48 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { aggregateActions, formatDate, URGENCY_COLOR } from '@/lib/helpers';
+import { formatDate, URGENCY_COLOR } from '@/lib/helpers';
+import { useData } from '@/store/data';
 
 export default function ActionsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const actions = useMemo(() => aggregateActions(), []);
-  const [done, setDone] = useState<Record<string, boolean>>({});
+  const { tasks, communications, loading, toggleTask } = useData();
   const [owner, setOwner] = useState<string>('All');
   const [urgency, setUrgency] = useState<string>('All');
 
-  const owners = useMemo(() => ['All', ...Array.from(new Set(actions.map((a) => a.owner)))], [actions]);
+  const commSubject = useMemo(() => {
+    const map: Record<string, string> = {};
+    communications.forEach((c) => (map[c.id] = c.subject));
+    return map;
+  }, [communications]);
+
+  const owners = useMemo(() => ['All', ...Array.from(new Set(tasks.map((t) => t.owner)))], [tasks]);
   const urgencies = ['All', 'high', 'medium', 'low'];
 
   const visible = useMemo(
     () =>
-      actions.filter(
-        (a) => (owner === 'All' || a.owner === owner) && (urgency === 'All' || a.urgency === urgency)
+      tasks.filter(
+        (t) => (owner === 'All' || t.owner === owner) && (urgency === 'All' || t.priority === urgency)
       ),
-    [actions, owner, urgency]
+    [tasks, owner, urgency]
   );
 
-  const toggle = (id: string) => setDone((p) => ({ ...p, [id]: !p[id] }));
-  const remaining = visible.filter((a) => !done[a.id]).length;
+  const remaining = visible.filter((t) => !t.completed).length;
+  const sourcedCount = new Set(tasks.filter((t) => t.sourceCommId).map((t) => t.sourceCommId)).size;
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={Brand.accent} size="large" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -39,9 +53,7 @@ export default function ActionsScreen() {
           <Text style={styles.bannerValue}>{remaining}</Text>
           <Text style={styles.bannerLabel}>open actions</Text>
         </View>
-        <Text style={styles.bannerHint}>
-          Extracted by AI from {new Set(actions.map((a) => a.emailId)).size} family communications
-        </Text>
+        <Text style={styles.bannerHint}>Tracked across {sourcedCount} family communications</Text>
       </Card>
 
       <View style={{ gap: 8 }}>
@@ -55,11 +67,12 @@ export default function ActionsScreen() {
         <Card><Text style={styles.noneText}>No actions match these filters.</Text></Card>
       )}
 
-      {visible.map((a) => {
-        const isDone = !!done[a.id];
+      {visible.map((t) => {
+        const isDone = t.completed;
+        const subject = t.sourceCommId ? commSubject[t.sourceCommId] : null;
         return (
-          <Card key={a.id} style={[styles.actionCard, isDone && styles.doneCard]}>
-            <Pressable onPress={() => toggle(a.id)} hitSlop={8} style={styles.checkbox}>
+          <Card key={t.id} style={[styles.actionCard, isDone && styles.doneCard]}>
+            <Pressable onPress={() => toggleTask(t.id, !isDone)} hitSlop={8} style={styles.checkbox}>
               <Ionicons
                 name={isDone ? 'checkmark-circle' : 'ellipse-outline'}
                 size={26}
@@ -67,20 +80,22 @@ export default function ActionsScreen() {
               />
             </Pressable>
             <View style={styles.actionBody}>
-              <Text style={[styles.actionText, isDone && styles.doneText]}>{a.action}</Text>
+              <Text style={[styles.actionText, isDone && styles.doneText]}>{t.title}</Text>
               <View style={styles.actionMeta}>
-                <Pill label={a.owner} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
-                <Pill
-                  label={`Due ${formatDate(a.deadline)}`}
-                  color={URGENCY_COLOR[a.urgency]}
-                  bg={`${URGENCY_COLOR[a.urgency]}22`}
-                />
+                <Pill label={t.owner} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
+                {t.dueDate && (
+                  <Pill
+                    label={`Due ${formatDate(t.dueDate)}`}
+                    color={URGENCY_COLOR[t.priority]}
+                    bg={`${URGENCY_COLOR[t.priority]}22`}
+                  />
+                )}
               </View>
-              <Pressable onPress={() => router.push(`/email/${a.emailId}`)} hitSlop={6}>
-                <Text style={styles.source} numberOfLines={1}>
-                  ↪ {a.emailSubject}
-                </Text>
-              </Pressable>
+              {subject && t.sourceCommId && (
+                <Pressable onPress={() => router.push(`/email/${t.sourceCommId}`)} hitSlop={6}>
+                  <Text style={styles.source} numberOfLines={1}>↪ {subject}</Text>
+                </Pressable>
+              )}
             </View>
           </Card>
         );
@@ -117,6 +132,7 @@ function FilterRow({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bgBase },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Brand.bgBase },
   filterChip: {
     paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
     backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border,

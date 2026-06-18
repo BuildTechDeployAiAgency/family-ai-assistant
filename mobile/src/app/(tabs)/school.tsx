@@ -1,24 +1,33 @@
 import { Link, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar, Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { FAMILY_MEMBERS, INITIAL_EMAILS, MOCK_AI_RESPONSES } from '@/data/fixtures';
-import { categoryColor, childTasks, CHILDREN, formatDate, URGENCY_COLOR } from '@/lib/helpers';
+import { categoryColor, formatDate, URGENCY_COLOR } from '@/lib/helpers';
+import { useData, type Communication, type Member, type Task } from '@/store/data';
 
 type Segment = 'inbox' | 'children';
 
 export default function SchoolScreen() {
   const insets = useSafeAreaInsets();
   const [segment, setSegment] = useState<Segment>('inbox');
+  const { communications, tasks, members, loading } = useData();
 
   const emails = useMemo(
-    () => [...INITIAL_EMAILS].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    []
+    () => [...communications].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [communications]
   );
-  const byChild = useMemo(() => childTasks(), []);
+  const children = useMemo(() => members.filter((m) => m.memberType === 'child'), [members]);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={Brand.accent} size="large" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -29,25 +38,27 @@ export default function SchoolScreen() {
         <SegmentBtn label="By child" active={segment === 'children'} onPress={() => setSegment('children')} />
       </View>
 
-      {segment === 'inbox' ? <Inbox emails={emails} /> : <ByChild tasks={byChild} />}
+      {segment === 'inbox' ? (
+        <Inbox emails={emails} openTasks={tasks.filter((t) => !t.completed).length} />
+      ) : (
+        <ByChild children={children} tasks={tasks} />
+      )}
     </ScrollView>
   );
 }
 
-function Inbox({ emails }: { emails: typeof INITIAL_EMAILS }) {
+function Inbox({ emails, openTasks }: { emails: Communication[]; openTasks: number }) {
   const unread = emails.filter((e) => !e.read).length;
-  const analyzed = emails.filter((e) => MOCK_AI_RESPONSES[e.id]).length;
   return (
     <>
       <View style={styles.summaryRow}>
         <StatChip value={emails.length} label="Messages" color={Brand.accent} />
         <StatChip value={unread} label="Unread" color={Brand.violet} />
-        <StatChip value={analyzed} label="AI analyzed" color={Brand.green} />
+        <StatChip value={openTasks} label="Open tasks" color={Brand.green} />
       </View>
       <SectionLabel>Inbox</SectionLabel>
       {emails.map((email) => {
         const fromName = email.from.split('<')[0].trim();
-        const hasAi = !!MOCK_AI_RESPONSES[email.id];
         return (
           <Link key={email.id} href={`/email/${email.id}`} asChild>
             <Pressable>
@@ -66,7 +77,6 @@ function Inbox({ emails }: { emails: typeof INITIAL_EMAILS }) {
                     </Text>
                     <View style={styles.emailFooter}>
                       <Pill label={email.category} color={categoryColor(email.category)} bg={`${categoryColor(email.category)}22`} />
-                      {hasAi && <Pill label="✨ AI ready" color={Brand.green} bg="rgba(16,185,129,0.14)" />}
                       {!email.read && <View style={styles.dot} />}
                     </View>
                   </View>
@@ -80,36 +90,39 @@ function Inbox({ emails }: { emails: typeof INITIAL_EMAILS }) {
   );
 }
 
-function ByChild({ tasks }: { tasks: ReturnType<typeof childTasks> }) {
+function ByChild({ children, tasks }: { children: Member[]; tasks: Task[] }) {
   const router = useRouter();
   return (
     <View style={{ gap: 16 }}>
-      {CHILDREN.map((child) => {
-        const member = FAMILY_MEMBERS[child];
-        const items = tasks[child];
+      {children.map((child) => {
+        const items = tasks.filter((t) => t.owner === child.name && !t.completed);
         return (
-          <View key={child} style={{ gap: 10 }}>
+          <View key={child.name} style={{ gap: 10 }}>
             <View style={styles.childHeader}>
-              <Avatar owner={child} size={44} />
+              <Avatar owner={child.name} size={44} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.childName}>{member.name}</Text>
-                <Text style={styles.childRole}>{member.role}</Text>
+                <Text style={styles.childName}>{child.name}</Text>
+                <Text style={styles.childRole}>{child.role}</Text>
               </View>
               <Pill label={`${items.length} task${items.length === 1 ? '' : 's'}`} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
             </View>
             {items.length === 0 ? (
-              <Card><Text style={styles.empty}>No open school tasks 🎉</Text></Card>
+              <Card><Text style={styles.empty}>No open tasks 🎉</Text></Card>
             ) : (
               items.map((t) => (
-                <Pressable key={t.id} onPress={() => router.push(`/email/${t.emailId}`)}>
+                <Pressable
+                  key={t.id}
+                  disabled={!t.sourceCommId}
+                  onPress={() => t.sourceCommId && router.push(`/email/${t.sourceCommId}`)}>
                   <Card style={styles.taskCard}>
-                    <View style={[styles.urgBar, { backgroundColor: URGENCY_COLOR[t.urgency] }]} />
+                    <View style={[styles.urgBar, { backgroundColor: URGENCY_COLOR[t.priority] }]} />
                     <View style={{ flex: 1, gap: 6 }}>
-                      <Text style={styles.taskText}>{t.action}</Text>
-                      <View style={styles.taskMeta}>
-                        <Pill label={`Due ${formatDate(t.deadline)}`} color={URGENCY_COLOR[t.urgency]} bg={`${URGENCY_COLOR[t.urgency]}22`} />
-                        <Text style={styles.taskSource} numberOfLines={1}>↪ {t.emailSubject}</Text>
-                      </View>
+                      <Text style={styles.taskText}>{t.title}</Text>
+                      {t.dueDate && (
+                        <View style={styles.taskMeta}>
+                          <Pill label={`Due ${formatDate(t.dueDate)}`} color={URGENCY_COLOR[t.priority]} bg={`${URGENCY_COLOR[t.priority]}22`} />
+                        </View>
+                      )}
                     </View>
                   </Card>
                 </Pressable>
@@ -141,6 +154,7 @@ function StatChip({ value, label, color }: { value: number; label: string; color
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Brand.bgBase },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: Brand.bgBase },
   segment: { flexDirection: 'row', backgroundColor: Brand.surface, borderRadius: 12, padding: 4, borderWidth: 1, borderColor: Brand.border },
   segBtn: { flex: 1, paddingVertical: 9, borderRadius: 9, alignItems: 'center' },
   segBtnActive: { backgroundColor: Brand.accent },
@@ -170,5 +184,4 @@ const styles = StyleSheet.create({
   urgBar: { width: 4, borderRadius: 2 },
   taskText: { color: Brand.text, fontSize: 14, fontWeight: '600', lineHeight: 19 },
   taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  taskSource: { color: Brand.muted, fontSize: 11, fontStyle: 'italic', flex: 1 },
 });
