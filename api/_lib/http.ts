@@ -17,6 +17,45 @@ export class HttpError extends Error {
   }
 }
 
+// Browser origins permitted to call this API (the PWA + local Expo-web dev).
+// Native apps send no Origin header, so they're unaffected. Bearer-token auth
+// (not cookies) means we never set Allow-Credentials. Extra origins can be
+// added at runtime via the CORS_ORIGINS env (comma-separated).
+const STATIC_ALLOWED_ORIGINS = [
+  'https://family-ai-app.vercel.app',
+  'http://localhost:8081',
+  'http://localhost:19006',
+  'http://localhost:3000',
+];
+
+function allowedOrigins(): Set<string> {
+  const extra = (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return new Set([...STATIC_ALLOWED_ORIGINS, ...extra]);
+}
+
+// Echo CORS headers when the request Origin is allow-listed. Returns true when
+// the request is an OPTIONS preflight that has been fully answered (caller
+// should stop). RLS + user-JWT still gate all data — CORS only controls which
+// browser origins may issue the request.
+export function applyCors(req: VercelRequest, res: VercelResponse): boolean {
+  const origin = (req.headers.origin as string) || '';
+  if (origin && allowedOrigins().has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'authorization, content-type');
+    res.setHeader('Access-Control-Max-Age', '86400');
+  }
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return true;
+  }
+  return false;
+}
+
 // Verify the Supabase JWT, resolve the caller's family_id, attach an
 // RLS-scoped client. Throws HttpError(401) when unauthenticated.
 export async function authenticate(req: VercelRequest): Promise<AuthedContext> {
@@ -55,6 +94,9 @@ type Handler = (req: VercelRequest, res: VercelResponse, ctx: AuthedContext) => 
 // Wraps a handler with method-guard, auth, and uniform error handling.
 export function withAuth(methods: string[], handler: Handler) {
   return async (req: VercelRequest, res: VercelResponse) => {
+    // CORS first: answer preflight before the method guard (OPTIONS carries no
+    // Authorization header and is not in `methods`).
+    if (applyCors(req, res)) return;
     if (!methods.includes(req.method || '')) {
       res.setHeader('Allow', methods.join(', '));
       return res.status(405).json({ error: 'Method not allowed' });
