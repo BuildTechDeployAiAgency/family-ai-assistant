@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from './_lib/vercel.js';
 import { withAuth, parseBody, HttpError } from './_lib/http.js';
-import { memberUpdateSchema } from './_lib/schemas.js';
+import { memberCreateSchema, memberUpdateSchema } from './_lib/schemas.js';
 import { ageFromDob } from './_lib/members.js';
 import { env } from './_lib/env.js';
 
@@ -21,13 +21,41 @@ function toClient(m: any) {
   };
 }
 
-// PATCH /api/members?id=... — edit a single family member.
-// RLS (auth_family_id) scopes the update to the caller's own family; the
-// id comes from the query, the family is never trusted from the body.
-export default withAuth(['PATCH'], async (req: VercelRequest, res: VercelResponse, ctx) => {
+// /api/members — manage the caller's family roster.
+//   POST            → add a member
+//   PATCH ?id=...   → edit a member
+//   DELETE ?id=...  → remove a member
+// RLS (auth_family_id) scopes every operation to the caller's own family. On
+// create, family_id is set from the VERIFIED ctx.familyId (JWT-derived), never
+// from the request body — the #1 isolation invariant.
+export default withAuth(['POST', 'PATCH', 'DELETE'], async (req: VercelRequest, res: VercelResponse, ctx) => {
+  if (req.method === 'POST') {
+    const body = parseBody(memberCreateSchema, req.body);
+    const row = {
+      family_id: ctx.familyId, // verified source — never the request body
+      name: body.name,
+      member_type: body.memberType,
+      role: body.role ?? null,
+      grade: body.grade ?? null,
+      avatar: body.avatar ?? '🙂',
+      color: body.color ?? '#6366f1',
+      date_of_birth: body.dateOfBirth ?? null,
+    };
+    const { data, error } = await ctx.supabase.from('family_members').insert(row).select(SELECT).single();
+    if (error) throw new HttpError(500, 'Failed to add member');
+    return res.status(201).json({ member: toClient(data) });
+  }
+
   const id = (req.query.id as string) || '';
   if (!id) throw new HttpError(400, 'Missing member id');
 
+  if (req.method === 'DELETE') {
+    const { error } = await ctx.supabase.from('family_members').delete().eq('id', id);
+    if (error) throw new HttpError(500, 'Failed to remove member');
+    return res.status(200).json({ ok: true });
+  }
+
+  // PATCH
   const body = parseBody(memberUpdateSchema, req.body);
   const patch: Record<string, unknown> = {};
   if (body.name !== undefined) patch.name = body.name;

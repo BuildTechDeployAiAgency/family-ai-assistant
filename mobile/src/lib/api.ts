@@ -27,11 +27,15 @@ export const api = {
   documents: () => authedFetch<{ documents: any[] }>('/api/documents'),
   createDocument: (doc: any) =>
     authedFetch<{ document: any }>('/api/documents', { method: 'POST', body: JSON.stringify(doc) }),
+  createMember: (member: object) =>
+    authedFetch<{ member: any }>('/api/members', { method: 'POST', body: JSON.stringify(member) }),
   updateMember: (id: string, patch: object) =>
     authedFetch<{ member: any }>(`/api/members?id=${encodeURIComponent(id)}`, {
       method: 'PATCH',
       body: JSON.stringify(patch),
     }),
+  deleteMember: (id: string) =>
+    authedFetch<{ ok: boolean }>(`/api/members?id=${encodeURIComponent(id)}`, { method: 'DELETE' }),
   preferences: () =>
     authedFetch<{ preferences: { tone: string; assistantName: string | null; aiModel: string; language: string } }>(
       '/api/preferences'

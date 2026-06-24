@@ -24,6 +24,21 @@ export const taskPatchSchema = z.object({
   completed: z.boolean(),
 });
 
+// New family member — name required; the rest optional with sane defaults.
+export const memberCreateSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  memberType: z.enum(['adult', 'child', 'household']).default('child'),
+  role: z.string().trim().max(60).nullable().optional(),
+  grade: z.string().trim().max(60).nullable().optional(),
+  avatar: z.string().min(1).max(16).optional(), // emoji
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color must be a #RRGGBB hex').optional(),
+  dateOfBirth: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'dateOfBirth must be YYYY-MM-DD')
+    .nullable()
+    .optional(),
+});
+
 // Family member edit — all fields optional; at least one required.
 export const memberUpdateSchema = z
   .object({

@@ -47,6 +47,16 @@ export interface MemberPatch {
   dateOfBirth?: string | null;
 }
 
+export interface MemberCreate {
+  name: string;
+  memberType: 'adult' | 'child' | 'household';
+  role?: string | null;
+  grade?: string | null;
+  avatar?: string;
+  color?: string;
+  dateOfBirth?: string | null;
+}
+
 interface DataContextValue {
   communications: Communication[];
   tasks: Task[];
@@ -54,7 +64,9 @@ interface DataContextValue {
   loading: boolean;
   refresh: () => Promise<void>;
   toggleTask: (id: string, completed: boolean) => void;
+  addMember: (member: MemberCreate) => Promise<Member>;
   updateMember: (id: string, patch: MemberPatch) => Promise<void>;
+  removeMember: (id: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -99,6 +111,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Create a member, then append the server's canonical row.
+  const addMember = useCallback(async (input: MemberCreate) => {
+    const { member } = await api.createMember(input);
+    setMembers((prev) => [...prev, member as Member]);
+    return member as Member;
+  }, []);
+
   // Optimistic member edit; reconciled by the server response, reverted on error.
   const updateMember = useCallback(async (id: string, patch: MemberPatch) => {
     let snapshot: Member[] = [];
@@ -115,9 +134,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Optimistic remove; restored on error.
+  const removeMember = useCallback(async (id: string) => {
+    let snapshot: Member[] = [];
+    setMembers((prev) => {
+      snapshot = prev;
+      return prev.filter((m) => m.id !== id);
+    });
+    try {
+      await api.deleteMember(id);
+    } catch (err) {
+      setMembers(snapshot);
+      throw err;
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ communications, tasks, members, loading, refresh, toggleTask, updateMember }),
-    [communications, tasks, members, loading, refresh, toggleTask, updateMember]
+    () => ({ communications, tasks, members, loading, refresh, toggleTask, addMember, updateMember, removeMember }),
+    [communications, tasks, members, loading, refresh, toggleTask, addMember, updateMember, removeMember]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

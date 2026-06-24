@@ -1,5 +1,5 @@
 import { Link, useRouter } from 'expo-router';
-import { CaretRight, Folders, BellRinging, Brain, SlidersHorizontal, SignOut } from 'phosphor-react-native';
+import { CaretRight, Folders, BellRinging, Brain, SlidersHorizontal, SignOut, Plus } from 'phosphor-react-native';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -52,7 +52,18 @@ export default function ProfileScreen() {
               </Text>
             </Pressable>
           ))}
-          {family.length === 0 && <Text style={styles.emptyMembers}>No family members yet.</Text>}
+          {/* Add member */}
+          <Pressable
+            style={({ pressed }) => [styles.member, pressed && styles.memberPressed]}
+            onPress={() => router.push('/profile/member/new')}>
+            <View style={styles.addCircle}>
+              <Plus size={24} color={Brand.accent} weight="bold" />
+            </View>
+            <Text style={styles.memberName}>Add</Text>
+            <Text style={styles.memberRole} numberOfLines={1}>
+              {family.length === 0 ? 'Add a member' : 'Parent / child'}
+            </Text>
+          </Pressable>
         </ScrollView>
       </Card>
 
@@ -140,7 +151,10 @@ const styles = StyleSheet.create({
   memberPressed: { opacity: 0.6 },
   memberName: { color: Brand.text, fontSize: 13, fontFamily: FontFamily.semibold, marginTop: 2 },
   memberRole: { color: Brand.faint, fontSize: 10, fontFamily: FontFamily.medium, textAlign: 'center' },
-  emptyMembers: { color: Brand.muted, fontSize: 13, padding: 12 },
+  addCircle: {
+    width: 52, height: 52, borderRadius: 26, borderWidth: 1.5, borderColor: Brand.accent,
+    borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center', backgroundColor: Brand.surfaceAlt,
+  },
 
   linksCard: { padding: 0 },
   linkRow: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16 },
