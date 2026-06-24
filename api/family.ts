@@ -14,6 +14,7 @@ export default withAuth(['GET'], async (_req: VercelRequest, res: VercelResponse
   if (familyRes.error) throw new HttpError(500, 'Failed to load family');
 
   const members = (membersRes.data ?? []).map((m: any) => ({
+    id: m.id,
     name: m.name,
     role: m.role ?? m.member_type,
     avatar: m.avatar ?? '🙂',
@@ -21,6 +22,7 @@ export default withAuth(['GET'], async (_req: VercelRequest, res: VercelResponse
     initials: m.name.slice(0, 1).toUpperCase(),
     memberType: m.member_type,
     grade: m.grade,
+    dateOfBirth: m.date_of_birth,
     age: ageFromDob(m.date_of_birth, env.REFERENCE_DATE),
   }));
 
