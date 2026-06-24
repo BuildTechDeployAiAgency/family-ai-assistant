@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -60,6 +61,9 @@ export default function ScanScreen() {
   };
 
   const takePhoto = async () => {
+    // Web has no native camera module; the file picker on mobile browsers
+    // already offers "Take Photo or Video", so route there.
+    if (Platform.OS === 'web') return pickImage();
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
       Alert.alert('Camera access needed', 'Enable camera access to scan a document.');
@@ -106,12 +110,14 @@ export default function ScanScreen() {
             </View>
             <Pressable style={[styles.bigBtn, styles.primaryBtn]} onPress={takePhoto}>
               <Camera size={20} color={Brand.onAccent} weight="fill" />
-              <Text style={styles.primaryBtnText}>Take photo</Text>
+              <Text style={styles.primaryBtnText}>{Platform.OS === 'web' ? 'Add a photo' : 'Take photo'}</Text>
             </Pressable>
-            <Pressable style={[styles.bigBtn, styles.secondaryBtn]} onPress={pickImage}>
-              <ImageSquare size={20} color={Brand.text} />
-              <Text style={styles.secondaryBtnText}>Choose from library</Text>
-            </Pressable>
+            {Platform.OS !== 'web' && (
+              <Pressable style={[styles.bigBtn, styles.secondaryBtn]} onPress={pickImage}>
+                <ImageSquare size={20} color={Brand.text} />
+                <Text style={styles.secondaryBtnText}>Choose from library</Text>
+              </Pressable>
+            )}
           </>
         )}
 
