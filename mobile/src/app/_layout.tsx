@@ -10,7 +10,8 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { CaretLeft } from 'phosphor-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -64,6 +65,17 @@ function RootNav() {
         headerBackButtonDisplayMode: 'minimal', // bare chevron — no "(tabs)" back title
         headerBackTitle: '',
         contentStyle: { backgroundColor: Brand.bgBase },
+        // Always-present back control. The native chevron is hidden when the
+        // stack has no history (e.g. a PWA deep-load via SPA fallback), so we
+        // render our own and fall back to home when there's nothing to pop.
+        headerLeft: () => (
+          <Pressable
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+            hitSlop={12}
+            style={{ paddingRight: 16 }}>
+            <CaretLeft size={24} color={Brand.accent} weight="bold" />
+          </Pressable>
+        ),
       }}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

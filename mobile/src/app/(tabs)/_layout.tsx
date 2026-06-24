@@ -1,11 +1,16 @@
 import { Tabs, useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Folders, GraduationCap, ListChecks, Sparkle, UserCircle } from 'phosphor-react-native';
 
 import { Brand, FontFamily } from '@/constants/theme';
 
 export default function TabsLayout() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  // Reserve room for the iOS home indicator so labels aren't clipped by the
+  // bottom edge in the installed PWA (a fixed height would sit under it).
+  const bottomInset = Math.max(insets.bottom, 8);
   return (
     <Tabs
       screenOptions={{
@@ -18,8 +23,9 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: Brand.surface,
           borderTopColor: Brand.border,
-          height: 88,
+          height: 60 + bottomInset,
           paddingTop: 8,
+          paddingBottom: bottomInset,
         },
         headerRight: () => (
           <Pressable onPress={() => router.push('/profile')} hitSlop={12} style={{ marginRight: 16 }}>
