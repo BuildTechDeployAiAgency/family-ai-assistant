@@ -17,14 +17,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { FAMILY_MEMBERS, type MemberKey } from '@/data/fixtures';
 import { FontFamily } from '@/constants/theme';
 import { categoryColor } from '@/lib/helpers';
 import { extractFromImage, type Extraction } from '@/lib/mockExtract';
+import { useData } from '@/store/data';
 import { useDocuments } from '@/store/documents';
 
 const CATEGORIES = ['Identity', 'Driving', 'Education', 'Health', 'Finance', 'Insurance', 'Travel', 'Admin'];
-const OWNERS = Object.keys(FAMILY_MEMBERS) as MemberKey[];
+
+// Shared/household owner — stored with no member_id, returned by the API as "Family".
+const FAMILY_OWNER = { name: 'Family', avatar: '🏡', color: Brand.accent };
 
 type Phase = 'capture' | 'analyzing' | 'review';
 
@@ -32,6 +34,12 @@ export default function ScanScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addDocument } = useDocuments();
+  const { members } = useData();
+
+  // Owner choices = the signed-in family's real members. The seed already includes a
+  // "Family" household member; only fall back to a synthetic one if it's missing.
+  const base = members.map((m) => ({ name: m.name, avatar: m.avatar, color: m.color }));
+  const owners = base.some((m) => m.name === FAMILY_OWNER.name) ? base : [...base, FAMILY_OWNER];
 
   const [phase, setPhase] = useState<Phase>('capture');
   const [image, setImage] = useState<string | null>(null);
@@ -173,11 +181,10 @@ export default function ScanScreen() {
 
               <Field label="Owner">
                 <View style={styles.chipWrap}>
-                  {OWNERS.map((o) => {
-                    const active = draft.owner === o;
-                    const m = FAMILY_MEMBERS[o];
+                  {owners.map((m) => {
+                    const active = draft.owner === m.name;
                     return (
-                      <Pressable key={o} onPress={() => patch({ owner: o })}>
+                      <Pressable key={m.name} onPress={() => patch({ owner: m.name })}>
                         <View style={[styles.ownerChip, active && { backgroundColor: m.color, borderColor: m.color }]}>
                           <Text style={styles.ownerEmoji}>{m.avatar}</Text>
                           <Text style={[styles.ownerName, active && { color: Brand.onAccent }]}>{m.name}</Text>

@@ -9,7 +9,7 @@ function toClient(row: any) {
     id: row.id,
     name: row.title,
     number: row.document_number ?? '',
-    expiryDate: row.expiry_date,
+    expiryDate: row.expiry_date ?? '',
     owner: row.family_members?.name ?? 'Family',
     category: row.category ?? 'Other',
     progress: row.progress ?? 0,
@@ -39,7 +39,7 @@ export default withAuth(['GET', 'POST'], async (req: VercelRequest, res: VercelR
       title: body.name,
       document_number: body.number,
       category: body.category,
-      expiry_date: body.expiryDate ?? null,
+      expiry_date: body.expiryDate?.trim() || null, // '' / blank → null (date column rejects '')
       progress: body.progress,
       source_channel: 'manual',
     })

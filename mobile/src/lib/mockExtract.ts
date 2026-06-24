@@ -1,11 +1,10 @@
-import type { MemberKey } from '@/data/fixtures';
 import { api } from './api';
 
 export interface Extraction {
   name: string;
   number: string;
   category: string;
-  owner: MemberKey;
+  owner: string; // family member name, or "Family" if shared
   expiryDate: string;
   confidence: number; // 0-1
 }
@@ -19,7 +18,7 @@ export async function extractFromImage(imageBase64: string, mimeType = 'image/jp
     name: r.name,
     number: r.number ?? '',
     category: r.category,
-    owner: (r.owner as MemberKey) ?? 'Family',
+    owner: r.owner ?? 'Family',
     expiryDate: r.expiryDate ?? '',
     confidence: r.confidence ?? 0,
   };

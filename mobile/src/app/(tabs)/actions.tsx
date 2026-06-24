@@ -1,4 +1,4 @@
-import { CheckCircle, Circle } from 'phosphor-react-native';
+import { CheckCircle, CircleIcon } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -76,7 +76,7 @@ export default function ActionsScreen() {
               {isDone ? (
                 <CheckCircle size={26} color={Brand.green} weight="fill" />
               ) : (
-                <Circle size={26} color={Brand.faint} />
+                <CircleIcon size={26} color={Brand.faint} />
               )}
             </Pressable>
             <View style={styles.actionBody}>

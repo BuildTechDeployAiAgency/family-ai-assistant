@@ -44,7 +44,7 @@ export default function DocumentsScreen() {
 
       {docs.map((doc) => {
         const status = getDocumentStatus(doc.expiryDate);
-        const member = FAMILY_MEMBERS[doc.owner] ?? { name: doc.owner };
+        const member = FAMILY_MEMBERS[doc.owner as keyof typeof FAMILY_MEMBERS] ?? { name: doc.owner };
         return (
           <Link key={doc.id} href={`/document/${doc.id}`} asChild>
             <Pressable>

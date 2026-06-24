@@ -24,7 +24,7 @@ export default function DocumentDetail() {
   }
 
   const status = getDocumentStatus(doc.expiryDate);
-  const member = FAMILY_MEMBERS[doc.owner] ?? { name: doc.owner, role: 'Family' };
+  const member = FAMILY_MEMBERS[doc.owner as keyof typeof FAMILY_MEMBERS] ?? { name: doc.owner, role: 'Family' };
   const plan = DEFAULT_RENEWAL_PLANS[doc.name] ?? [];
 
   return (
