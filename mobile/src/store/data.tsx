@@ -26,6 +26,7 @@ export interface Task {
 }
 
 export interface Member {
+  id: string;
   name: string;
   role: string;
   avatar: string;
@@ -33,7 +34,17 @@ export interface Member {
   initials: string;
   memberType: string;
   grade: string | null;
+  dateOfBirth: string | null;
   age: number | null;
+}
+
+export interface MemberPatch {
+  name?: string;
+  role?: string | null;
+  grade?: string | null;
+  avatar?: string;
+  color?: string;
+  dateOfBirth?: string | null;
 }
 
 interface DataContextValue {
@@ -43,6 +54,7 @@ interface DataContextValue {
   loading: boolean;
   refresh: () => Promise<void>;
   toggleTask: (id: string, completed: boolean) => void;
+  updateMember: (id: string, patch: MemberPatch) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | null>(null);
@@ -87,9 +99,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Optimistic member edit; reconciled by the server response, reverted on error.
+  const updateMember = useCallback(async (id: string, patch: MemberPatch) => {
+    let snapshot: Member[] = [];
+    setMembers((prev) => {
+      snapshot = prev;
+      return prev.map((m) => (m.id === id ? { ...m, ...patch } as Member : m));
+    });
+    try {
+      const { member } = await api.updateMember(id, patch);
+      setMembers((prev) => prev.map((m) => (m.id === id ? (member as Member) : m)));
+    } catch (err) {
+      setMembers(snapshot);
+      throw err;
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ communications, tasks, members, loading, refresh, toggleTask }),
-    [communications, tasks, members, loading, refresh, toggleTask]
+    () => ({ communications, tasks, members, loading, refresh, toggleTask, updateMember }),
+    [communications, tasks, members, loading, refresh, toggleTask, updateMember]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

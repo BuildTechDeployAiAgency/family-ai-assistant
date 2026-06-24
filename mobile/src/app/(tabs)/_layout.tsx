@@ -1,12 +1,11 @@
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
-import { Folders, GraduationCap, ListChecks, Sparkle, SignOut } from 'phosphor-react-native';
+import { Folders, GraduationCap, ListChecks, Sparkle, UserCircle } from 'phosphor-react-native';
 
 import { Brand, FontFamily } from '@/constants/theme';
-import { useAuth } from '@/store/auth';
 
 export default function TabsLayout() {
-  const { signOut } = useAuth();
+  const router = useRouter();
   return (
     <Tabs
       screenOptions={{
@@ -23,8 +22,8 @@ export default function TabsLayout() {
           paddingTop: 8,
         },
         headerRight: () => (
-          <Pressable onPress={signOut} hitSlop={12} style={{ marginRight: 16 }}>
-            <SignOut size={22} color={Brand.faint} />
+          <Pressable onPress={() => router.push('/profile')} hitSlop={12} style={{ marginRight: 16 }}>
+            <UserCircle size={28} color={Brand.accent} weight="duotone" />
           </Pressable>
         ),
       }}>

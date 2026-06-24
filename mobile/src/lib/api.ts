@@ -27,6 +27,24 @@ export const api = {
   documents: () => authedFetch<{ documents: any[] }>('/api/documents'),
   createDocument: (doc: any) =>
     authedFetch<{ document: any }>('/api/documents', { method: 'POST', body: JSON.stringify(doc) }),
+  updateMember: (id: string, patch: object) =>
+    authedFetch<{ member: any }>(`/api/members?id=${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+  preferences: () =>
+    authedFetch<{ preferences: { tone: string; assistantName: string | null; aiModel: string; language: string } }>(
+      '/api/preferences'
+    ),
+  updatePreferences: (patch: object) =>
+    authedFetch<{ preferences: any }>('/api/preferences', { method: 'PATCH', body: JSON.stringify(patch) }),
+  memory: () => authedFetch<{ memory: any[] }>('/api/memory'),
+  addMemory: (fact: string, kind = 'fact', salience = 50) =>
+    authedFetch<{ memory: any }>('/api/memory', { method: 'POST', body: JSON.stringify({ fact, kind, salience }) }),
+  updateMemory: (id: string, patch: object) =>
+    authedFetch<{ memory: any }>(`/api/memory?id=${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  deleteMemory: (id: string) =>
+    authedFetch<{ ok: boolean }>(`/api/memory?id=${encodeURIComponent(id)}`, { method: 'DELETE' }),
   communications: () => authedFetch<{ communications: any[] }>('/api/communications'),
   tasks: () => authedFetch<{ tasks: any[] }>('/api/tasks'),
   setTaskCompleted: (id: string, completed: boolean) =>

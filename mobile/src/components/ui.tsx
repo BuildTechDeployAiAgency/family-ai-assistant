@@ -43,8 +43,20 @@ export function Pill({
 
 const FALLBACK_MEMBER = { name: 'Family', role: 'Household', avatar: '🙂', color: '#8fa3c0', initials: 'F' };
 
-export function Avatar({ owner, size = 40 }: { owner: MemberKey | string; size?: number }) {
-  const m = FAMILY_MEMBERS[owner as MemberKey] ?? FALLBACK_MEMBER;
+export function Avatar({
+  owner,
+  size = 40,
+  emoji,
+  color,
+}: {
+  owner?: MemberKey | string;
+  size?: number;
+  emoji?: string; // live override (e.g. an edited member's avatar)
+  color?: string; // live override
+}) {
+  const base = FAMILY_MEMBERS[owner as MemberKey] ?? FALLBACK_MEMBER;
+  const av = emoji ?? base.avatar;
+  const col = color ?? base.color;
   return (
     <View
       style={[
@@ -53,11 +65,11 @@ export function Avatar({ owner, size = 40 }: { owner: MemberKey | string; size?:
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: `${m.color}22`,
-          borderColor: `${m.color}66`,
+          backgroundColor: `${col}22`,
+          borderColor: `${col}66`,
         },
       ]}>
-      <Text style={{ fontSize: size * 0.5 }}>{m.avatar}</Text>
+      <Text style={{ fontSize: size * 0.5 }}>{av}</Text>
     </View>
   );
 }

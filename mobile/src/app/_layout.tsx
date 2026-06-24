@@ -61,10 +61,17 @@ function RootNav() {
         headerTintColor: Brand.text,
         headerShadowVisible: false,
         headerTitleStyle: { fontFamily: FontFamily.serif, fontSize: 18, color: Brand.text },
+        headerBackButtonDisplayMode: 'minimal', // bare chevron — no "(tabs)" back title
+        headerBackTitle: '',
         contentStyle: { backgroundColor: Brand.bgBase },
       }}>
       <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="profile/index" options={{ title: 'Profile' }} />
+      <Stack.Screen name="profile/preferences" options={{ title: 'Preferences' }} />
+      <Stack.Screen name="profile/notifications" options={{ title: 'Notifications' }} />
+      <Stack.Screen name="profile/memory" options={{ title: "What I've learned" }} />
+      <Stack.Screen name="profile/member/[id]" options={{ title: 'Edit member' }} />
       <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
       <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
       <Stack.Screen name="scan" options={{ presentation: 'modal', title: 'Scan document' }} />
