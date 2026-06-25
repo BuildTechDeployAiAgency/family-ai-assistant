@@ -24,14 +24,20 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const onSubmit = async () => {
     setError(null);
+    setNotice(null);
     setBusy(true);
     try {
-      await signUp(email, password, familyName);
-      // gate redirects to /(tabs) once session is set
+      const { needsConfirmation } = await signUp(email, password, familyName);
+      // If confirmation is OFF, a session arrives and the gate redirects to
+      // /(tabs). If ON, no session comes — tell the user instead of going silent.
+      if (needsConfirmation) {
+        setNotice('Account created. Check your email to confirm your address, then sign in.');
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Sign up failed.');
     } finally {
@@ -87,10 +93,17 @@ export default function RegisterScreen() {
           </Field>
 
           {error && <Text style={styles.error}>{error}</Text>}
+          {notice && <Text style={styles.notice}>{notice}</Text>}
 
           <Pressable style={[styles.btn, busy && styles.btnBusy]} onPress={onSubmit} disabled={busy}>
             {busy ? <ActivityIndicator color={Brand.onAccent} /> : <Text style={styles.btnText}>Create account</Text>}
           </Pressable>
+
+          {notice && (
+            <Link href="/(auth)/login" style={[styles.link, { textAlign: 'center' }]}>
+              Go to sign in
+            </Link>
+          )}
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account? </Text>
@@ -130,6 +143,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 13, color: Brand.text, fontSize: 16,
   },
   error: { color: Brand.red, fontSize: 13 },
+  notice: { color: Brand.green, fontSize: 13, fontFamily: FontFamily.medium },
   btn: {
     backgroundColor: Brand.accent, borderRadius: 12, paddingVertical: 15,
     alignItems: 'center', justifyContent: 'center', marginTop: 4,
