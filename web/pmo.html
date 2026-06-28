@@ -217,27 +217,62 @@ const COLUMNS = [
 const TAG_COLORS = { Design:'#7A6A9E', Mobile:'#4E6E8E', Backend:'#B5654A', AI:'#5B8A7A', Infra:'#C79A3A', Product:'#B23A48' };
 function tagStyle(t){const c=TAG_COLORS[t]||'#615D56';return `color:${c};background:${c}1c`;}
 
-const SEED = [
-  { id:'s1', col:'done', tag:'AI', author:'Diogo', title:'Set Gemma 4 free model in prod', note:'OPENROUTER_MODEL_AGENT + _EXTRACT → google/gemma-4-31b-it:free on Vercel.' },
-  { id:'s2', col:'done', tag:'Mobile', author:'Diogo', title:'Profile & Settings screens', note:'Profile home, Preferences + AI model, Notifications. Reached via header avatar.' },
-  { id:'s3', col:'done', tag:'Mobile', author:'Diogo', title:'Fix stale fixtures → Pacheco family', note:'Re-keyed FAMILY_MEMBERS + renewal plans; pruned dead mock data.' },
-  { id:'s4', col:'done', tag:'Design', author:'Diogo', title:'App showcase (all screens)', note:'Single paginated HTML gallery of every screen.' },
-  { id:'s5', col:'backlog', tag:'Mobile', author:'Diogo', title:"Build 'Today — one calm focus' home", note:'Anticipatory home: greeting + concierge focus card + on-your-plate digest.' },
-  { id:'s6', col:'backlog', tag:'Backend', author:'Diogo', title:'Proactive daily digest (Vercel Cron)', note:'Cron → per-family digest of expiries/tasks. Service-role + explicit family_id filter.' },
-  { id:'s7', col:'backlog', tag:'Backend', author:'Diogo', title:'Push notifications (Expo, iOS+Android)', note:'push_tokens + notification_settings tables; Expo Push sender.' },
-  { id:'s8', col:'backlog', tag:'Backend', author:'Diogo', title:'Persist Profile preferences + model switch', note:'Wire preferences/notification_settings to a real endpoint; model radio is a no-op today.' },
-  { id:'s9', col:'progress', tag:'Infra', author:'Diogo', title:'EAS build setup (eas.json + credentials)', note:'No eas.json/projectId yet; needs Apple + Android signing before TestFlight.' },
-  { id:'s10', col:'backlog', tag:'Product', author:'Diogo', title:'Marketing landing + waitlist live', note:'VSL landing deployed; wire waitlist capture to Supabase.' },
-];
+// ── Shared board now lives in Supabase (table public.pmo_cards). The board is
+// one global team board; RLS allows any signed-in team member to read/write.
+// localStorage is kept ONLY to one-time-migrate cards added before this switch.
+const MIGRATE_FLAG = 'pmo_migrated_v2';
+const OLD_SEED_IDS = new Set(['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10']);
+const VALID_COLS = ['ideas','backlog','progress','done'];
+const okCol = c => VALID_COLS.includes(c) ? c : 'ideas';
 
-let cards = [], currentUser = '';
+let cards = [], currentUser = '', boardReady = false;
 
-function load(){ try{ const r=localStorage.getItem(STORE_KEY); cards=r?JSON.parse(r):SEED.slice(); }catch(e){ cards=SEED.slice(); } if(!Array.isArray(cards)||!cards.length) cards=SEED.slice(); }
-function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(cards)); }
-function uid(){ return 'c'+Math.random().toString(36).slice(2,9); }
 function esc(s){ return String(s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
-function render(){ renderBoard(); renderStats(); save(); }
+async function fetchCards(){
+  const { data, error } = await sb.from('pmo_cards').select('*').order('position',{ascending:true}).order('created_at',{ascending:false});
+  if(error){ console.error('[pmo] fetch', error); return cards; }
+  return data || [];
+}
+
+// One-time: lift any USER-added local cards (not the old default seed) into the
+// shared board so neither Mario's nor Diogo's existing cards are lost.
+async function migrateLocalCards(existing){
+  if(localStorage.getItem(MIGRATE_FLAG)) return false;
+  let local = [];
+  try { const r = localStorage.getItem(STORE_KEY); local = r ? JSON.parse(r) : []; } catch(e){ local = []; }
+  const seenTitles = new Set((existing||[]).map(c => String(c.title||'').trim().toLowerCase()));
+  const toAdd = (Array.isArray(local)?local:[])
+    .filter(c => c && c.id && !OLD_SEED_IDS.has(c.id) && c.title && !seenTitles.has(String(c.title).trim().toLowerCase()))
+    .map((c,i) => ({ col:okCol(c.col), title:String(c.title), note:String(c.note||''), tag:c.tag||'Product', author:c.author||currentUser||'', position:1000+i }));
+  if(toAdd.length){
+    const { error } = await sb.from('pmo_cards').insert(toAdd);
+    if(error){ console.error('[pmo] migrate', error); return false; }
+  }
+  localStorage.setItem(MIGRATE_FLAG, '1');
+  return toAdd.length > 0;
+}
+
+async function addCard({col, title, note, tag}){
+  const row = { col:okCol(col), title, note:note||'', tag:tag||'Product', author:currentUser||'', position:0 };
+  const { data, error } = await sb.from('pmo_cards').insert(row).select().single();
+  if(error){ console.error('[pmo] add', error); alert('Could not add card.'); return; }
+  cards.unshift(data); renderBoard(); renderStats();
+}
+async function moveCard(id, col){
+  const card = cards.find(x=>x.id===id); if(!card) return;
+  const prev = card.col; card.col = okCol(col); renderBoard(); renderStats();
+  const { error } = await sb.from('pmo_cards').update({ col:okCol(col) }).eq('id', id);
+  if(error){ console.error('[pmo] move', error); card.col = prev; renderBoard(); renderStats(); }
+}
+async function delCard(id){
+  const idx = cards.findIndex(x=>x.id===id); if(idx<0) return;
+  const [removed] = cards.splice(idx,1); renderBoard(); renderStats();
+  const { error } = await sb.from('pmo_cards').delete().eq('id', id);
+  if(error){ console.error('[pmo] delete', error); cards.splice(idx,0,removed); renderBoard(); renderStats(); }
+}
+
+function render(){ renderBoard(); renderStats(); }
 
 function renderBoard(){
   const board=document.getElementById('board'); board.innerHTML='';
@@ -248,7 +283,7 @@ function renderBoard(){
     const list=col.querySelector('.cards'); colCards.forEach(k=>list.appendChild(cardEl(k)));
     col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('drag-over');});
     col.addEventListener('dragleave',()=>col.classList.remove('drag-over'));
-    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('drag-over');const id=e.dataTransfer.getData('text/plain');const card=cards.find(x=>x.id===id);if(card){card.col=c.id;render();}});
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('drag-over');const id=e.dataTransfer.getData('text/plain');moveCard(id,c.id);});
     col.querySelector('.add-card').addEventListener('click',()=>openAdd(c.id));
     board.appendChild(col);
   });
@@ -258,7 +293,7 @@ function cardEl(k){
   el.innerHTML=`<div class="ct">${esc(k.title)}</div>${k.note?`<div class="cn">${esc(k.note)}</div>`:''}<div class="cf"><span class="tag" style="${tagStyle(k.tag)}">${esc(k.tag||'')}</span><span class="author">${esc(k.author||'')}</span><button class="del" title="Delete">&times;</button></div>`;
   el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',k.id);el.classList.add('dragging');});
   el.addEventListener('dragend',()=>el.classList.remove('dragging'));
-  el.querySelector('.del').addEventListener('click',()=>{cards=cards.filter(x=>x.id!==k.id);render();});
+  el.querySelector('.del').addEventListener('click',()=>{delCard(k.id);});
   return el;
 }
 function renderStats(){
@@ -271,22 +306,38 @@ function openAdd(col){
   const close=()=>bg.remove();
   bg.addEventListener('click',e=>{if(e.target===bg)close();});
   bg.querySelector('#mCancel').addEventListener('click',close);
-  bg.querySelector('#mSave').addEventListener('click',()=>{const t=ti.value.trim();if(!t){ti.focus();return;}cards.unshift({id:uid(),col,title:t,note:bg.querySelector('#mNote').value.trim(),tag:bg.querySelector('#mTag').value,author:currentUser});close();render();});
+  bg.querySelector('#mSave').addEventListener('click',()=>{const t=ti.value.trim();if(!t){ti.focus();return;}addCard({col,title:t,note:bg.querySelector('#mNote').value.trim(),tag:bg.querySelector('#mTag').value});close();});
 }
 function showView(v){ ['board','showcase'].forEach(id=>document.getElementById('view-'+id).classList.toggle('hidden',id!==v)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v)); }
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showView(b.dataset.view);});
-document.getElementById('quickAdd').addEventListener('submit',e=>{e.preventDefault();const t=document.getElementById('qaTitle');const title=t.value.trim();if(!title){t.focus();return;}cards.unshift({id:uid(),col:'ideas',title,note:'',tag:document.getElementById('qaTag').value,author:currentUser});t.value='';render();});
+document.getElementById('quickAdd').addEventListener('submit',e=>{e.preventDefault();const t=document.getElementById('qaTitle');const title=t.value.trim();if(!title){t.focus();return;}addCard({col:'ideas',title,note:'',tag:document.getElementById('qaTag').value});t.value='';});
 
 // ---- name from email ----
 function nameFor(email){ const e=(email||'').toLowerCase(); if(e.startsWith('diogo'))return 'Diogo'; if(e.startsWith('mario'))return 'Mario'; const lp=(email||'').split('@')[0]||'Team'; return lp.charAt(0).toUpperCase()+lp.slice(1); }
 
-function enterApp(email){
+let pmoChannel = null;
+async function enterApp(email){
   currentUser=nameFor(email);
   document.getElementById('login').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   document.getElementById('userNm').textContent=currentUser;
   document.getElementById('userAv').textContent=currentUser.charAt(0);
-  load(); render(); showView('board');
+  showView('board');
+
+  // Load shared board, one-time-migrate local cards, then render.
+  cards = await fetchCards();
+  const migrated = await migrateLocalCards(cards);
+  if(migrated) cards = await fetchCards();
+  boardReady = true; render();
+
+  // Live sync: refetch on any change so Diogo + Mario stay in step.
+  if(!pmoChannel){
+    pmoChannel = sb.channel('pmo-board')
+      .on('postgres_changes', { event:'*', schema:'public', table:'pmo_cards' }, async ()=>{
+        cards = await fetchCards(); renderBoard(); renderStats();
+      })
+      .subscribe();
+  }
 }
 function showLogin(){ document.getElementById('app').classList.add('hidden'); document.getElementById('login').classList.remove('hidden'); document.getElementById('pw').value=''; }
 
