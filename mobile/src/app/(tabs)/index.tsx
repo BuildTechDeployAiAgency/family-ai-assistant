@@ -1,87 +1,160 @@
-import { Camera } from 'phosphor-react-native';
-import { Link, useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Airplane,
+  Bank,
+  Camera,
+  CarProfile,
+  FileText,
+  GraduationCap,
+  Heartbeat,
+  IdentificationCard,
+  MagnifyingGlass,
+  ShieldCheck,
+} from 'phosphor-react-native';
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Avatar, Card, Pill, ProgressBar, SectionLabel } from '@/components/ui';
-import { Brand, FontFamily } from '@/constants/theme';
-import { FAMILY_MEMBERS } from '@/data/fixtures';
+import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { categoryColor, getDocumentStatus } from '@/lib/helpers';
 import { useDocuments } from '@/store/documents';
+import { useData } from '@/store/data';
 
-export default function DocumentsScreen() {
+// Category → Phosphor icon (falls back to a document glyph).
+const CATEGORY_ICONS: Record<string, React.ComponentType<{ size?: number; color?: string; weight?: any }>> = {
+  Identity: IdentificationCard,
+  Driving: CarProfile,
+  Health: Heartbeat,
+  Education: GraduationCap,
+  Finance: Bank,
+  Insurance: ShieldCheck,
+  Travel: Airplane,
+};
+function categoryIcon(category: string) {
+  return CATEGORY_ICONS[category] ?? FileText;
+}
+
+export default function VaultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { documents } = useDocuments();
+  const { members } = useData();
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('All');
 
-  const docs = useMemo(
-    () =>
-      [...documents].sort((a, b) => {
+  const ownerColor = useMemo(() => {
+    const map = new Map(members.map((m) => [m.name, m.color]));
+    return (name: string) => map.get(name) ?? Brand.accent;
+  }, [members]);
+
+  const categories = useMemo(() => {
+    const set = new Set(documents.map((d) => d.category).filter(Boolean));
+    return ['All', ...Array.from(set)];
+  }, [documents]);
+
+  const docs = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return documents
+      .filter((d) => (category === 'All' || d.category === category))
+      .filter(
+        (d) =>
+          !q ||
+          d.name.toLowerCase().includes(q) ||
+          d.owner.toLowerCase().includes(q) ||
+          d.category.toLowerCase().includes(q)
+      )
+      .sort((a, b) => {
         const ua = getDocumentStatus(a.expiryDate).urgency;
         const ub = getDocumentStatus(b.expiryDate).urgency;
         if (ua !== ub) return ua - ub;
         return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
-      }),
-    [documents]
-  );
-
-  const expired = docs.filter((d) => getDocumentStatus(d.expiryDate).urgency === 0).length;
-  const soon = docs.filter((d) => getDocumentStatus(d.expiryDate).urgency === 1).length;
+      });
+  }, [documents, query, category]);
 
   return (
     <View style={styles.root}>
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 96, gap: 12 }}>
-      <View style={styles.summaryRow}>
-        <StatChip value={docs.length} label="Documents" color={Brand.accent} />
-        <StatChip value={soon} label="Expiring soon" color={Brand.amber} />
-        <StatChip value={expired} label="Expired" color={Brand.red} />
-      </View>
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        keyboardShouldPersistTaps="handled">
+        {/* Search */}
+        <View style={styles.searchBar}>
+          <MagnifyingGlass size={18} color={Brand.faint} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={`Search ${documents.length} documents…`}
+            placeholderTextColor={Brand.faint}
+            style={styles.searchInput}
+          />
+        </View>
 
-      <SectionLabel>Family documents</SectionLabel>
+        {/* Category filter chips */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}>
+          {categories.map((c) => {
+            const active = c === category;
+            const label = c === 'All' ? `All ${documents.length}` : c;
+            return (
+              <Pressable key={c} onPress={() => setCategory(c)} style={[styles.chip, active && styles.chipOn]}>
+                <Text style={[styles.chipText, active && styles.chipTextOn]}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
 
-      {docs.map((doc) => {
-        const status = getDocumentStatus(doc.expiryDate);
-        const member = FAMILY_MEMBERS[doc.owner as keyof typeof FAMILY_MEMBERS] ?? { name: doc.owner };
-        return (
-          <Link key={doc.id} href={`/document/${doc.id}`} asChild>
-            <Pressable>
-              {({ pressed }) => (
-                <Card style={[styles.docCard, pressed && styles.pressed]}>
-                  <Avatar owner={doc.owner} />
-                  <View style={styles.docBody}>
-                    <View style={styles.docTitleRow}>
-                      <Text style={styles.docName} numberOfLines={1}>
+        {/* Grid */}
+        {docs.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyText}>No documents match.</Text>
+          </View>
+        ) : (
+          <View style={styles.grid}>
+            {docs.map((doc) => {
+              const status = getDocumentStatus(doc.expiryDate);
+              const cat = categoryColor(doc.category);
+              const Icon = categoryIcon(doc.category);
+              const oc = ownerColor(doc.owner);
+              return (
+                <Pressable
+                  key={doc.id}
+                  style={styles.cardWrap}
+                  onPress={() => router.push(`/document/${doc.id}`)}>
+                  {({ pressed }) => (
+                    <View style={[styles.vcard, pressed && styles.pressed]}>
+                      <View style={styles.vcardTop}>
+                        <View style={[styles.vIcon, { backgroundColor: `${cat}1A` }]}>
+                          <Icon size={19} color={cat} weight="fill" />
+                        </View>
+                        <View style={[styles.expiryTag, { backgroundColor: status.bg }]}>
+                          <Text style={[styles.expiryText, { color: status.color }]} numberOfLines={1}>
+                            {status.label}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text style={styles.vTitle} numberOfLines={2}>
                         {doc.name}
                       </Text>
-                      <Pill label={status.label} color={status.color} bg={status.bg} />
-                    </View>
-                    <Text style={styles.docMeta} numberOfLines={1}>
-                      {member.name} · {doc.number}
-                    </Text>
-                    <View style={styles.docFooter}>
-                      <Pill label={doc.category} color={categoryColor(doc.category)} bg={`${categoryColor(doc.category)}22`} />
-                      <Text style={styles.expiry}>Exp {doc.expiryDate}</Text>
-                    </View>
-                    {doc.progress > 0 && doc.progress < 100 && (
-                      <View style={styles.progressWrap}>
-                        <ProgressBar value={doc.progress} />
-                        <Text style={styles.progressText}>{doc.progress}% renewed</Text>
+                      <View style={styles.vOwner}>
+                        <View style={[styles.ownerDot, { backgroundColor: oc }]}>
+                          <Text style={styles.ownerInitial}>{doc.owner[0]?.toUpperCase()}</Text>
+                        </View>
+                        <Text style={styles.ownerName} numberOfLines={1}>
+                          {doc.owner}
+                        </Text>
                       </View>
-                    )}
-                  </View>
-                </Card>
-              )}
-            </Pressable>
-          </Link>
-        );
-      })}
-    </ScrollView>
-      <Pressable
-        style={[styles.fab, { bottom: insets.bottom + 16 }]}
-        onPress={() => router.push('/scan')}>
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
+
+      <Pressable style={[styles.fab, { bottom: insets.bottom + 16 }]} onPress={() => router.push('/scan')}>
         <Camera size={22} color={Brand.onAccent} weight="fill" />
         <Text style={styles.fabText}>Scan</Text>
       </Pressable>
@@ -89,36 +162,51 @@ export default function DocumentsScreen() {
   );
 }
 
-function StatChip({ value, label, color }: { value: number; label: string; color: string }) {
-  return (
-    <Card style={styles.statChip}>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </Card>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.bgBase },
   screen: { flex: 1, backgroundColor: Brand.bgBase },
+
+  searchBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    marginHorizontal: 18, marginTop: 8, marginBottom: 14,
+    backgroundColor: Brand.surface, borderWidth: 1.5, borderColor: Brand.border,
+    borderRadius: 999, paddingHorizontal: 16, paddingVertical: 11,
+  },
+  searchInput: { flex: 1, fontSize: 15, color: Brand.text, fontFamily: FontFamily.regular, padding: 0 },
+
+  chipsRow: { gap: 8, paddingHorizontal: 18, paddingBottom: 14 },
+  chip: {
+    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 999,
+    backgroundColor: Brand.surfaceAlt, borderWidth: 1, borderColor: Brand.border,
+  },
+  chipOn: { backgroundColor: Brand.accent, borderColor: Brand.accent },
+  chipText: { color: Brand.muted, fontSize: 13, fontFamily: FontFamily.semibold },
+  chipTextOn: { color: Brand.onAccent },
+
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 18 },
+  cardWrap: { width: '48%', marginBottom: 13 },
+  vcard: {
+    backgroundColor: Brand.surface, borderWidth: 1, borderColor: Brand.border,
+    borderRadius: Radius.md, padding: 14, gap: 10, minHeight: 142, justifyContent: 'flex-start',
+  },
+  pressed: { opacity: 0.7 },
+  vcardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  vIcon: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  expiryTag: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999, flexShrink: 1 },
+  expiryText: { fontSize: 10.5, fontFamily: FontFamily.bold },
+  vTitle: { color: Brand.text, fontSize: 14.5, fontFamily: FontFamily.semibold, lineHeight: 19 },
+  vOwner: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 'auto' },
+  ownerDot: { width: 18, height: 18, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  ownerInitial: { color: '#fff', fontSize: 9, fontFamily: FontFamily.bold },
+  ownerName: { color: Brand.faint, fontSize: 12, fontFamily: FontFamily.medium },
+
+  emptyWrap: { padding: 40, alignItems: 'center' },
+  emptyText: { color: Brand.muted, fontSize: 14, fontFamily: FontFamily.regular },
+
   fab: {
     position: 'absolute', right: 16, flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: Brand.accent, paddingHorizontal: 18, paddingVertical: 14, borderRadius: 999,
     shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 6,
   },
   fabText: { color: Brand.onAccent, fontFamily: FontFamily.bold, fontSize: 15 },
-  summaryRow: { flexDirection: 'row', gap: 10 },
-  statChip: { flex: 1, alignItems: 'center', paddingVertical: 14, paddingHorizontal: 6 },
-  statValue: { fontSize: 26, fontFamily: FontFamily.serif },
-  statLabel: { color: Brand.muted, fontSize: 11, marginTop: 2, textAlign: 'center', fontFamily: FontFamily.medium },
-  docCard: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  pressed: { opacity: 0.7 },
-  docBody: { flex: 1, gap: 6 },
-  docTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  docName: { color: Brand.text, fontSize: 16, fontFamily: FontFamily.semibold, flexShrink: 1 },
-  docMeta: { color: Brand.muted, fontSize: 13, fontFamily: FontFamily.regular },
-  docFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
-  expiry: { color: Brand.muted, fontSize: 12 },
-  progressWrap: { marginTop: 6, gap: 4 },
-  progressText: { color: Brand.muted, fontSize: 11 },
 });
