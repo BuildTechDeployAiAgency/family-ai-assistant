@@ -17,7 +17,7 @@ import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { useData } from '@/store/data';
 
 const EMOJIS = ['👨‍💻', '👩', '👧', '👦', '👶', '🧑', '👴', '👵', '🧔', '👩‍🦰', '🐶', '🐱'];
-const COLORS = ['#4E6E8E', '#B5654A', '#7A6A9E', '#5B8A7A', '#C79A3A', '#8E5B6E', '#6366f1', '#f43f5e', '#f59e0b', '#10b981', '#a855f7', '#14b8a6'];
+const COLORS = ['#2A4FC4', '#B6831A', '#3E7C5A', '#BC4A2E', '#7A6A9E', '#2F8F9E', '#4E6E8E', '#C2557E', '#5B8A7A', '#9A6E2A', '#6B5BC4', '#2F8F8F'];
 
 const DOB_RE = /^\d{4}-\d{2}-\d{2}$/;
 

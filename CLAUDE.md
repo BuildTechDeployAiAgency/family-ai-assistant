@@ -16,7 +16,7 @@ A fresh Claude must be able to resume with zero context loss. In order:
 - **MVP data path = user-JWT + RLS only.** Service-role is reserved for future ingestion. Don't introduce service-role reads on the request path.
 - **`REFERENCE_DATE` (2026-05-19)** is the deterministic "today" for the POC (env + seed). Expiry/urgency math depends on it; keep it consistent across client + server.
 - **`EXPO_PUBLIC_*` are baked at build time** — changing them needs a new EAS build, not a redeploy.
-- **Design direction is LOCKED: Calm Concierge** (light tonal, clay accent `#B5654A`, Fraunces serif headings + Inter, Phosphor icons). Don't reintroduce the old dark + cyan theme.
+- **Design direction is LOCKED: Almanac** (warm bulletin-board, single cobalt accent `#2A4FC4` on warm cream paper `#F1EFE7`, Bricolage Grotesque display + Hanken Grotesk body, Phosphor icons; signature touches = marker highlight on key facts + sticky-note reminders). Replaced Calm Concierge (clay + Fraunces) on 2026-06-29 by owner request. Don't reintroduce the old dark + cyan theme, nor the clay/Fraunces Concierge theme. Tokens in `mobile/src/constants/theme.ts`; exploration source in `documentation/designs/ui-exploration-almanac/`.
 
 ## Run / build / ship
 - **Mobile (dev):** `cd mobile && SOCKET_CLI_ACCEPT_RISKS=1 npx expo start --lan` → Expo Go at `exp://<LAN-ip>:8081`. (npm is behind Socket CLI — always prefix `SOCKET_CLI_ACCEPT_RISKS=1` for installs.)

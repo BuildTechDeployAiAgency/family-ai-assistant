@@ -7,29 +7,32 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// "Calm Concierge" — warm, light-first palette. Single clay accent, paper
-// surfaces, Fraunces serif headings over Inter body. Token KEYS are kept stable
-// so existing components keep compiling; values are remapped to the warm system.
+// "Almanac" — warm bulletin-board palette. Single confident COBALT accent on
+// warm cream paper, Bricolage Grotesque display over Hanken Grotesk body.
+// Token KEYS are kept stable so existing components keep compiling; values are
+// remapped to the Almanac system (replaces the old Calm Concierge clay theme).
 export const Brand = {
-  bgBase: '#F7F5F1',     // warm paper background
-  surface: '#FFFFFF',    // card / paper
-  surfaceAlt: '#F2EEE7', // tonal inset
-  border: '#E7E1D7',     // hairline
-  accent: '#B5654A',     // clay — the single signature accent
-  accentSoft: '#C9805F',
-  onAccent: '#FFFFFF',   // text/icon on the clay accent
-  violet: '#4E6E8E',     // slate (secondary)
-  magenta: '#7A6A9E',    // plum (tertiary)
-  text: '#2B2A28',       // ink
-  muted: '#615D56',      // secondary text
-  faint: '#9C968B',      // tertiary text
-  green: '#5B8A7A',      // sage / success
-  amber: '#C79A3A',      // gold / warning
-  red: '#B23A48',        // danger
+  bgBase: '#F1EFE7',     // warm cream paper
+  surface: '#FCFBF7',    // raised paper card
+  surfaceAlt: '#ECEAE0', // tonal inset / wells
+  border: '#E2DFD3',     // hairline
+  accent: '#2A4FC4',     // cobalt — the single signature accent
+  accentSoft: '#3A5FD0',
+  accentWash: '#E5E9F8', // cobalt tint (chips, source cards, focus rings)
+  onAccent: '#FCFBF7',   // text/icon on cobalt
+  marker: '#FBE08A',     // warm highlighter swipe behind key facts
+  violet: '#7A6A9E',     // plum (member identity fallback)
+  magenta: '#2F8F9E',    // teal (member identity fallback)
+  text: '#20211B',       // warm near-black ink
+  muted: '#54564C',      // secondary text
+  faint: '#8A8B7F',      // tertiary text
+  green: '#3E7C5A',      // sage / success
+  amber: '#B6831A',      // amber / warning
+  red: '#BC4A2E',        // brick / danger
 } as const;
 
 // Per-member colour identity (fallback when a member has no stored colour).
-export const MemberPalette = ['#4E6E8E', '#B5654A', '#7A6A9E', '#5B8A7A', '#C79A3A', '#8E5B6E'];
+export const MemberPalette = ['#2A4FC4', '#B6831A', '#3E7C5A', '#BC4A2E', '#7A6A9E', '#2F8F9E'];
 export function memberColor(seed: string, stored?: string | null): string {
   if (stored) return stored;
   let h = 0;
@@ -84,15 +87,16 @@ export const Fonts = Platform.select({
   },
 });
 
-// Type system: Inter for body/UI, Fraunces (serif) for display headings.
-// Loaded in app/_layout.tsx via useFonts.
+// Type system: Hanken Grotesk for body/UI, Bricolage Grotesque for display.
+// Key `serif` is kept for source compatibility but now maps to the friendly
+// Bricolage display grotesque (Almanac uses no serif). Loaded in app/_layout.tsx.
 export const FontFamily = {
-  regular: 'Inter_400Regular',
-  medium: 'Inter_500Medium',
-  semibold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
-  serif: 'Fraunces_600SemiBold',
-  serifMd: 'Fraunces_500Medium',
+  regular: 'HankenGrotesk_400Regular',
+  medium: 'HankenGrotesk_500Medium',
+  semibold: 'HankenGrotesk_600SemiBold',
+  bold: 'HankenGrotesk_700Bold',
+  serif: 'BricolageGrotesque_600SemiBold',
+  serifMd: 'BricolageGrotesque_500Medium',
 } as const;
 
 export const Spacing = {

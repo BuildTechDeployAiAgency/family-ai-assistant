@@ -18,7 +18,7 @@ export default function Root({ children }: PropsWithChildren) {
 
         {/* PWA / install */}
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#B5654A" />
+        <meta name="theme-color" content="#2A4FC4" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
