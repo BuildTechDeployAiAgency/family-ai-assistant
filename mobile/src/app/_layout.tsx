@@ -10,7 +10,7 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, View } from 'react-native';
 import { CaretLeft } from 'phosphor-react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -92,14 +92,22 @@ function RootNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    HankenGrotesk_400Regular,
-    HankenGrotesk_500Medium,
-    HankenGrotesk_600SemiBold,
-    HankenGrotesk_700Bold,
-    BricolageGrotesque_500Medium,
-    BricolageGrotesque_600SemiBold,
-  });
+  // On web, fonts are provided purely via CSS @font-face (src/global.css). Calling
+  // useFonts on web registers broken FontFace objects that shadow the CSS faces,
+  // so load through expo-font on native only and treat web as always-ready.
+  const [nativeFontsLoaded] = useFonts(
+    Platform.OS === 'web'
+      ? {}
+      : {
+          HankenGrotesk_400Regular,
+          HankenGrotesk_500Medium,
+          HankenGrotesk_600SemiBold,
+          HankenGrotesk_700Bold,
+          BricolageGrotesque_500Medium,
+          BricolageGrotesque_600SemiBold,
+        }
+  );
+  const fontsLoaded = Platform.OS === 'web' ? true : nativeFontsLoaded;
 
   if (!fontsLoaded) {
     return (

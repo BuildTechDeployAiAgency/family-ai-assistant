@@ -1,14 +1,14 @@
 {
   "name": "Family AI",
   "short_name": "Family AI",
-  "description": "The calm home for your family's documents and deadlines.",
+  "description": "The whole household, one calm place. Documents, renewals and each kid's school run.",
   "lang": "en",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#B5654A",
-  "background_color": "#F7F5F1",
+  "theme_color": "#2A4FC4",
+  "background_color": "#F1EFE7",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
