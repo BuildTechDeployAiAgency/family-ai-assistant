@@ -1,9 +1,12 @@
 import { Tabs, useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Folders, GraduationCap, ListChecks, Sparkle, UserCircle } from 'phosphor-react-native';
+import { Folders, GraduationCap, House, ListChecks, Sparkle, UserCircle } from 'phosphor-react-native';
 
 import { Brand, FontFamily } from '@/constants/theme';
+
+// Land on Today, not the document vault, when the app cold-starts.
+export const unstable_settings = { initialRouteName: 'today' };
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -33,6 +36,13 @@ export default function TabsLayout() {
           </Pressable>
         ),
       }}>
+      <Tabs.Screen
+        name="today"
+        options={{
+          title: 'Today',
+          tabBarIcon: ({ color, size, focused }) => <House color={color} size={size} weight={focused ? 'fill' : 'regular'} />,
+        }}
+      />
       <Tabs.Screen
         name="index"
         options={{
