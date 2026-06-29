@@ -26,16 +26,20 @@ export default withAuth(['GET', 'PATCH'], async (req: VercelRequest, res: Vercel
     return res.status(200).json({ tasks: (data ?? []).map(toClient) });
   }
 
-  // PATCH /api/tasks?id=... — toggle completion.
+  // PATCH /api/tasks?id=... — toggle completion and/or change the due date.
   const id = (req.query.id as string) || '';
   if (!id) throw new HttpError(400, 'Missing task id');
   const body = parseBody(taskPatchSchema, req.body);
+  const patch: Record<string, unknown> = {};
+  if (body.completed !== undefined) patch.completed = body.completed;
+  if (body.dueDate !== undefined) patch.due_date = body.dueDate; // null clears it
   const { data, error } = await ctx.supabase
     .from('tasks')
-    .update({ completed: body.completed })
+    .update(patch)
     .eq('id', id)
     .select(SELECT)
     .single();
   if (error) throw new HttpError(500, 'Failed to update task');
+  if (!data) throw new HttpError(404, 'Task not found');
   return res.status(200).json({ task: toClient(data) });
 });

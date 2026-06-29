@@ -1,4 +1,4 @@
-import { CheckCircle, CircleIcon } from 'phosphor-react-native';
+import { CaretRight, CheckCircle, CircleIcon } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -71,33 +71,34 @@ export default function ActionsScreen() {
         const isDone = t.completed;
         const subject = t.sourceCommId ? commSubject[t.sourceCommId] : null;
         return (
-          <Card key={t.id} style={[styles.actionCard, isDone && styles.doneCard]}>
-            <Pressable onPress={() => toggleTask(t.id, !isDone)} hitSlop={8} style={styles.checkbox}>
-              {isDone ? (
-                <CheckCircle size={26} color={Brand.green} weight="fill" />
-              ) : (
-                <CircleIcon size={26} color={Brand.faint} />
-              )}
-            </Pressable>
-            <View style={styles.actionBody}>
-              <Text style={[styles.actionText, isDone && styles.doneText]}>{t.title}</Text>
-              <View style={styles.actionMeta}>
-                <Pill label={t.owner} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
-                {t.dueDate && (
-                  <Pill
-                    label={`Due ${formatDate(t.dueDate)}`}
-                    color={URGENCY_COLOR[t.priority]}
-                    bg={`${URGENCY_COLOR[t.priority]}22`}
-                  />
+          <Pressable key={t.id} onPress={() => router.push(`/action/${t.id}`)}>
+            <Card style={[styles.actionCard, isDone && styles.doneCard]}>
+              <Pressable onPress={() => toggleTask(t.id, !isDone)} hitSlop={8} style={styles.checkbox}>
+                {isDone ? (
+                  <CheckCircle size={26} color={Brand.green} weight="fill" />
+                ) : (
+                  <CircleIcon size={26} color={Brand.faint} />
+                )}
+              </Pressable>
+              <View style={styles.actionBody}>
+                <Text style={[styles.actionText, isDone && styles.doneText]}>{t.title}</Text>
+                <View style={styles.actionMeta}>
+                  <Pill label={t.owner} color={Brand.accent} bg="rgba(0,194,255,0.14)" />
+                  {t.dueDate && (
+                    <Pill
+                      label={`Due ${formatDate(t.dueDate)}`}
+                      color={URGENCY_COLOR[t.priority]}
+                      bg={`${URGENCY_COLOR[t.priority]}22`}
+                    />
+                  )}
+                </View>
+                {subject && t.sourceCommId && (
+                  <Text style={styles.source} numberOfLines={1}>↪ {subject}</Text>
                 )}
               </View>
-              {subject && t.sourceCommId && (
-                <Pressable onPress={() => router.push(`/email/${t.sourceCommId}`)} hitSlop={6}>
-                  <Text style={styles.source} numberOfLines={1}>↪ {subject}</Text>
-                </Pressable>
-              )}
-            </View>
-          </Card>
+              <CaretRight size={18} color={Brand.faint} style={{ marginTop: 2 }} />
+            </Card>
+          </Pressable>
         );
       })}
     </ScrollView>

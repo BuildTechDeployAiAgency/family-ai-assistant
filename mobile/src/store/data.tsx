@@ -64,6 +64,7 @@ interface DataContextValue {
   loading: boolean;
   refresh: () => Promise<void>;
   toggleTask: (id: string, completed: boolean) => void;
+  updateTask: (id: string, patch: { completed?: boolean; dueDate?: string | null }) => Promise<void>;
   addMember: (member: MemberCreate) => Promise<Member>;
   updateMember: (id: string, patch: MemberPatch) => Promise<void>;
   removeMember: (id: string) => Promise<void>;
@@ -111,6 +112,26 @@ export function DataProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  // Optimistic task edit (due date and/or completion); reverted on error.
+  const updateTask = useCallback(async (id: string, patch: { completed?: boolean; dueDate?: string | null }) => {
+    let snapshot: Task[] = [];
+    setTasks((prev) => {
+      snapshot = prev;
+      return prev.map((t) =>
+        t.id === id
+          ? { ...t, ...(patch.completed !== undefined ? { completed: patch.completed } : {}), ...(patch.dueDate !== undefined ? { dueDate: patch.dueDate } : {}) }
+          : t
+      );
+    });
+    try {
+      const { task } = await api.updateTask(id, patch);
+      setTasks((prev) => prev.map((t) => (t.id === id ? (task as Task) : t)));
+    } catch (err) {
+      setTasks(snapshot);
+      throw err;
+    }
+  }, []);
+
   // Create a member, then append the server's canonical row.
   const addMember = useCallback(async (input: MemberCreate) => {
     const { member } = await api.createMember(input);
@@ -150,8 +171,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ communications, tasks, members, loading, refresh, toggleTask, addMember, updateMember, removeMember }),
-    [communications, tasks, members, loading, refresh, toggleTask, addMember, updateMember, removeMember]
+    () => ({ communications, tasks, members, loading, refresh, toggleTask, updateTask, addMember, updateMember, removeMember }),
+    [communications, tasks, members, loading, refresh, toggleTask, updateTask, addMember, updateMember, removeMember]
   );
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

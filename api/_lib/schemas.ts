@@ -20,9 +20,37 @@ export const documentCreateSchema = z.object({
   progress: z.number().int().min(0).max(100).default(0),
 });
 
-export const taskPatchSchema = z.object({
-  completed: z.boolean(),
+// Task edit — toggle completion and/or change the due date (snooze to the
+// future, or clear it). At least one field required.
+export const taskPatchSchema = z
+  .object({
+    completed: z.boolean().optional(),
+    dueDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'dueDate must be YYYY-MM-DD')
+      .nullable()
+      .optional(),
+  })
+  .refine((o) => Object.keys(o).length > 0, { message: 'No fields to update' });
+
+// Action step (child of a task) — create requires a title; task_id comes from
+// the body and is re-verified against the caller's family server-side.
+export const stepCreateSchema = z.object({
+  taskId: z.string().uuid(),
+  title: z.string().trim().min(1).max(300),
+  detail: z.string().trim().max(2000).nullable().optional(),
+  position: z.number().int().min(0).optional(),
 });
+
+export const stepUpdateSchema = z
+  .object({
+    title: z.string().trim().min(1).max(300).optional(),
+    detail: z.string().trim().max(2000).nullable().optional(),
+    completed: z.boolean().optional(),
+    position: z.number().int().min(0).optional(),
+    status: z.enum(['active', 'proposed', 'archived']).optional(),
+  })
+  .refine((o) => Object.keys(o).length > 0, { message: 'No fields to update' });
 
 // New family member — name required; the rest optional with sane defaults.
 export const memberCreateSchema = z.object({

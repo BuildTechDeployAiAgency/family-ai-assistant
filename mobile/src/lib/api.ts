@@ -56,6 +56,25 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ completed }),
     }),
+  updateTask: (id: string, patch: { completed?: boolean; dueDate?: string | null }) =>
+    authedFetch<{ task: any }>(`/api/tasks?id=${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+  steps: (taskId: string) =>
+    authedFetch<{ steps: any[] }>(`/api/steps?taskId=${encodeURIComponent(taskId)}`),
+  createStep: (taskId: string, title: string, position = 0) =>
+    authedFetch<{ step: any }>('/api/steps', {
+      method: 'POST',
+      body: JSON.stringify({ taskId, title, position }),
+    }),
+  updateStep: (id: string, patch: { title?: string; detail?: string | null; completed?: boolean; position?: number; status?: string }) =>
+    authedFetch<{ step: any }>(`/api/steps?id=${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+  deleteStep: (id: string) =>
+    authedFetch<{ ok: boolean }>(`/api/steps?id=${encodeURIComponent(id)}`, { method: 'DELETE' }),
   extract: (imageBase64: string, mimeType = 'image/jpeg') =>
     authedFetch<{ name: string; number: string; category: string; owner: string; expiryDate: string | null; confidence: number }>(
       '/api/ai/extract',

@@ -127,19 +127,25 @@ export default function TodayScreen() {
               {reminders.slice(0, 2).map((t) => {
                 const who = identify(t.owner);
                 return (
-                  <View key={t.id} style={styles.sticky}>
-                    <View style={styles.stickyWho}>
-                      <View style={[styles.dot, { backgroundColor: who.color }]}>
-                        <Text style={styles.dotText}>{who.initials}</Text>
-                      </View>
-                      <Text style={styles.whoText}>
-                        {t.owner}
-                        {who.role ? ` · ${who.role.replace(/^Child · /, '')}` : ''}
-                      </Text>
-                    </View>
-                    <Text style={styles.stickyTask}>{t.title}</Text>
-                    {t.dueDate && <Text style={styles.stickyDue}>Due {formatDate(t.dueDate)}</Text>}
-                  </View>
+                  <Link key={t.id} href={`/action/${t.id}`} asChild>
+                    <Pressable>
+                      {({ pressed }) => (
+                        <View style={[styles.sticky, pressed && styles.pressed]}>
+                          <View style={styles.stickyWho}>
+                            <View style={[styles.dot, { backgroundColor: who.color }]}>
+                              <Text style={styles.dotText}>{who.initials}</Text>
+                            </View>
+                            <Text style={styles.whoText}>
+                              {t.owner}
+                              {who.role ? ` · ${who.role.replace(/^Child · /, '')}` : ''}
+                            </Text>
+                          </View>
+                          <Text style={styles.stickyTask}>{t.title}</Text>
+                          {t.dueDate && <Text style={styles.stickyDue}>Due {formatDate(t.dueDate)}</Text>}
+                        </View>
+                      )}
+                    </Pressable>
+                  </Link>
                 );
               })}
             </View>

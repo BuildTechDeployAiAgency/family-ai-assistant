@@ -84,6 +84,7 @@ function RootNav() {
       <Stack.Screen name="profile/notifications" options={{ title: 'Notifications' }} />
       <Stack.Screen name="profile/memory" options={{ title: "What I've learned" }} />
       <Stack.Screen name="profile/member/[id]" options={{ title: 'Edit member' }} />
+      <Stack.Screen name="action/[id]" options={{ title: 'Action' }} />
       <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
       <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
       <Stack.Screen name="scan" options={{ presentation: 'modal', title: 'Scan document' }} />
