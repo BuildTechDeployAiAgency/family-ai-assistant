@@ -1,10 +1,11 @@
 import { ArrowRight, CaretRight, Camera, SealWarning } from 'phosphor-react-native';
 import { Link, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, SectionLabel } from '@/components/ui';
+import { SkeletonRows } from '@/components/States';
 import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { REFERENCE_DATE } from '@/data/fixtures';
 import { categoryColor, formatDate, getDaysDifference, getDocumentStatus } from '@/lib/helpers';
@@ -73,8 +74,14 @@ export default function TodayScreen() {
 
   if (docsLoading || dataLoading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={Brand.accent} size="large" />
+      <View style={styles.root}>
+        <View style={styles.topline}>
+          <View style={{ flex: 1, gap: 8 }}>
+            <Text style={styles.date}>{today}</Text>
+            <Text style={styles.greet}>Good morning</Text>
+          </View>
+        </View>
+        <SkeletonRows rows={5} />
       </View>
     );
   }

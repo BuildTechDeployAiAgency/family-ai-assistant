@@ -4,6 +4,7 @@ import {
   Camera,
   CarProfile,
   FileText,
+  FolderOpen,
   GraduationCap,
   Heartbeat,
   IdentificationCard,
@@ -15,6 +16,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState, SkeletonGrid } from '@/components/States';
 import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { categoryColor, getDocumentStatus } from '@/lib/helpers';
 import { useDocuments } from '@/store/documents';
@@ -37,7 +39,7 @@ function categoryIcon(category: string) {
 export default function VaultScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { documents } = useDocuments();
+  const { documents, loading } = useDocuments();
   const { members } = useData();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
@@ -106,7 +108,17 @@ export default function VaultScreen() {
         </ScrollView>
 
         {/* Grid */}
-        {docs.length === 0 ? (
+        {loading ? (
+          <SkeletonGrid count={6} />
+        ) : documents.length === 0 ? (
+          <EmptyState
+            icon={FolderOpen}
+            title="Your vault is empty"
+            body="Snap your first document and I'll file it for you in seconds."
+            actionLabel="Scan a document"
+            onAction={() => router.push('/scan')}
+          />
+        ) : docs.length === 0 ? (
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyText}>No documents match.</Text>
           </View>

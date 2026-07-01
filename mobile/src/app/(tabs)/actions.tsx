@@ -1,10 +1,11 @@
-import { Check, CircleIcon } from 'phosphor-react-native';
+import { Check, CircleIcon, ListChecks } from 'phosphor-react-native';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card } from '@/components/ui';
+import { EmptyState, SkeletonRows } from '@/components/States';
 import { Brand, FontFamily, Radius } from '@/constants/theme';
 import { formatDate } from '@/lib/helpers';
 import { useData } from '@/store/data';
@@ -69,8 +70,12 @@ export default function ActionsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={Brand.accent} size="large" />
+      <View style={styles.screen}>
+        <View style={styles.topline}>
+          <Text style={styles.title}>Actions</Text>
+        </View>
+        <View style={{ height: 14 }} />
+        <SkeletonRows rows={5} />
       </View>
     );
   }
@@ -122,11 +127,18 @@ export default function ActionsScreen() {
           )}
         </View>
 
-        {open.length === 0 && (
-          <Card>
-            <Text style={styles.empty}>Nothing open here — all clear.</Text>
-          </Card>
-        )}
+        {open.length === 0 &&
+          (done.length === 0 ? (
+            <EmptyState
+              icon={ListChecks}
+              title="Nothing on the list"
+              body={`No tasks for ${scopeLabel} yet. School emails and reminders will land here as actions.`}
+            />
+          ) : (
+            <Card>
+              <Text style={styles.empty}>Nothing open here — all clear.</Text>
+            </Card>
+          ))}
 
         {open.map((t) => (
           <TaskRow
