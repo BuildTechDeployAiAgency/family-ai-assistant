@@ -104,9 +104,12 @@
   .cards{display:flex;flex-direction:column;gap:10px;min-height:30px}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:13px;cursor:grab;box-shadow:0 1px 2px rgba(43,42,40,.04)}
   .card:active{cursor:grabbing}.card.dragging{opacity:.4}
-  .card .ct{font-size:14px;font-weight:600;line-height:1.35;margin-bottom:5px}
-  .card .cn{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:9px;white-space:pre-wrap}
+  .card .ct{font-size:14px;font-weight:600;line-height:1.35;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card .cn{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:9px;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
   .card .cf{display:flex;align-items:center;gap:8px}
+  .card .exp{border:none;background:transparent;color:var(--faint);padding:2px;border-radius:6px;font-size:14px;line-height:1;cursor:pointer}
+  .card .exp:hover{color:var(--clay)}
+  .readbody{white-space:pre-wrap;font-size:13.5px;line-height:1.55;color:var(--t2);max-height:52vh;overflow:auto;margin-top:2px}
   .tag{font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px}
   .card .author{font-size:11px;color:var(--faint);font-weight:600;margin-left:auto}
   .card .del{border:none;background:transparent;color:var(--faint);padding:2px;border-radius:6px;font-size:15px;line-height:1}
@@ -164,6 +167,7 @@
     <nav class="nav" id="nav">
       <button data-view="board" class="active"><i class="ph ph-kanban"></i><span>Ideas & Backlog</span></button>
       <button data-view="showcase"><i class="ph ph-device-mobile"></i><span>App Showcase</span></button>
+      <button data-view="roadmap"><i class="ph ph-map-trifold"></i><span>Feature Roadmap</span></button>
     </nav>
     <div class="spacer"></div>
     <div class="userchip"><div class="av" id="userAv">D</div><div class="nm" id="userNm">—</div></div>
@@ -186,14 +190,23 @@
   </main>
 
   <main class="view hidden" id="view-showcase">
-    <div class="view-head"><div class="eyebrow">Design</div><h2>App Showcase</h2><p>Every screen in the app, paginated — Calm Concierge direction.</p></div>
+    <div class="view-head"><div class="eyebrow">Design</div><h2>App Showcase</h2><p>All features as tap-through journeys — reminders, calendar, source cards, auto-memory & Telegram ingest. Almanac direction.</p></div>
     <div class="showcase-wrap">
       <div class="showcase-bar">
         <i class="ph-fill ph-device-mobile" style="color:var(--clay)"></i>
-        <span class="t">app-showcase</span>
-        <a href="./showcase.html" target="_blank" rel="noopener">Open full <i class="ph-bold ph-arrow-square-out"></i></a>
+        <span class="t">feature-showcase</span>
+        <a href="./feature-showcase.html" target="_blank" rel="noopener">Open full <i class="ph-bold ph-arrow-square-out"></i></a>
       </div>
-      <iframe class="showcase" src="./showcase.html" title="App Showcase"></iframe>
+      <iframe class="showcase" src="./feature-showcase.html" title="App Showcase"></iframe>
+    </div>
+  </main>
+
+  <main class="view hidden" id="view-roadmap">
+    <div class="view-head"><div class="eyebrow">What's next</div><h2>Feature Roadmap</h2><p>Sequenced delivery plan — coming soon.</p></div>
+    <div class="showcase-wrap" style="padding:64px 24px; text-align:center">
+      <i class="ph-duotone ph-map-trifold" style="font-size:44px; color:var(--clay)"></i>
+      <h3 style="font-family:Fraunces,serif; font-weight:600; font-size:22px; margin:14px 0 6px">Roadmap coming soon</h3>
+      <p style="color:var(--muted); font-size:14px; max-width:440px; margin:0 auto">The build order and timeline for the next features will live here.</p>
     </div>
   </main>
 </div>
@@ -290,11 +303,23 @@ function renderBoard(){
 }
 function cardEl(k){
   const el=document.createElement('div'); el.className='card'; el.draggable=true; el.dataset.id=k.id;
-  el.innerHTML=`<div class="ct">${esc(k.title)}</div>${k.note?`<div class="cn">${esc(k.note)}</div>`:''}<div class="cf"><span class="tag" style="${tagStyle(k.tag)}">${esc(k.tag||'')}</span><span class="author">${esc(k.author||'')}</span><button class="del" title="Delete">&times;</button></div>`;
+  el.innerHTML=`<div class="ct">${esc(k.title)}</div>${k.note?`<div class="cn">${esc(k.note)}</div>`:''}<div class="cf"><span class="tag" style="${tagStyle(k.tag)}">${esc(k.tag||'')}</span><span class="author">${esc(k.author||'')}</span><button class="exp" title="Open">&#10530;</button><button class="del" title="Delete">&times;</button></div>`;
   el.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',k.id);el.classList.add('dragging');});
   el.addEventListener('dragend',()=>el.classList.remove('dragging'));
-  el.querySelector('.del').addEventListener('click',()=>{delCard(k.id);});
+  el.querySelector('.del').addEventListener('click',e=>{e.stopPropagation();delCard(k.id);});
+  el.querySelector('.exp').addEventListener('click',e=>{e.stopPropagation();openRead(k);});
+  el.addEventListener('click',e=>{if(e.target.closest('.del')||e.target.closest('.exp'))return;openRead(k);});
   return el;
+}
+function openRead(k){
+  const bg=document.createElement('div'); bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal"><span class="tag" style="${tagStyle(k.tag)};display:inline-block;margin-bottom:10px">${esc(k.tag||'')}</span><h3 style="margin:0 0 10px;font-size:19px;line-height:1.3">${esc(k.title)}</h3><div class="readbody">${k.note?esc(k.note):'<span style="color:var(--faint)">No detail.</span>'}</div>${k.author?`<div style="margin-top:12px;font-size:12px;color:var(--faint);font-weight:600">— ${esc(k.author)}</div>`:''}<div class="actions"><button class="btn ghost" id="rClose">Close</button></div></div>`;
+  document.body.appendChild(bg);
+  const close=()=>{bg.remove();document.removeEventListener('keydown',onKey);};
+  function onKey(e){if(e.key==='Escape')close();}
+  bg.addEventListener('click',e=>{if(e.target===bg)close();});
+  bg.querySelector('#rClose').addEventListener('click',close);
+  document.addEventListener('keydown',onKey);
 }
 function renderStats(){
   document.getElementById('statRow').innerHTML=COLUMNS.map(c=>{const n=cards.filter(k=>k.col===c.id).length;return `<div class="stat"><div class="v" style="color:${c.color}">${n}</div><div class="l">${c.name}</div></div>`;}).join('');
@@ -308,7 +333,7 @@ function openAdd(col){
   bg.querySelector('#mCancel').addEventListener('click',close);
   bg.querySelector('#mSave').addEventListener('click',()=>{const t=ti.value.trim();if(!t){ti.focus();return;}addCard({col,title:t,note:bg.querySelector('#mNote').value.trim(),tag:bg.querySelector('#mTag').value});close();});
 }
-function showView(v){ ['board','showcase'].forEach(id=>document.getElementById('view-'+id).classList.toggle('hidden',id!==v)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v)); }
+function showView(v){ ['board','showcase','roadmap'].forEach(id=>document.getElementById('view-'+id).classList.toggle('hidden',id!==v)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v)); }
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)showView(b.dataset.view);});
 document.getElementById('quickAdd').addEventListener('submit',e=>{e.preventDefault();const t=document.getElementById('qaTitle');const title=t.value.trim();if(!title){t.focus();return;}addCard({col:'ideas',title,note:'',tag:document.getElementById('qaTag').value});t.value='';});
 
