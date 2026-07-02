@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Family AI Assistant — App Showcase · Calm Concierge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css" />
+<style>
+  :root{
+    --clay:#B5654A; --clay-soft:#C9805F; --sage:#5B8A7A; --gold:#C79A3A; --danger:#B23A48;
+    /* real-family member identity colours (from the 0005 seed) */
+    --m-diogo:#6366f1; --m-alana:#f43f5e; --m-bella:#f59e0b; --m-noah:#10b981; --m-ayla:#a855f7; --m-family:#14b8a6;
+    /* category accents (from helpers.ts CATEGORY_COLORS) */
+    --c-identity:#6366f1; --c-driving:#0ea5e9; --c-education:#a855f7; --c-health:#ef4444;
+    --c-finance:#10b981; --c-insurance:#f59e0b; --c-travel:#3b82f6; --c-admin:#8b5cf6;
+  }
+  .screen{
+    --bg:#F7F5F1; --paper:#FFFFFF; --paper2:#F2EEE7; --line:#E7E1D7;
+    --t1:#2B2A28; --t2:#615D56; --t3:#9C968B; --navbg:rgba(255,255,255,.92);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;background:#1a1714;color:#e8e2d8;-webkit-font-smoothing:antialiased}
+  i.ph,i[class^="ph-"],i[class*=" ph-"]{display:inline-flex;line-height:1}
+
+  /* ===== sticky pager header ===== */
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(20,18,15,.86);backdrop-filter:blur(14px);border-bottom:1px solid #322b23}
+  .topbar-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:13px 24px;flex-wrap:wrap}
+  .brandmark{display:flex;align-items:center;gap:10px;flex:none}
+  .brandmark .bi{width:34px;height:34px;border-radius:11px;background:var(--clay);display:grid;place-items:center;color:#fff;font-size:18px}
+  .brandmark .bt{font-family:Fraunces,serif;font-size:18px;font-weight:600;color:#f0e9dc}
+  .chips{display:flex;gap:7px;overflow-x:auto;flex:1;padding:2px 0;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;font-size:12px;font-weight:600;color:#c9c0b2;background:#241f1a;border:1px solid #3a332b;border-radius:999px;padding:7px 13px;cursor:pointer;transition:.15s;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .chip:hover{border-color:var(--clay-soft);color:#f0e9dc}
+  .chip.active{background:var(--clay);border-color:var(--clay);color:#fff}
+  .chip .gi{font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;font-weight:700}
+  .pager{display:flex;align-items:center;gap:10px;flex:none}
+  .pgbtn{width:36px;height:36px;border-radius:11px;background:#241f1a;border:1px solid #3a332b;color:#e8e2d8;display:grid;place-items:center;cursor:pointer;font-size:16px;transition:.15s}
+  .pgbtn:hover{border-color:var(--clay-soft)}
+  .pgbtn:disabled{opacity:.35;cursor:default}
+  .counter{font-size:12px;font-weight:700;color:#b79e84;min-width:46px;text-align:center;font-variant-numeric:tabular-nums}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 24px 90px}
+
+  /* ===== intro ===== */
+  .intro{max-width:760px;margin:0 auto 8px}
+  .eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#b79e84}
+  h1{font-family:Fraunces,serif;font-size:42px;font-weight:600;letter-spacing:-.01em;margin:10px 0 14px;color:#f0e9dc}
+  .lede{font-size:16px;line-height:1.65;color:#c9c0b2}
+  .lede b{color:#fff;font-weight:600}
+  .designnote{display:flex;gap:12px;margin-top:22px;padding:16px 18px;background:#241f1a;border:1px solid #3a332b;border-radius:16px;font-size:13.5px;line-height:1.6;color:#c9c0b2}
+  .designnote i{color:var(--clay-soft);font-size:20px;flex:none;margin-top:1px}
+  .designnote b{color:#f0e9dc}
+
+  /* ===== section (one screen) ===== */
+  .section{display:none;animation:fade .25s ease}
+  .section.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .sechead{max-width:1100px;margin:0 auto 26px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .sechead .num{font-family:Fraunces,serif;font-size:30px;color:#5d5247;flex:none;line-height:1}
+  .sechead h2{font-family:Fraunces,serif;font-size:28px;font-weight:600;color:#f0e9dc;line-height:1.15}
+  .sechead .grp{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#b79e84;margin-bottom:4px}
+  .stbadge{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+  .stbadge.built{color:var(--sage);background:rgba(91,138,122,.16)}
+  .stbadge.planned{color:var(--gold);background:rgba(199,154,58,.18)}
+
+  .layout{display:flex;gap:44px;justify-content:center;align-items:flex-start;flex-wrap:wrap}
+  .phones{display:flex;gap:34px;flex-wrap:wrap;justify-content:center}
+  .col{display:flex;flex-direction:column;align-items:center;gap:13px}
+  .label{font-size:13px;font-weight:600;color:#b79e84;text-align:center;max-width:300px}
+
+  /* ===== explain panel ===== */
+  .explain{flex:1;min-width:300px;max-width:380px;position:sticky;top:90px}
+  .explain h3{font-family:Fraunces,serif;font-size:19px;font-weight:600;color:#f0e9dc;margin-bottom:9px}
+  .explain p{font-size:14px;line-height:1.6;color:#c9c0b2;margin-bottom:14px}
+  .explain p b{color:#f0e9dc;font-weight:600}
+  .xblock{margin-bottom:18px}
+  .xtitle{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8c7f6e;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .xtitle i{color:var(--clay-soft);font-size:15px}
+  .xlist{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .xlist li{font-size:13.5px;line-height:1.5;color:#c9c0b2;padding-left:16px;position:relative}
+  .xlist li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--clay-soft)}
+  .xlist li b{color:#f0e9dc;font-weight:600}
+  .ai-callout{background:linear-gradient(135deg,rgba(181,101,74,.16),rgba(181,101,74,.05));border:1px solid rgba(181,101,74,.4);border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.55;color:#ddd2c2}
+  .ai-callout .ah{display:flex;align-items:center;gap:7px;font-weight:700;color:#f0e9dc;margin-bottom:6px;font-size:12.5px}
+  .ai-callout .ah i{color:var(--clay-soft);font-size:16px}
+
+  /* ============ PHONE FRAME (copied from profile-page-direction) ============ */
+  .phone{width:316px;height:664px;background:#000;border-radius:46px;padding:11px;box-shadow:0 30px 70px rgba(0,0,0,.5),0 0 0 1px #3a332b;position:relative}
+  .screen{width:100%;height:100%;background:var(--bg);border-radius:36px;overflow:hidden;position:relative;display:flex;flex-direction:column}
+  .island{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:96px;height:26px;background:#000;border-radius:999px;z-index:50}
+  .statusbar{height:44px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 4px;font-size:13px;font-weight:600;color:var(--t1);flex:none}
+  .si{display:flex;gap:6px}
+  .scroll{flex:1;overflow:auto;padding:6px 16px 26px}
+  .scroll::-webkit-scrollbar{display:none}
+
+  /* tab header (Documents/School/Actions/Ask use a serif title + sign-out) */
+  .tabhead{display:flex;align-items:center;padding:6px 4px 12px}
+  .tabhead .ttl{font-family:Fraunces,serif;font-size:24px;font-weight:600;color:var(--t1)}
+  .tabhead .out{margin-left:auto;color:var(--t3);font-size:21px}
+  /* pushed-route navbar (detail/scan) */
+  .navbar{display:flex;align-items:center;gap:10px;padding:4px 2px 12px}
+  .navbar .back{width:34px;height:34px;border-radius:11px;background:var(--paper);border:1px solid var(--line);display:grid;place-items:center;color:var(--t1);font-size:17px}
+  .navbar .ttl{font-family:Fraunces,serif;font-size:19px;font-weight:600;color:var(--t1)}
+
+  .sec{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin:14px 2px 9px}
+  .card{background:var(--paper);border-radius:20px;padding:15px;margin-bottom:11px;border:1px solid var(--line)}
+
+  /* stat chips row */
+  .stats{display:flex;gap:9px;margin-bottom:4px}
+  .stat{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:12px 4px;text-align:center}
+  .stat .sv{font-family:Fraunces,serif;font-size:25px;line-height:1}
+  .stat .sl{font-size:10.5px;color:var(--t2);margin-top:4px;font-weight:500}
+
+  /* avatar */
+  .av{border-radius:50%;display:grid;place-items:center;flex:none;border:1px solid}
+  .av .em{line-height:1}
+
+  /* document card */
+  .doc{display:flex;gap:11px;align-items:flex-start}
+  .doc .body{flex:1;min-width:0}
+  .doc .trow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .doc .nm{font-size:15px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .doc .meta{font-size:12.5px;color:var(--t2);margin-top:3px}
+  .doc .frow{display:flex;align-items:center;justify-content:space-between;margin-top:7px}
+  .doc .exp{font-size:11.5px;color:var(--t2)}
+  .pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;display:inline-flex;align-items:center;flex:none}
+  .prog{margin-top:8px}
+  .ptrack{height:6px;border-radius:999px;background:var(--paper2);overflow:hidden}
+  .pfill{height:100%;border-radius:999px;background:var(--clay)}
+  .ptext{font-size:10.5px;color:var(--t2);margin-top:4px}
+
+  /* FAB */
+  .fab{position:absolute;right:14px;bottom:86px;background:var(--clay);color:#fff;border-radius:999px;padding:13px 18px;display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;box-shadow:0 8px 20px rgba(181,101,74,.4);z-index:40}
+
+  /* bottom tab nav */
+  .nav{position:absolute;left:0;right:0;bottom:0;height:78px;background:var(--paper);border-top:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-around;padding:10px 6px 0}
+  .navitem{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--t3);flex:1}
+  .navitem i{font-size:23px}
+  .navitem.on{color:var(--clay)}
+
+  /* segmented control */
+  .segment{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:11px}
+  .seg{flex:1;text-align:center;padding:9px;border-radius:9px;font-size:13.5px;font-weight:700;color:var(--t2)}
+  .seg.on{background:var(--clay);color:#fff}
+
+  /* email row */
+  .email{display:flex;gap:11px;align-items:flex-start}
+  .email .ico{font-size:26px;flex:none}
+  .email .eb{flex:1;min-width:0}
+  .email .top{display:flex;justify-content:space-between;gap:8px}
+  .email .from{font-size:12.5px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .email .from.un{color:var(--t1);font-weight:700}
+  .email .date{font-size:11px;color:var(--t2);flex:none}
+  .email .subj{font-size:14px;color:var(--t2);margin-top:3px;line-height:1.35}
+  .email .subj.un{color:var(--t1);font-weight:600}
+  .email .ef{display:flex;align-items:center;margin-top:7px}
+  .undot{width:8px;height:8px;border-radius:50%;background:var(--clay);margin-left:auto}
+
+  /* child header + task card */
+  .childhd{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+  .childhd .cn{font-family:Fraunces,serif;font-size:17px;font-weight:600;color:var(--t1)}
+  .childhd .cr{font-size:11.5px;color:var(--t2);margin-top:1px}
+  .task{display:flex;gap:11px;align-items:stretch;overflow:hidden}
+  .task .ub{width:4px;border-radius:2px;flex:none}
+  .task .tt{font-size:13.5px;font-weight:600;color:var(--t1);line-height:1.4}
+  .task .tm{margin-top:6px}
+
+  /* actions banner */
+  .banner{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:11px}
+  .banner .bv{font-family:Fraunces,serif;font-size:34px;color:var(--clay);line-height:1}
+  .banner .bl{font-size:13px;color:var(--t2);margin-top:0;font-weight:500}
+  .banner .bh{font-size:12px;color:var(--t2);margin-top:7px}
+  .filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .filters::-webkit-scrollbar{display:none}
+  .fchip{flex:none;font-size:12.5px;font-weight:600;color:var(--t2);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 13px}
+  .fchip.on{background:var(--clay);border-color:var(--clay);color:#fff}
+  .action{display:flex;gap:11px;align-items:flex-start}
+  .action .ck{font-size:24px;flex:none;line-height:1;margin-top:1px}
+  .action .ab{flex:1;min-width:0}
+  .action .at{font-size:14px;font-weight:600;color:var(--t1);line-height:1.4}
+  .action .at.done{text-decoration:line-through;color:var(--t2);font-weight:500}
+  .action .am{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+  .action .src{font-size:11.5px;color:var(--t2);font-style:italic;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ask / chat */
+  .ask-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:34px 6px 14px;text-align:center}
+  .orb{width:62px;height:62px;border-radius:22px;background:var(--clay);display:grid;place-items:center;color:#fff;font-size:27px;box-shadow:0 8px 22px rgba(181,101,74,.4)}
+  .ask-empty .et{font-family:Fraunces,serif;font-size:21px;font-weight:600;color:var(--t1);margin-top:4px}
+  .ask-empty .es{font-size:13.5px;color:var(--t2);line-height:1.5;padding:0 8px}
+  .suggests{width:100%;display:flex;flex-direction:column;gap:9px;margin-top:14px}
+  .sug{display:flex;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:13px 14px;font-size:13.5px;font-weight:500;color:var(--t1);text-align:left}
+  .sug i{color:var(--clay);font-size:16px;flex:none}
+  .bubble{max-width:86%;padding:11px 14px;font-size:14px;line-height:1.45}
+  .b-user{align-self:flex-end;background:var(--clay);color:#fff;border-radius:20px;border-bottom-right-radius:6px;font-weight:500}
+  .a-wrap{align-self:flex-start;max-width:92%}
+  .a-label{display:flex;align-items:center;gap:5px;margin:0 0 5px 4px;font-size:10.5px;font-weight:700;letter-spacing:.04em;color:var(--clay)}
+  .b-ai{background:var(--paper);border:1px solid var(--line);border-radius:20px;border-bottom-left-radius:6px;color:var(--t1)}
+  .b-ai p{margin:0 0 7px}.b-ai p:last-child{margin:0}
+  .b-ai strong{font-weight:700;color:var(--t1)}
+  .b-ai ul{margin:6px 0 6px 2px;list-style:none;display:flex;flex-direction:column;gap:5px}
+  .b-ai ul li{padding-left:15px;position:relative}
+  .b-ai ul li::before{content:"";position:absolute;left:2px;top:8px;width:4px;height:4px;border-radius:50%;background:var(--clay)}
+  .composer{flex:none;display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--paper);border-top:1px solid var(--line)}
+  .composer .field{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:11px 15px;font-size:14px;color:var(--t3)}
+  .composer .send{width:40px;height:40px;border-radius:20px;background:var(--clay);color:#fff;display:grid;place-items:center;font-size:17px;flex:none}
+  .chatscroll{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:11px}
+  .chatscroll::-webkit-scrollbar{display:none}
+
+  /* auth */
+  .auth{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 22px;gap:34px}
+  .auth .brandblk{display:flex;flex-direction:column;align-items:center;gap:7px}
+  .auth .logo{width:62px;height:62px;border-radius:20px;background:var(--clay);display:grid;place-items:center;color:#fff;font-size:28px;margin-bottom:6px}
+  .auth .at{font-family:Fraunces,serif;font-size:27px;font-weight:600;color:var(--t1);text-align:center}
+  .auth .as{font-size:14px;color:var(--t2);text-align:center}
+  .auth .frm{display:flex;flex-direction:column;gap:15px}
+  .auth .fl{font-size:12.5px;font-weight:600;color:var(--t2);margin-bottom:7px}
+  .auth .inp{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font-size:15px;color:var(--t3)}
+  .auth .btn{background:var(--clay);color:#fff;border-radius:12px;padding:14px;text-align:center;font-weight:700;font-size:15px;margin-top:4px}
+  .auth .ft{text-align:center;font-size:13.5px;color:var(--t2);margin-top:6px}
+  .auth .ft b{color:var(--clay);font-weight:700}
+
+  /* detail key-value */
+  .kv{display:flex;justify-content:space-between;padding:1px 0}
+  .kv .k{font-size:12.5px;color:var(--t2)}
+  .kv .v{font-size:12.5px;font-weight:600;color:var(--t1)}
+  .step{display:flex;gap:11px;align-items:flex-start}
+  .stepnum{width:27px;height:27px;border-radius:14px;background:rgba(181,101,74,.15);color:var(--clay);display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+  .step .st{font-size:14px;font-weight:700;color:var(--t1)}
+  .step .sd{font-size:12px;color:var(--t2);line-height:1.45;margin-top:3px}
+  .step .sf{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+  .emailbody{font-size:13px;color:var(--t2);line-height:1.55;margin-top:6px;white-space:pre-line}
+
+  /* scan */
+  .scanhero{display:flex;flex-direction:column;align-items:center;gap:9px;padding:22px 6px}
+  .scanhero .si2{font-size:46px;color:var(--clay)}
+  .scanhero .ht{font-family:Fraunces,serif;font-size:22px;font-weight:600;color:var(--t1)}
+  .scanhero .hs{font-size:13px;color:var(--t2);text-align:center;line-height:1.45;padding:0 6px}
+  .bigbtn{display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;border-radius:14px;font-size:15px;font-weight:700;margin-bottom:11px}
+  .bigbtn.pri{background:var(--clay);color:#fff}
+  .bigbtn.sec{background:var(--paper);border:1px solid var(--line);color:var(--t1)}
+  .preview{width:100%;height:150px;border-radius:14px;display:grid;place-items:center;color:#fff;margin-bottom:14px}
+  .analyzing{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0}
+  .spinner{width:34px;height:34px;border-radius:50%;border:3px solid var(--paper2);border-top-color:var(--clay)}
+  .field2{margin-bottom:12px}
+  .field2 .fl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+  .field2 .inp{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;color:var(--t1)}
+  .chipwrap{display:flex;flex-wrap:wrap;gap:7px}
+  .ownerchip{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--paper2);font-size:12.5px;font-weight:600;color:var(--t1)}
+
+  .foot{text-align:center;color:#7d7264;font-size:12px;margin-top:54px;border-top:1px solid #2a241d;padding-top:24px}
+  @media(max-width:900px){.explain{position:static;max-width:none}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brandmark"><div class="bi"><i class="ph-fill ph-house"></i></div><span class="bt">Family AI</span></div>
+    <div class="chips" id="chips"></div>
+    <div class="pager">
+      <button class="pgbtn" id="prev" aria-label="Previous"><i class="ph-bold ph-caret-left"></i></button>
+      <span class="counter" id="counter">1 / 11</span>
+      <button class="pgbtn" id="next" aria-label="Next"><i class="ph-bold ph-caret-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ======================= 0 · INTRO ======================= -->
+  <section class="section active" data-group="Overview" data-title="Introduction">
+    <div class="intro">
+      <div class="eyebrow">Product Showcase · Mobile App</div>
+      <h1>Family AI Assistant</h1>
+      <p class="lede">A mobile-first family operations assistant. It keeps the household's <b>documents, expiries and renewals</b> in one calm vault, surfaces <b>per-child school tasks</b> pulled out of real communications, and answers natural-language questions through a <b>server-side AI concierge grounded only in the family's own data</b>. Built in Expo / React Native; backend on Vercel serverless + Supabase Postgres (row-level security) + OpenRouter.</p>
+      <div class="designnote">
+        <i class="ph-duotone ph-palette"></i>
+        <div><b>Design language — Calm Concierge.</b> Warm paper surfaces, a single clay accent (#B5654A), Fraunces serif headings over Inter body text, Phosphor icons and soft rounded cards. Member colours are reserved strictly for identity; clay carries every interactive and selection state. Every mockup below is rendered from the real screen source and the seeded <b>Pacheco family</b> — Diogo, Alana, Bella, Noah, Ayla — with the POC reference date of <b>19 May 2026</b>.</div>
+      </div>
+      <div class="designnote" style="margin-top:14px">
+        <i class="ph-duotone ph-shield-check"></i>
+        <div><b>How to read this.</b> Use the chips above or the ←/→ arrows to page through every screen. Each screen is grouped <b>Auth → Core tabs → Detail & flows → Profile</b>, shown in a phone frame with a written explanation of what it does, the data it shows, and any AI behaviour. Nine screens are <b>Built</b>; the Profile &amp; Settings panels are <b>Planned</b>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 1 · LOGIN ======================= -->
+  <section class="section" data-group="Auth" data-title="Login">
+    <div class="sechead"><span class="num">01</span><div><div class="grp">Auth</div><h2>Login</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones"><div class="col">
+        <div class="phone"><div class="screen">
+          <div class="island"></div>
+          <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+          <div class="auth">
+            <div class="brandblk"><div class="logo"><i class="ph-fill ph-house"></i></div><div class="at">Family AI</div><div class="as">Your household, organized.</div></div>
+            <div class="frm">
+              <div><div class="fl">Email</div><div class="inp">you@family.com</div></div>
+              <div><div class="fl">Password</div><div class="inp">••••••••</div></div>
+              <div class="btn">Sign in</div>
+              <div class="ft">New here? <b>Create an account</b></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="label">Email + password sign-in</div>
+      </div></div>
+      <div class="explain">
+        <h3>Sign in to the household</h3>
+        <p>The entry screen. A single Supabase Auth email/password sign-in — the whole family shares <b>one account</b> in the POC. On success the root layout swaps the auth stack for the tab navigator.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li>Clay <b>house mark</b> + "Family AI / Your household, organized."</li><li>Email and password fields, clay <b>Sign in</b> button</li><li>Inline error text on failed auth; spinner while signing in</li><li>Link through to <b>Create an account</b></li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-lock-key"></i> Behaviour</div>
+          <ul class="xlist"><li>Calls Supabase Auth; the returned JWT carries the <b>family_id</b></li><li>That JWT scopes every later request — the basis of family isolation</li><li>Auth gate in <code>app/_layout.tsx</code> redirects signed-in users to the tabs</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 2 · REGISTER ======================= -->
+  <section class="section" data-group="Auth" data-title="Register">
+    <div class="sechead"><span class="num">02</span><div><div class="grp">Auth</div><h2>Register</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones"><div class="col">
+        <div class="phone"><div class="screen">
+          <div class="island"></div>
+          <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+          <div class="auth">
+            <div class="brandblk"><div class="logo"><i class="ph-fill ph-house"></i></div><div class="at">Create your family</div><div class="as">One account for the whole household.</div></div>
+            <div class="frm">
+              <div><div class="fl">Family name</div><div class="inp">The Pacheco Family</div></div>
+              <div><div class="fl">Email</div><div class="inp">you@family.com</div></div>
+              <div><div class="fl">Password</div><div class="inp">At least 6 characters</div></div>
+              <div class="btn">Create account</div>
+              <div class="ft">Already have an account? <b>Sign in</b></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="label">Create a new family account</div>
+      </div></div>
+      <div class="explain">
+        <h3>Create the family</h3>
+        <p>Registration takes a <b>family name</b>, email and password. Sign-up provisions a brand-new, <b>empty</b> family — a trigger creates the family row and an owner user, and crucially does <b>not</b> seed any demo data, so real families start clean.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li>Family name field (placeholder "The Pacheco Family")</li><li>Email + password (6-char minimum hint)</li><li>Clay <b>Create account</b> button; link back to sign in</li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-database"></i> Behaviour</div>
+          <ul class="xlist"><li>Creates a <b>families</b> row and an <b>owner</b> user, both isolated by RLS</li><li>New family is empty — members and documents are added in-app or seeded explicitly</li><li>Auth gate redirects into the tabs once the session is live</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 3 · DOCUMENTS ======================= -->
+  <section class="section" data-group="Core tabs" data-title="Documents">
+    <div class="sechead"><span class="num">03</span><div><div class="grp">Core tab · Home</div><h2>Documents — the vault</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones"><div class="col">
+        <div class="phone"><div class="screen">
+          <div class="island"></div>
+          <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+          <div class="scroll" style="padding-bottom:90px">
+            <div class="tabhead"><span class="ttl">Documents</span><i class="ph ph-sign-out out"></i></div>
+            <div class="stats">
+              <div class="stat"><div class="sv" style="color:var(--clay)">12</div><div class="sl">Documents</div></div>
+              <div class="stat"><div class="sv" style="color:var(--gold)">5</div><div class="sl">Expiring soon</div></div>
+              <div class="stat"><div class="sv" style="color:var(--danger)">1</div><div class="sl">Expired</div></div>
+            </div>
+            <div class="sec">Family documents</div>
+            <!-- sorted urgency: expired, then soonest -->
+            <div class="card doc">
+              <div class="av" style="width:40px;height:40px;background:rgba(244,63,94,.13);border-color:rgba(244,63,94,.4)"><span class="em" style="font-size:20px">👩</span></div>
+              <div class="body"><div class="trow"><span class="nm">Passport</span><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.1)">Expired</span></div>
+                <div class="meta">Alana · P-ALANA-02</div>
+                <div class="frow"><span class="pill" style="color:var(--c-identity);background:rgba(99,102,241,.13)">Identity</span><span class="exp">Exp 2025-09-30</span></div></div>
+            </div>
+            <div class="card doc">
+              <div class="av" style="width:40px;height:40px;background:rgba(20,184,166,.13);border-color:rgba(20,184,166,.4)"><span class="em" style="font-size:20px">🏡</span></div>
+              <div class="body"><div class="trow"><span class="nm">Health Insurance</span><span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Soon · 27d</span></div>
+                <div class="meta">Family · HI-FAM-09</div>
+                <div class="frow"><span class="pill" style="color:var(--c-health);background:rgba(239,68,68,.13)">Health</span><span class="exp">Exp 2026-06-15</span></div></div>
+            </div>
+            <div class="card doc">
+              <div class="av" style="width:40px;height:40px;background:rgba(99,102,241,.13);border-color:rgba(99,102,241,.4)"><span class="em" style="font-size:20px">👨‍💻</span></div>
+              <div class="body"><div class="trow"><span class="nm">Passport</span><span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Soon · 40d</span></div>
+                <div class="meta">Diogo · P-DIOGO-01</div>
+                <div class="frow"><span class="pill" style="color:var(--c-identity);background:rgba(99,102,241,.13)">Identity</span><span class="exp">Exp 2026-06-28</span></div>
+                <div class="prog"><div class="ptrack"><div class="pfill" style="width:20%"></div></div><div class="ptext">20% renewed</div></div></div>
+            </div>
+            <div class="card doc">
+              <div class="av" style="width:40px;height:40px;background:rgba(245,158,11,.13);border-color:rgba(245,158,11,.4)"><span class="em" style="font-size:20px">👧</span></div>
+              <div class="body"><div class="trow"><span class="nm">School ID</span><span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Soon · 73d</span></div>
+                <div class="meta">Bella · SCH-BELLA</div>
+                <div class="frow"><span class="pill" style="color:var(--c-education);background:rgba(168,85,247,.13)">Education</span><span class="exp">Exp 2026-07-31</span></div>
+                <div class="prog"><div class="ptrack"><div class="pfill" style="width:60%"></div></div><div class="ptext">60% renewed</div></div></div>
+            </div>
+            <div class="card doc">
+              <div class="av" style="width:40px;height:40px;background:rgba(20,184,166,.13);border-color:rgba(20,184,166,.4)"><span class="em" style="font-size:20px">🏡</span></div>
+              <div class="body"><div class="trow"><span class="nm">Car Insurance</span><span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Soon · 64d</span></div>
+                <div class="meta">Family · CI-FAM-10</div>
+                <div class="frow"><span class="pill" style="color:var(--c-driving);background:rgba(14,165,233,.13)">Driving</span><span class="exp">Exp 2026-07-22</span></div>
+                <div class="prog"><div class="ptrack"><div class="pfill" style="width:70%"></div></div><div class="ptext">70% renewed</div></div></div>
+            </div>
+          </div>
+          <div class="fab"><i class="ph-fill ph-camera"></i> Scan</div>
+          <div class="nav">
+            <div class="navitem on"><i class="ph-fill ph-folders"></i><span>Documents</span></div>
+            <div class="navitem"><i class="ph ph-graduation-cap"></i><span>School</span></div>
+            <div class="navitem"><i class="ph ph-list-checks"></i><span>Actions</span></div>
+            <div class="navitem"><i class="ph ph-sparkle"></i><span>Ask</span></div>
+          </div>
+        </div></div>
+        <div class="label">Urgency-sorted vault + Scan FAB</div>
+      </div></div>
+      <div class="explain">
+        <h3>Every household document, by urgency</h3>
+        <p>The home tab. All family documents in one list, <b>sorted by urgency then soonest expiry</b> — expired first, then expiring-soon, then valid. Three stat chips summarise the vault at a glance.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li><b>Stat chips:</b> total documents · expiring soon · expired</li><li>Per-doc <b>member avatar</b>, name, document number</li><li><b>Status pill</b> (Expired / Soon · Nd / Valid) + <b>category pill</b></li><li><b>% renewed</b> progress bar when a renewal is underway</li><li>Floating clay <b>Scan</b> button to add a new document</li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-calculator"></i> Data &amp; logic</div>
+          <ul class="xlist"><li>12 seeded docs across Diogo, Alana, Bella, Noah, Ayla and the household</li><li>Status is computed against the POC reference date <b>19 May 2026</b>: &lt;0 days = Expired, ≤90 = Soon, else Valid</li><li>Here: 1 expired (Alana passport), 5 expiring soon</li><li>Tapping a card opens the <b>Document detail</b> screen</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 4 · SCHOOL ======================= -->
+  <section class="section" data-group="Core tabs" data-title="School">
+    <div class="sechead"><span class="num">04</span><div><div class="grp">Core tab</div><h2>School</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones">
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll" style="padding-bottom:84px">
+              <div class="tabhead"><span class="ttl">School</span><i class="ph ph-sign-out out"></i></div>
+              <div class="segment"><div class="seg on">Inbox</div><div class="seg">By child</div></div>
+              <div class="stats">
+                <div class="stat"><div class="sv" style="color:var(--clay)">6</div><div class="sl">Messages</div></div>
+                <div class="stat"><div class="sv" style="color:var(--m-alana)">6</div><div class="sl">Unread</div></div>
+                <div class="stat"><div class="sv" style="color:var(--sage)">8</div><div class="sl">Open tasks</div></div>
+              </div>
+              <div class="sec">Inbox</div>
+              <div class="card email">
+                <span class="ico">🏫</span><div class="eb">
+                  <div class="top"><span class="from un">Oakwood Primary School</span><span class="date">18 May 2026</span></div>
+                  <div class="subj un">Year 5 — Residential Trip Consent &amp; Parents Evening</div>
+                  <div class="ef"><span class="pill" style="color:var(--c-education);background:rgba(168,85,247,.13)">Education</span><span class="undot"></span></div></div>
+              </div>
+              <div class="card email">
+                <span class="ico">🩺</span><div class="eb">
+                  <div class="top"><span class="from un">City Pediatric Clinic</span><span class="date">19 May 2026</span></div>
+                  <div class="subj un">Annual Health Checks Due — Bella, Noah &amp; Ayla</div>
+                  <div class="ef"><span class="pill" style="color:var(--c-health);background:rgba(239,68,68,.13)">Health</span><span class="undot"></span></div></div>
+              </div>
+              <div class="card email">
+                <span class="ico">📚</span><div class="eb">
+                  <div class="top"><span class="from un">Oakwood Primary School</span><span class="date">19 May 2026</span></div>
+                  <div class="subj un">Year 2 — Reading Log &amp; Phonics Check</div>
+                  <div class="ef"><span class="pill" style="color:var(--c-education);background:rgba(168,85,247,.13)">Education</span><span class="undot"></span></div></div>
+              </div>
+            </div>
+            <div class="nav">
+              <div class="navitem"><i class="ph ph-folders"></i><span>Documents</span></div>
+              <div class="navitem on"><i class="ph-fill ph-graduation-cap"></i><span>School</span></div>
+              <div class="navitem"><i class="ph ph-list-checks"></i><span>Actions</span></div>
+              <div class="navitem"><i class="ph ph-sparkle"></i><span>Ask</span></div>
+            </div>
+          </div></div>
+          <div class="label">Inbox segment</div>
+        </div>
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll" style="padding-bottom:84px">
+              <div class="tabhead"><span class="ttl">School</span><i class="ph ph-sign-out out"></i></div>
+              <div class="segment"><div class="seg">Inbox</div><div class="seg on">By child</div></div>
+              <div class="childhd">
+                <div class="av" style="width:44px;height:44px;background:rgba(245,158,11,.13);border-color:rgba(245,158,11,.4)"><span class="em" style="font-size:22px">👧</span></div>
+                <div style="flex:1"><div class="cn">Bella</div><div class="cr">Child 1</div></div>
+                <span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">2 tasks</span>
+              </div>
+              <div class="card task"><div class="ub" style="background:var(--danger)"></div><div style="flex:1"><div class="tt">Sign Bella's Year 5 trip consent + pay GBP 180</div><div class="tm"><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 30 May 2026</span></div></div></div>
+              <div class="card task"><div class="ub" style="background:var(--gold)"></div><div style="flex:1"><div class="tt">Book Year 5 parents evening slot</div><div class="tm"><span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Due 28 May 2026</span></div></div></div>
+              <div class="childhd" style="margin-top:14px">
+                <div class="av" style="width:44px;height:44px;background:rgba(16,185,129,.13);border-color:rgba(16,185,129,.4)"><span class="em" style="font-size:22px">👦</span></div>
+                <div style="flex:1"><div class="cn">Noah</div><div class="cr">Child 2</div></div>
+                <span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">1 task</span>
+              </div>
+              <div class="card task"><div class="ub" style="background:var(--danger)"></div><div style="flex:1"><div class="tt">Submit Noah's weekly reading log</div><div class="tm"><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 21 May 2026</span></div></div></div>
+              <div class="childhd" style="margin-top:14px">
+                <div class="av" style="width:44px;height:44px;background:rgba(168,85,247,.13);border-color:rgba(168,85,247,.4)"><span class="em" style="font-size:22px">👶</span></div>
+                <div style="flex:1"><div class="cn">Ayla</div><div class="cr">Child 3</div></div>
+                <span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">2 tasks</span>
+              </div>
+            </div>
+            <div class="nav">
+              <div class="navitem"><i class="ph ph-folders"></i><span>Documents</span></div>
+              <div class="navitem on"><i class="ph-fill ph-graduation-cap"></i><span>School</span></div>
+              <div class="navitem"><i class="ph ph-list-checks"></i><span>Actions</span></div>
+              <div class="navitem"><i class="ph ph-sparkle"></i><span>Ask</span></div>
+            </div>
+          </div></div>
+          <div class="label">By-child segment</div>
+        </div>
+      </div>
+      <div class="explain">
+        <h3>School comms &amp; per-child tasks</h3>
+        <p>The School tab has two segments. <b>Inbox</b> lists incoming school and family communications (newest first, unread bolded with a clay dot). <b>By child</b> regroups open tasks under each child so a parent sees exactly what each kid needs.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li>Segmented control: <b>Inbox</b> / <b>By child</b></li><li>Inbox stat chips: messages · unread · open tasks</li><li>Per-child header (avatar, role, task-count pill) + task cards</li><li>Each task: priority bar (red/gold/sage), title, due-date pill</li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-database"></i> Data</div>
+          <ul class="xlist"><li>6 seeded communications, 8 tasks fetched live via the JWT</li><li>Children = members whose <b>memberType</b> is "child" (Bella, Noah, Ayla)</li><li>Tapping a task with a source comm jumps to that communication</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 5 · ACTIONS ======================= -->
+  <section class="section" data-group="Core tabs" data-title="Actions">
+    <div class="sechead"><span class="num">05</span><div><div class="grp">Core tab</div><h2>Actions</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones"><div class="col">
+        <div class="phone"><div class="screen">
+          <div class="island"></div>
+          <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+          <div class="scroll" style="padding-bottom:84px">
+            <div class="tabhead"><span class="ttl">Actions</span><i class="ph ph-sign-out out"></i></div>
+            <div class="banner"><div class="bv">8</div><div class="bl">open actions</div><div class="bh">Tracked across 6 family communications</div></div>
+            <div class="filters" style="margin-bottom:8px"><span class="fchip on">All</span><span class="fchip">Bella</span><span class="fchip">Noah</span><span class="fchip">Ayla</span><span class="fchip">Family</span></div>
+            <div class="filters" style="margin-bottom:4px"><span class="fchip on">All</span><span class="fchip">High</span><span class="fchip">Medium</span><span class="fchip">Low</span></div>
+            <div class="sec">To do · by priority</div>
+            <div class="card action">
+              <i class="ph ph-circle ck" style="color:var(--t3)"></i>
+              <div class="ab"><div class="at">Sign Bella's Year 5 trip consent + pay GBP 180</div>
+                <div class="am"><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">Bella</span><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 30 May 2026</span></div>
+                <div class="src">↪ Year 5 — Residential Trip Consent &amp; Parents Evening</div></div>
+            </div>
+            <div class="card action">
+              <i class="ph ph-circle ck" style="color:var(--t3)"></i>
+              <div class="ab"><div class="at">Submit Noah's weekly reading log</div>
+                <div class="am"><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">Noah</span><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 21 May 2026</span></div>
+                <div class="src">↪ Year 2 — Reading Log &amp; Phonics Check</div></div>
+            </div>
+            <div class="card action">
+              <i class="ph-fill ph-check-circle ck" style="color:var(--sage)"></i>
+              <div class="ab"><div class="at done">Pay summer term tuition (GBP 6,400)</div>
+                <div class="am"><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">Family</span><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 2 Jun 2026</span></div>
+                <div class="src">↪ Summer Term Tuition Invoice — Due 2 June</div></div>
+            </div>
+            <div class="card action">
+              <i class="ph ph-circle ck" style="color:var(--t3)"></i>
+              <div class="ab"><div class="at">Confirm family health insurance renewal</div>
+                <div class="am"><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">Family</span><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 15 Jun 2026</span></div>
+                <div class="src">↪ Family Health Insurance Renewal — 15 June</div></div>
+            </div>
+          </div>
+          <div class="nav">
+            <div class="navitem"><i class="ph ph-folders"></i><span>Documents</span></div>
+            <div class="navitem"><i class="ph ph-graduation-cap"></i><span>School</span></div>
+            <div class="navitem on"><i class="ph-fill ph-list-checks"></i><span>Actions</span></div>
+            <div class="navitem"><i class="ph ph-sparkle"></i><span>Ask</span></div>
+          </div>
+        </div></div>
+        <div class="label">Open-actions banner · filters · task list</div>
+      </div></div>
+      <div class="explain">
+        <h3>One checklist for the whole family</h3>
+        <p>Every task the assistant has pulled from communications, flattened into a single prioritised checklist. A headline banner counts open actions; owner and urgency filters narrow the list; tap the circle to mark done.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li><b>Banner:</b> open-action count + "tracked across N communications"</li><li>Two filter rows — <b>owner</b> (All/members/Family) and <b>urgency</b></li><li>Checkbox toggle, owner pill, due-date pill colour-coded by priority</li><li>"↪ source" line links back to the originating communication</li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-database"></i> Data &amp; behaviour</div>
+          <ul class="xlist"><li>8 live tasks; completion is an <b>optimistic toggle</b> reconciled by the server</li><li>Completed items dim and strike through (shown: tuition paid)</li><li>Owner = the person/household the task concerns, enabling per-child views</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 6 · ASK ======================= -->
+  <section class="section" data-group="Core tabs" data-title="Ask">
+    <div class="sechead"><span class="num">06</span><div><div class="grp">Core tab · AI</div><h2>Ask — the Concierge</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones">
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll" style="padding-bottom:84px">
+              <div class="tabhead"><span class="ttl">Ask</span><i class="ph ph-sign-out out"></i></div>
+              <div class="ask-empty">
+                <div class="orb"><i class="ph-fill ph-sparkle"></i></div>
+                <div class="et">How can I help your family?</div>
+                <div class="es">Ask about documents, expiries, school results or tasks — answered from your real data.</div>
+                <div class="suggests">
+                  <div class="sug"><i class="ph-bold ph-arrow-bend-up-right"></i>Are our passports OK for the summer trip?</div>
+                  <div class="sug"><i class="ph-bold ph-arrow-bend-up-right"></i>How did Bella do in her latest results?</div>
+                  <div class="sug"><i class="ph-bold ph-arrow-bend-up-right"></i>What do we need to do for Ayla?</div>
+                  <div class="sug"><i class="ph-bold ph-arrow-bend-up-right"></i>What's most urgent this week?</div>
+                </div>
+              </div>
+            </div>
+            <div class="composer"><div class="field">Ask anything…</div><div class="send"><i class="ph-bold ph-arrow-up"></i></div></div>
+            <div class="nav" style="position:static;border-radius:0">
+              <div class="navitem"><i class="ph ph-folders"></i><span>Documents</span></div>
+              <div class="navitem"><i class="ph ph-graduation-cap"></i><span>School</span></div>
+              <div class="navitem"><i class="ph ph-list-checks"></i><span>Actions</span></div>
+              <div class="navitem on"><i class="ph-fill ph-sparkle"></i><span>Ask</span></div>
+            </div>
+          </div></div>
+          <div class="label">Empty state · suggestion chips</div>
+        </div>
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="tabhead" style="padding:6px 16px 4px"><span class="ttl">Ask</span><i class="ph ph-sign-out out"></i></div>
+            <div class="chatscroll">
+              <div class="bubble b-user">Are our passports OK for the summer trip?</div>
+              <div class="a-wrap">
+                <div class="a-label"><i class="ph-fill ph-sparkle"></i> CONCIERGE</div>
+                <div class="bubble b-ai">
+                  <p>A few things to flag before summer:</p>
+                  <ul>
+                    <li><strong>Alana's passport expired</strong> on 30 Sep 2025 — renew before any travel.</li>
+                    <li><strong>Diogo's passport</strong> expires 28 Jun 2026 (40 days) and is only 20% through renewal.</li>
+                    <li>Bella, Noah and Ayla's passports are all valid well past the summer.</li>
+                  </ul>
+                  <p>I'd prioritise Alana's renewal first.</p>
+                </div>
+              </div>
+              <div class="bubble b-user">What's most urgent this week?</div>
+              <div class="a-wrap">
+                <div class="a-label"><i class="ph-fill ph-sparkle"></i> CONCIERGE</div>
+                <div class="bubble b-ai"><p>Noah's <strong>reading log is due 21 May</strong>, and Bella's Year 5 trip consent + GBP 180 is due 30 May.</p></div>
+              </div>
+            </div>
+            <div class="composer"><div class="field">Ask anything…</div><div class="send"><i class="ph-bold ph-arrow-up"></i></div></div>
+          </div></div>
+          <div class="label">Answered state · markdown reply</div>
+        </div>
+      </div>
+      <div class="explain">
+        <h3>Natural-language questions, grounded answers</h3>
+        <p>A chat concierge. The empty state offers tappable suggestion chips; once a question is asked it becomes a clay user bubble, and the assistant replies in a paper bubble with <b>markdown rendering</b> (bold, bullet lists) under a "Concierge" label. A "Thinking…" state shows while the server works.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li>Clay sparkle orb + "How can I help your family?"</li><li>Four suggestion chips referencing the real children</li><li>Right-aligned user bubbles, left-aligned markdown assistant bubbles</li><li>Rounded composer with clay send button</li></ul></div>
+        <div class="ai-callout">
+          <div class="ah"><i class="ph-fill ph-brain"></i> AI &amp; backend</div>
+          Each question hits <b>/api/ai/ask</b>, a <b>server-side tool-calling agent</b>. It can only read the signed-in family's own rows (documents, tasks, communications, school results) — grounded strictly in their data, never another family's. The OpenRouter key lives only on the server; the app just sends the question and renders the answer.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 7 · DOCUMENT DETAIL ======================= -->
+  <section class="section" data-group="Detail & flows" data-title="Document detail">
+    <div class="sechead"><span class="num">07</span><div><div class="grp">Detail</div><h2>Document detail</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones"><div class="col">
+        <div class="phone"><div class="screen">
+          <div class="island"></div>
+          <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+          <div class="scroll">
+            <div class="navbar"><div class="back"><i class="ph-bold ph-arrow-left"></i></div><span class="ttl">Passport</span></div>
+            <div class="card" style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;gap:11px">
+                <div class="av" style="width:52px;height:52px;background:rgba(99,102,241,.13);border-color:rgba(99,102,241,.4)"><span class="em" style="font-size:26px">👨‍💻</span></div>
+                <div style="flex:1"><div style="font-family:Fraunces,serif;font-size:21px;font-weight:600;color:var(--t1)">Passport</div><div style="font-size:12.5px;color:var(--t2);margin-top:2px">Diogo · Parent 1</div></div>
+                <span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Soon · 40d</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <div class="kv"><span class="k">Number</span><span class="v">P-DIOGO-01</span></div>
+                <div class="kv"><span class="k">Category</span><span class="v" style="color:var(--c-identity)">Identity</span></div>
+                <div class="kv"><span class="k">Expiry</span><span class="v">2026-06-28</span></div>
+              </div>
+              <div><div class="ptrack"><div class="pfill" style="width:20%"></div></div><div class="ptext">20% through renewal</div></div>
+            </div>
+            <div class="sec">Renewal plan · 3 steps</div>
+            <div class="card step"><div class="stepnum">1</div><div style="flex:1"><div class="st">Submit ICP Portal Request</div><div class="sd">Log in to the ICP Smart Channels app using UAE PASS. Fill the online form, upload bio details and a compliant biometric photo.</div><div class="sf"><span class="pill" style="color:var(--sage);background:rgba(91,138,122,.13)">AED 150</span><span class="pill" style="color:var(--t2);background:var(--paper2)">ICP Portal / App</span></div></div></div>
+            <div class="card step"><div class="stepnum">2</div><div style="flex:1"><div class="st">Settle Renewal Fees</div><div class="sd">Pay the application and delivery fees securely online to initiate immediate processing.</div><div class="sf"><span class="pill" style="color:var(--sage);background:rgba(91,138,122,.13)">AED 150</span><span class="pill" style="color:var(--t2);background:var(--paper2)">Payment Gateway</span></div></div></div>
+            <div class="card step"><div class="stepnum">3</div><div style="flex:1"><div class="st">Courier Delivery</div><div class="sd">The new unified UAE Passport is printed and dispatched directly to your registered family address.</div><div class="sf"><span class="pill" style="color:var(--sage);background:rgba(91,138,122,.13)">Free (Included)</span><span class="pill" style="color:var(--t2);background:var(--paper2)">Home Delivery</span></div></div></div>
+          </div>
+        </div></div>
+        <div class="label">Document header + renewal plan</div>
+      </div></div>
+      <div class="explain">
+        <h3>One document, with a guided renewal</h3>
+        <p>Pushed when a document card is tapped. A header card carries the owner, status and the key fields; below it, a <b>step-by-step renewal plan</b> tells the family exactly how to renew that document type — each step with a fee and where to do it.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li>Owner avatar + role, status pill, renewal progress bar</li><li>Key/value rows: number, category, expiry date</li><li>Numbered renewal steps, each with a <b>fee pill</b> and <b>location pill</b></li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-database"></i> Data</div>
+          <ul class="xlist"><li>Document fetched by id from the live family store</li><li>Renewal plan looked up by document type (e.g. Passport, Driving Licence, School ID)</li><li>Documents without a known plan simply omit the renewal section</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 8 · EMAIL DETAIL ======================= -->
+  <section class="section" data-group="Detail & flows" data-title="Communication detail">
+    <div class="sechead"><span class="num">08</span><div><div class="grp">Detail</div><h2>Communication detail</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones"><div class="col">
+        <div class="phone"><div class="screen">
+          <div class="island"></div>
+          <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+          <div class="scroll">
+            <div class="navbar"><div class="back"><i class="ph-bold ph-arrow-left"></i></div><span class="ttl">Education</span></div>
+            <div class="card" style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:11px;align-items:flex-start">
+                <span style="font-size:30px">🏫</span>
+                <div style="flex:1"><div style="font-family:Fraunces,serif;font-size:18px;font-weight:600;color:var(--t1);line-height:1.3">Year 5 — Residential Trip Consent &amp; Parents Evening</div><div style="font-size:11.5px;color:var(--t2);margin-top:4px">Oakwood Primary School &lt;admin@oakwood.sch&gt;</div></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><span class="pill" style="color:var(--c-education);background:rgba(168,85,247,.13)">Education</span><span style="font-size:11.5px;color:var(--t2)">18 May 2026</span></div>
+              <div class="emailbody">Year 5 residential trip to the activity centre: signed consent form and GBP 180 payment due by 30 May. Parents evening bookings open for 28 May via the portal.</div>
+            </div>
+            <div class="sec">✨ Extracted actions</div>
+            <div class="card" style="display:flex;flex-direction:column;gap:11px">
+              <div style="display:flex;gap:8px"><span style="color:var(--clay);font-size:16px">•</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:var(--t1);line-height:1.4">Sign Bella's Year 5 trip consent + pay GBP 180</div><div class="am" style="display:flex;gap:7px;margin-top:6px"><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">Bella</span><span class="pill" style="color:var(--danger);background:rgba(178,58,72,.13)">Due 30 May 2026</span></div></div></div>
+              <div style="display:flex;gap:8px"><span style="color:var(--clay);font-size:16px">•</span><div style="flex:1"><div style="font-size:13.5px;font-weight:600;color:var(--t1);line-height:1.4">Book Year 5 parents evening slot</div><div class="am" style="display:flex;gap:7px;margin-top:6px"><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.13)">Bella</span><span class="pill" style="color:var(--gold);background:rgba(199,154,58,.13)">Due 28 May 2026</span></div></div></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="label">Message body + extracted actions</div>
+      </div></div>
+      <div class="explain">
+        <h3>The message, and what to do about it</h3>
+        <p>Opened from the School inbox or from a task's source link. It shows the full communication — sender, category, date and body — then lists the <b>actions the assistant extracted</b> from it, each tied to an owner and a due date.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> Key elements</div>
+          <ul class="xlist"><li>Header card: icon, subject (serif), sender, category pill, date</li><li>Full message body</li><li>"✨ Extracted actions" card linking the message to its tasks</li><li>Falls back to "No actions extracted" when none apply</li></ul></div>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-link"></i> Relationship</div>
+          <ul class="xlist"><li>Tasks reference their <b>source communication</b>, so this view is the two-way link between an inbox message and the Actions list</li><li>Same task data surfaces here, in Actions, and in School → By child</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 9 · SCAN ======================= -->
+  <section class="section" data-group="Detail & flows" data-title="Scan / capture">
+    <div class="sechead"><span class="num">09</span><div><div class="grp">Flow · AI</div><h2>Scan — capture &amp; extract</h2></div><span class="stbadge built"><i class="ph-fill ph-check-circle"></i> Built</span></div>
+    <div class="layout">
+      <div class="phones">
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll">
+              <div class="navbar"><div class="back"><i class="ph-bold ph-x"></i></div><span class="ttl">Scan document</span></div>
+              <div class="scanhero"><i class="ph-duotone ph-file-text si2"></i><div class="ht">Add a document</div><div class="hs">Snap or pick a photo — the assistant reads the title, category, and expiry for you.</div></div>
+              <div class="bigbtn pri"><i class="ph-fill ph-camera"></i> Take photo</div>
+              <div class="bigbtn sec"><i class="ph ph-image-square"></i> Choose from library</div>
+            </div>
+          </div></div>
+          <div class="label">Capture</div>
+        </div>
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll">
+              <div class="navbar"><div class="back"><i class="ph-bold ph-x"></i></div><span class="ttl">Scan document</span></div>
+              <div class="analyzing">
+                <div class="preview" style="background:linear-gradient(135deg,#4E6E8E,#2B2A28)"><i class="ph-duotone ph-identification-card" style="font-size:46px;opacity:.6"></i></div>
+                <div class="spinner" style="animation:spin 1s linear infinite"></div>
+                <div style="font-size:14.5px;color:var(--t2)">✨ Reading document…</div>
+              </div>
+            </div>
+          </div></div>
+          <div class="label">Extracting (AI)</div>
+        </div>
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll">
+              <div class="navbar"><div class="back"><i class="ph-bold ph-x"></i></div><span class="ttl">Scan document</span></div>
+              <div class="preview" style="background:linear-gradient(135deg,#4E6E8E,#2B2A28)"><i class="ph-duotone ph-identification-card" style="font-size:46px;opacity:.6"></i></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span class="pill" style="color:var(--sage);background:rgba(91,138,122,.13)">AI confidence 92%</span><span style="font-size:11.5px;color:var(--t2)">Check &amp; edit before saving</span></div>
+              <div class="card" style="display:flex;flex-direction:column">
+                <div class="field2"><div class="fl">Title</div><div class="inp">Passport</div></div>
+                <div class="field2"><div class="fl">Number</div><div class="inp">P-NOAH-04</div></div>
+                <div class="field2"><div class="fl">Expiry date</div><div class="inp">2026-08-20</div></div>
+                <div class="field2"><div class="fl">Category</div><div class="chipwrap"><span class="pill" style="color:#fff;background:var(--c-identity)">Identity</span><span class="pill" style="color:var(--c-driving);background:rgba(14,165,233,.13)">Driving</span><span class="pill" style="color:var(--c-education);background:rgba(168,85,247,.13)">Education</span><span class="pill" style="color:var(--c-health);background:rgba(239,68,68,.13)">Health</span></div></div>
+                <div class="field2" style="margin-bottom:0"><div class="fl">Owner</div><div class="chipwrap"><span class="ownerchip" style="background:var(--m-noah);border-color:var(--m-noah);color:#fff">👦 Noah</span><span class="ownerchip">👨‍💻 Diogo</span><span class="ownerchip">👧 Bella</span><span class="ownerchip">🏡 Family</span></div></div>
+              </div>
+              <div class="bigbtn pri" style="margin-top:12px"><i class="ph-bold ph-check"></i> Save to vault</div>
+            </div>
+          </div></div>
+          <div class="label">Review &amp; save</div>
+        </div>
+      </div>
+      <div class="explain">
+        <h3>Photo in, structured document out</h3>
+        <p>A modal three-step flow for adding a document. <b>Capture</b> a photo or pick one from the library; the assistant <b>reads it</b>; then the family <b>reviews and edits</b> the extracted fields before saving to the vault.</p>
+        <div class="xblock"><div class="xtitle"><i class="ph-fill ph-squares-four"></i> The three phases</div>
+          <ul class="xlist"><li><b>Capture</b> — Take photo / Choose from library</li><li><b>Extracting</b> — image preview + "✨ Reading document…" spinner</li><li><b>Review</b> — confidence pill, editable title/number/expiry, category &amp; owner chips, Save to vault</li></ul></div>
+        <div class="ai-callout">
+          <div class="ah"><i class="ph-fill ph-scan"></i> AI &amp; backend</div>
+          The captured image is sent to <b>/api/ai/extract</b>, a server-side multimodal call that returns validated structured fields (title, number, category, owner, expiry) plus a confidence score. The owner chips are the <b>signed-in family's real members</b>, so a scanned document is attributed correctly. The AI key never leaves the server.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 10 · PROFILE (PLANNED) ======================= -->
+  <section class="section" data-group="Profile" data-title="Profile & Settings">
+    <div class="sechead"><span class="num">10</span><div><div class="grp">Profile · reached via header avatar</div><h2>Profile &amp; Settings</h2></div><span class="stbadge planned"><i class="ph-fill ph-wrench"></i> Planned — not yet built</span></div>
+    <div class="layout" style="flex-direction:column;align-items:stretch">
+      <div class="explain" style="position:static;max-width:760px;margin-bottom:8px">
+        <h3>A calm control room for the family</h3>
+        <p>Three designed-but-unbuilt panels, reached from a <b>header avatar</b> rather than a fifth tab (keeping the four "do" tabs uncluttered). Same Calm Concierge language. Shown here for direction; not in the shipped build.</p>
+        <div class="ai-callout">
+          <div class="ah"><i class="ph-fill ph-shield-check"></i> Invariant respected in the design</div>
+          The AI-model panel states models run <b>server-side via OpenRouter</b> and keys are <b>never stored on device</b> — no AI secret ever touches the client. "Bring your own key" is visibly gated as Advanced / later.
+        </div>
+      </div>
+      <div class="phones">
+        <!-- Panel A: Profile home -->
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll">
+              <div class="navbar"><div class="back"><i class="ph-bold ph-arrow-left"></i></div><span class="ttl">Profile</span></div>
+              <div class="card" style="display:flex;align-items:center;gap:14px;border-radius:22px">
+                <div class="av" style="width:56px;height:56px;background:var(--m-diogo);border:none;color:#fff;font-family:Fraunces,serif;font-size:22px">D</div>
+                <div style="flex:1"><div style="font-family:Fraunces,serif;font-size:19px;font-weight:600;color:var(--t1)">Diogo</div><div style="font-size:12px;color:var(--t2);margin-top:2px">Primary parent · diogo@…</div></div>
+                <div style="width:34px;height:34px;border-radius:11px;background:var(--paper2);display:grid;place-items:center;color:var(--clay)"><i class="ph ph-pencil-simple"></i></div>
+              </div>
+              <div class="sec">Family</div>
+              <div style="display:flex;gap:13px;overflow:auto;padding-bottom:6px">
+                <div style="text-align:center;flex:none;width:56px"><div class="av" style="width:48px;height:48px;margin:0 auto;background:var(--m-diogo);border:none;color:#fff;font-family:Fraunces,serif">D</div><div style="font-size:11px;font-weight:600;color:var(--t1);margin-top:5px">Diogo</div></div>
+                <div style="text-align:center;flex:none;width:56px"><div class="av" style="width:48px;height:48px;margin:0 auto;background:var(--m-alana);border:none;color:#fff;font-family:Fraunces,serif">A</div><div style="font-size:11px;font-weight:600;color:var(--t1);margin-top:5px">Alana</div></div>
+                <div style="text-align:center;flex:none;width:56px"><div class="av" style="width:48px;height:48px;margin:0 auto;background:var(--m-bella);border:none;color:#fff;font-family:Fraunces,serif">B</div><div style="font-size:11px;font-weight:600;color:var(--t1);margin-top:5px">Bella</div></div>
+                <div style="text-align:center;flex:none;width:56px"><div class="av" style="width:48px;height:48px;margin:0 auto;background:var(--m-noah);border:none;color:#fff;font-family:Fraunces,serif">N</div><div style="font-size:11px;font-weight:600;color:var(--t1);margin-top:5px">Noah</div></div>
+                <div style="text-align:center;flex:none;width:56px"><div class="av" style="width:48px;height:48px;margin:0 auto;background:var(--m-ayla);border:none;color:#fff;font-family:Fraunces,serif">A</div><div style="font-size:11px;font-weight:600;color:var(--t1);margin-top:5px">Ayla</div></div>
+              </div>
+              <div class="sec">Quick links</div>
+              <div class="card" style="padding:2px 14px">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)"><div style="width:36px;height:36px;border-radius:11px;background:var(--paper2);display:grid;place-items:center;color:var(--clay);font-size:18px"><i class="ph-duotone ph-folders"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">All documents</div><div style="font-size:11.5px;color:var(--t2)">5 need attention soon</div></div><span class="pill" style="color:var(--clay);background:rgba(181,101,74,.1)">12 docs</span></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)"><div style="width:36px;height:36px;border-radius:11px;background:var(--paper2);display:grid;place-items:center;color:var(--clay);font-size:18px"><i class="ph-duotone ph-sliders-horizontal"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Preferences &amp; AI model</div><div style="font-size:11.5px;color:var(--t2)">Concise · default model</div></div><i class="ph ph-caret-right" style="color:var(--t3)"></i></div>
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 0"><div style="width:36px;height:36px;border-radius:11px;background:var(--paper2);display:grid;place-items:center;color:var(--clay);font-size:18px"><i class="ph-duotone ph-bell"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Notifications</div><div style="font-size:11.5px;color:var(--t2)">3 types on · quiet 9pm–7am</div></div><i class="ph ph-caret-right" style="color:var(--t3)"></i></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--clay);font-weight:600;font-size:14px;padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--paper)"><i class="ph ph-sign-out"></i> Sign out</div>
+            </div>
+          </div></div>
+          <div class="label">Profile home · you + family + links</div>
+        </div>
+        <!-- Panel B: Preferences & AI model -->
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll">
+              <div class="navbar"><div class="back"><i class="ph-bold ph-arrow-left"></i></div><span class="ttl">Preferences</span></div>
+              <div class="sec">Communication</div>
+              <div class="card" style="padding:2px 14px">
+                <div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Reply style</div><div style="font-size:11px;color:var(--t2)">How the concierge talks to you</div></div><span style="font-size:13px;font-weight:600;color:var(--clay)">Concise ›</span></div>
+                <div style="display:flex;align-items:center;padding:12px 0"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Channel</div><div style="font-size:11px;color:var(--t2)">Telegram — coming soon</div></div><span style="font-size:13px;color:var(--t3)">In-app</span></div>
+              </div>
+              <div class="sec">AI model</div>
+              <div class="card" style="display:flex;align-items:center;gap:13px;box-shadow:0 0 0 1px var(--clay) inset;border-color:var(--clay)"><div style="width:40px;height:40px;border-radius:12px;background:rgba(91,138,122,.14);color:var(--sage);display:grid;place-items:center;font-size:20px"><i class="ph-duotone ph-sparkle"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Default model <span class="pill" style="color:var(--sage);background:rgba(91,138,122,.14);font-size:9px">DEFAULT</span></div><div style="font-size:11.5px;color:var(--t2)">Fast, runs on us — no cost.</div></div><div style="width:22px;height:22px;border-radius:50%;border:2px solid var(--clay);display:grid;place-items:center"><div style="width:11px;height:11px;border-radius:50%;background:var(--clay)"></div></div></div>
+              <div class="card" style="display:flex;align-items:center;gap:13px"><div style="width:40px;height:40px;border-radius:12px;background:rgba(78,110,142,.14);color:var(--m-diogo);display:grid;place-items:center;font-size:20px"><i class="ph-duotone ph-brain"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Sharper model</div><div style="font-size:11.5px;color:var(--t2)">Stronger reasoning for tricky questions.</div></div><div style="width:22px;height:22px;border-radius:50%;border:2px solid var(--line)"></div></div>
+              <div class="card" style="display:flex;align-items:center;gap:13px;opacity:.78"><div style="width:40px;height:40px;border-radius:12px;background:rgba(199,154,58,.16);color:var(--gold);display:grid;place-items:center;font-size:20px"><i class="ph-duotone ph-key"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Bring your own key <span class="pill" style="color:var(--gold);background:rgba(199,154,58,.16);font-size:9px">ADVANCED</span></div><div style="font-size:11.5px;color:var(--t2)">Your own provider &amp; key. Later.</div></div><div style="width:22px;height:22px;border-radius:50%;border:2px solid var(--line)"></div></div>
+              <div style="font-size:11.5px;color:var(--t2);line-height:1.5;margin:4px;display:flex;gap:7px"><i class="ph-fill ph-lock-simple" style="color:var(--clay);font-size:15px;flex:none"></i><span>Models run server-side via OpenRouter. Your family's data never trains them, and keys are never stored on this device.</span></div>
+            </div>
+          </div></div>
+          <div class="label">Preferences · AI model select</div>
+        </div>
+        <!-- Panel C: Notifications -->
+        <div class="col">
+          <div class="phone"><div class="screen">
+            <div class="island"></div>
+            <div class="statusbar"><span>9:41</span><span class="si"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-full"></i></span></div>
+            <div class="scroll">
+              <div class="navbar"><div class="back"><i class="ph-bold ph-arrow-left"></i></div><span class="ttl">Notifications</span></div>
+              <div class="sec">By type</div>
+              <div class="card" style="padding:2px 14px">
+                <div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Document expiry</div><div style="font-size:11px;color:var(--t2)">Lead time before any expiry</div></div><div style="display:flex;align-items:center;gap:9px"><div style="width:24px;height:24px;border-radius:8px;background:var(--paper2);display:grid;place-items:center;color:var(--clay)"><i class="ph-bold ph-minus"></i></div><span style="font-size:13px;font-weight:700;color:var(--t1)">14 days</span><div style="width:24px;height:24px;border-radius:8px;background:var(--paper2);display:grid;place-items:center;color:var(--clay)"><i class="ph-bold ph-plus"></i></div></div></div>
+                <div style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">School tasks &amp; deadlines</div></div><div style="width:44px;height:26px;border-radius:999px;background:var(--clay);position:relative"><div style="position:absolute;top:2px;left:20px;width:20px;height:20px;border-radius:50%;background:#fff"></div></div></div>
+                <div style="display:flex;align-items:center;padding:12px 0"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Daily digest</div><div style="font-size:11px;color:var(--t2)">Morning summary</div></div><span style="font-size:12px;font-weight:600;color:var(--t1);background:var(--paper2);border-radius:10px;padding:6px 10px">08:00</span></div>
+              </div>
+              <div class="sec">Quiet hours</div>
+              <div class="card" style="padding:2px 14px"><div style="display:flex;align-items:center;padding:12px 0"><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t1)">Pause overnight</div><div style="font-size:11px;color:var(--t2)">No pings overnight</div></div><div style="display:flex;align-items:center;gap:7px"><span style="font-size:12px;font-weight:600;color:var(--t1);background:var(--paper2);border-radius:10px;padding:6px 9px">21:00</span><span style="color:var(--t3)">→</span><span style="font-size:12px;font-weight:600;color:var(--t1);background:var(--paper2);border-radius:10px;padding:6px 9px">07:00</span></div></div></div>
+              <div class="sec">Custom rules</div>
+              <div class="card" style="display:flex;gap:11px;align-items:flex-start;border-radius:16px"><div style="width:34px;height:34px;border-radius:11px;background:rgba(181,101,74,.1);display:grid;place-items:center;color:var(--clay);font-size:17px;flex:none"><i class="ph-duotone ph-graduation-cap"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--t1);line-height:1.35">School tasks for Bella &amp; Noah, 3 days ahead</div><div style="font-size:11px;color:var(--t2);margin-top:4px;display:flex;gap:5px"><span class="pill" style="background:var(--paper2);color:var(--t2)">School</span><span class="pill" style="background:var(--paper2);color:var(--t2)">2 children</span></div></div><div style="width:44px;height:26px;border-radius:999px;background:var(--clay);position:relative;flex:none"><div style="position:absolute;top:2px;left:20px;width:20px;height:20px;border-radius:50%;background:#fff"></div></div></div>
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:var(--clay);font-weight:600;font-size:13.5px;padding:13px;border:1px dashed var(--clay);border-radius:16px;background:rgba(181,101,74,.05)"><i class="ph-bold ph-plus-circle"></i> Add a custom rule</div>
+            </div>
+          </div></div>
+          <div class="label">Notifications · custom rules</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">Family AI Assistant · App showcase · Calm Concierge · 11 sections · rendered from real screen source &amp; the seeded Pacheco family · static preview, no live backend</div>
+</div>
+
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script>
+  const sections = Array.from(document.querySelectorAll('.section'));
+  const chipsEl = document.getElementById('chips');
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  let idx = 0;
+
+  // build chips
+  sections.forEach((s, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    const grp = s.dataset.group;
+    const title = s.dataset.title;
+    chip.innerHTML = (i === 0 ? '' : '<span class="gi">' + grp + '</span>') + title;
+    chip.addEventListener('click', () => go(i));
+    chipsEl.appendChild(chip);
+  });
+  const chipEls = Array.from(chipsEl.children);
+
+  function go(i) {
+    idx = Math.max(0, Math.min(sections.length - 1, i));
+    sections.forEach((s, j) => s.classList.toggle('active', j === idx));
+    chipEls.forEach((c, j) => c.classList.toggle('active', j === idx));
+    counter.textContent = (idx + 1) + ' / ' + sections.length;
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === sections.length - 1;
+    chipEls[idx].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  prevBtn.addEventListener('click', () => go(idx - 1));
+  nextBtn.addEventListener('click', () => go(idx + 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') go(idx - 1);
+    if (e.key === 'ArrowRight') go(idx + 1);
+  });
+  go(0);
+</script>
+</body>
+</html>
