@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Family AI Assistant · Top-5 Feature Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<style>
+  :root{
+    --paper:#F1EFE7; --card:#FCFBF7; --sunk:#ECEAE0; --hair:#E2DFD3;
+    --cobalt:#2A4FC4; --cobalt-soft:#3A5FD0; --wash:#E5E9F8;
+    --ink:#20211B; --soft:#54564C; --faint:#8A8B7F;
+    --sage:#3E7C5A; --sage-wash:#E4EFE8;
+    --amber:#B6831A; --amber-wash:#FBF1D6;
+    --brick:#BC4A2E; --brick-wash:#F6E3DC;
+    --marker:#FBE08A;
+    --shadow:0 18px 40px -22px rgba(32,33,27,.45);
+    --serif:'Bricolage Grotesque',serif; --sans:'Hanken Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:var(--paper); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased; line-height:1.5}
+  .wrap{max-width:1180px; margin:0 auto; padding:44px 24px 90px}
+
+  /* ---- header ---- */
+  header.top{margin-bottom:40px}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:var(--cobalt)}
+  h1{font-family:var(--serif); font-weight:700; font-size:44px; line-height:1.05; margin:10px 0 12px; letter-spacing:-.5px}
+  .lede{font-size:16.5px; color:var(--soft); max-width:720px}
+  .lede b{color:var(--ink); font-weight:600}
+  .mark{background:linear-gradient(180deg,transparent 55%,var(--marker) 55%); padding:0 2px}
+
+  .legend{display:flex; flex-wrap:wrap; gap:18px 26px; margin-top:24px; padding:16px 20px; background:var(--card); border:1px solid var(--hair); border-radius:16px}
+  .legend .li{display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--soft)}
+  .dot{width:22px; height:22px; border-radius:50%; background:var(--cobalt); color:#fff; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 4px var(--wash); flex:0 0 auto}
+  .dot.sage{background:var(--sage); box-shadow:0 0 0 4px var(--sage-wash)}
+  .dot.amber{background:var(--amber); box-shadow:0 0 0 4px var(--amber-wash)}
+  .chip-eff{font-size:11px; font-weight:700; padding:3px 9px; border-radius:999px; background:var(--wash); color:var(--cobalt)}
+
+  /* ---- feature section ---- */
+  section.feat{margin-top:56px; scroll-margin-top:20px}
+  .feat-head{display:flex; align-items:flex-start; gap:16px; margin-bottom:6px}
+  .feat-num{font-family:var(--serif); font-weight:700; font-size:30px; color:var(--cobalt); background:var(--wash); width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+  .feat-title{font-family:var(--serif); font-weight:600; font-size:25px; letter-spacing:-.2px}
+  .feat-sub{font-size:14.5px; color:var(--soft); margin-top:3px; max-width:760px}
+  .feat-tags{display:flex; gap:8px; margin-top:9px}
+  .tag{font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--sunk); color:var(--soft)}
+  .tag.now{background:var(--sage-wash); color:var(--sage)}
+  .tag.big{background:var(--brick-wash); color:var(--brick)}
+
+  /* journey rail */
+  .rail{display:flex; gap:14px; align-items:stretch; overflow-x:auto; padding:26px 4px 12px; scrollbar-width:thin}
+  .rail::-webkit-scrollbar{height:8px}
+  .rail::-webkit-scrollbar-thumb{background:var(--hair); border-radius:8px}
+  .stepwrap{display:flex; align-items:center; gap:14px; flex:0 0 auto}
+  .arrow{color:var(--cobalt); font-size:26px; flex:0 0 auto; opacity:.65}
+  .step{flex:0 0 auto; width:264px}
+  .step .cap{display:flex; gap:9px; margin-bottom:12px; align-items:flex-start; min-height:52px}
+  .step .cap .t{font-size:13px; color:var(--soft)}
+  .step .cap .t b{color:var(--ink); font-weight:700; display:block; font-size:13.5px; margin-bottom:1px}
+
+  /* phone */
+  .phone{width:264px; background:#111319; border-radius:34px; padding:9px; box-shadow:var(--shadow)}
+  .scr{background:var(--paper); border-radius:26px; height:540px; overflow:hidden; position:relative; display:flex; flex-direction:column}
+  .statusbar{display:flex; justify-content:space-between; align-items:center; padding:9px 16px 4px; font-size:11px; font-weight:700; color:var(--ink)}
+  .statusbar .r{display:flex; gap:5px; font-size:12px}
+  .body{flex:1; overflow:hidden; padding:4px 14px 0}
+  .navbar{display:flex; justify-content:space-around; align-items:center; padding:8px 6px; border-top:1px solid var(--hair); background:var(--card)}
+  .navbar i{font-size:20px; color:var(--faint)}
+  .navbar .on{color:var(--cobalt)}
+  .navbar .lab{display:flex; flex-direction:column; align-items:center; gap:2px; font-size:9px; color:var(--faint); font-weight:600}
+  .navbar .lab.on{color:var(--cobalt)}
+
+  /* hotspot */
+  .hot{position:absolute; z-index:5}
+  .hot .dot{position:absolute; inset:auto; animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(42,79,196,.45)}70%{box-shadow:0 0 0 10px rgba(42,79,196,0)}100%{box-shadow:0 0 0 0 rgba(42,79,196,0)}}
+  .hot.sage .dot{background:var(--sage); animation:pulseS 1.8s infinite}
+  @keyframes pulseS{0%{box-shadow:0 0 0 0 rgba(62,124,90,.45)}70%{box-shadow:0 0 0 10px rgba(62,124,90,0)}100%{box-shadow:0 0 0 0 rgba(62,124,90,0)}}
+  .hot.amber .dot{background:var(--amber); animation:pulseA 1.8s infinite}
+  @keyframes pulseA{0%{box-shadow:0 0 0 0 rgba(182,131,26,.5)}70%{box-shadow:0 0 0 10px rgba(182,131,26,0)}100%{box-shadow:0 0 0 0 rgba(182,131,26,0)}}
+
+  /* generic ui inside phone */
+  .greet{font-family:var(--serif); font-weight:600; font-size:19px; margin:6px 2px 2px}
+  .date{font-size:11.5px; color:var(--soft); font-weight:600; margin:4px 2px 0}
+  .seclab{font-size:10.5px; font-weight:700; letter-spacing:.7px; text-transform:uppercase; color:var(--faint); margin:14px 2px 8px; display:flex; justify-content:space-between; align-items:center}
+  .card{background:var(--card); border:1px solid var(--hair); border-radius:15px; padding:12px 13px; margin-bottom:9px}
+  .row{display:flex; align-items:center; gap:11px}
+  .ic{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; flex:0 0 auto}
+  .ic.cob{background:var(--wash); color:var(--cobalt)}
+  .ic.br{background:var(--brick-wash); color:var(--brick)}
+  .ic.am{background:var(--amber-wash); color:var(--amber)}
+  .ic.sg{background:var(--sage-wash); color:var(--sage)}
+  .ttl{font-size:13.5px; font-weight:600}
+  .meta{font-size:11.5px; color:var(--soft); margin-top:2px}
+  .pill{font-size:10px; font-weight:700; padding:3px 8px; border-radius:999px; white-space:nowrap}
+  .pill.br{background:var(--brick-wash); color:var(--brick)}
+  .pill.am{background:var(--amber-wash); color:var(--amber)}
+  .pill.sg{background:var(--sage-wash); color:var(--sage)}
+  .pill.cob{background:var(--wash); color:var(--cobalt)}
+  .av{width:20px; height:20px; border-radius:50%; color:#fff; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+  .btn{background:var(--cobalt); color:#fff; font-weight:600; font-size:13px; padding:11px; border-radius:12px; text-align:center; margin-top:6px}
+  .btn.ghost{background:transparent; color:var(--soft); box-shadow:inset 0 0 0 1.5px var(--hair)}
+  .btn.sage{background:var(--sage)}
+  .fab{position:absolute; right:14px; bottom:70px; width:50px; height:50px; border-radius:16px; background:var(--cobalt); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 10px 20px -6px rgba(42,79,196,.6)}
+  .focus{background:var(--ink); color:#fff; border-radius:16px; padding:14px; margin:6px 0 4px}
+  .focus .k{font-size:9.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#B9C2E8}
+  .focus .h{font-family:var(--serif); font-size:16px; margin:6px 0 5px; line-height:1.25}
+  .focus .p{font-size:11.5px; color:#D9D7CE}
+  .focus .go{display:inline-flex; gap:6px; align-items:center; background:var(--cobalt); font-size:11.5px; font-weight:600; padding:7px 12px; border-radius:999px; margin-top:10px}
+
+  /* chat */
+  .bub{max-width:80%; padding:9px 12px; border-radius:14px; font-size:12.5px; margin-bottom:8px}
+  .bub.me{background:var(--cobalt); color:#fff; margin-left:auto; border-bottom-right-radius:5px}
+  .bub.ai{background:var(--card); border:1px solid var(--hair); border-bottom-left-radius:5px}
+  .ailab{font-size:9.5px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--faint); margin:0 2px 4px}
+  .srccard{display:inline-flex; gap:7px; align-items:center; background:var(--wash); border-radius:11px; padding:7px 9px; margin:0 6px 6px 0}
+  .srccard i{color:var(--cobalt); font-size:15px}
+  .srccard .st{font-size:11.5px; font-weight:600; color:var(--cobalt)}
+  .srccard .sk{font-size:9px; color:var(--faint); text-transform:capitalize}
+
+  /* toast */
+  .toast{position:absolute; left:14px; right:14px; bottom:76px; background:var(--sage-wash); border:1px solid var(--sage); color:var(--sage); font-size:12px; font-weight:600; padding:10px 12px; border-radius:12px; display:flex; gap:8px; align-items:center; z-index:6}
+
+  /* telegram chat */
+  .tg{background:#a8c6d8; height:100%; padding:12px 10px; display:flex; flex-direction:column; gap:8px}
+  .tg .tbar{background:#527da0; color:#fff; margin:-4px -14px 4px; padding:9px 14px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px}
+  .tg .m{max-width:82%; font-size:12px; padding:8px 10px; border-radius:12px; box-shadow:0 1px 1px rgba(0,0,0,.1)}
+  .tg .out{background:#e4fdc9; align-self:flex-end; border-bottom-right-radius:4px}
+  .tg .in{background:#fff; align-self:flex-start; border-bottom-left-radius:4px}
+  .tg .doc{display:flex; gap:8px; align-items:center; background:#fff; align-self:flex-end; padding:8px; border-radius:12px; font-size:11.5px}
+
+  .note{margin-top:14px; font-size:12.5px; color:var(--faint); padding-left:2px}
+  .note b{color:var(--soft); font-weight:600}
+
+  /* map / index */
+  .toc{display:flex; flex-wrap:wrap; gap:10px; margin-top:26px}
+  .toc a{font-size:13px; font-weight:600; color:var(--cobalt); text-decoration:none; padding:8px 14px; background:var(--card); border:1px solid var(--hair); border-radius:999px}
+  .toc a:hover{background:var(--wash)}
+  footer{margin-top:70px; padding-top:22px; border-top:1px solid var(--hair); font-size:12.5px; color:var(--faint)}
+  @media(max-width:640px){h1{font-size:32px}.wrap{padding:28px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="eyebrow">Family AI Assistant · Almanac</div>
+    <h1>Top-5 features — the journeys</h1>
+    <p class="lede">Every screen below is a mockup of a <b>planned</b> feature from <b>documentation/feature-plans/</b>. Follow the numbered taps left → right to see the flow. The <span class="mark">cobalt dot</span> marks where the user taps; the caption above each phone says what happens next.</p>
+
+    <div class="legend">
+      <div class="li"><span class="dot">1</span> Where to tap (in order)</div>
+      <div class="li"><span class="dot sage">✓</span> Confirm / positive action</div>
+      <div class="li"><span class="dot amber">!</span> Needs your decision</div>
+      <div class="li"><span class="chip-eff">M · S · L</span> Build effort</div>
+      <div class="li"><i class="ph ph-arrow-right" style="color:var(--cobalt)"></i> Next screen in the journey</div>
+    </div>
+
+    <div class="toc">
+      <a href="#f1">01 · Proactive reminders</a>
+      <a href="#f2">02 · Calendar</a>
+      <a href="#f3">03 · Source cards</a>
+      <a href="#f4">04 · Auto-memory</a>
+      <a href="#f5">05 · Telegram ingest</a>
+    </div>
+  </header>
+
+  <!-- ============ FEATURE 1 ============ -->
+  <section class="feat" id="f1">
+    <div class="feat-head">
+      <div class="feat-num">01</div>
+      <div>
+        <div class="feat-title">Proactive reminders</div>
+        <div class="feat-sub">An in-app "Needs attention" feed ranks expiring docs + due tasks; a Sunday digest (Vercel Cron) summarises the week. The vault stops being passive.</div>
+        <div class="feat-tags"><span class="tag now">Now</span><span class="tag">Effort M</span><span class="tag">migration 0009 · prefs</span></div>
+      </div>
+    </div>
+    <div class="rail">
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">1</span><span class="t"><b>Open Today</b>See the ranked "Needs attention" list — overdue first (red), due-soon (amber). Tap the passport.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="date">Tuesday, 19 May</div>
+              <div class="greet">Good morning, Diogo</div>
+              <div class="seclab">Needs attention <span class="pill br">3</span></div>
+              <div class="card row" style="position:relative">
+                <div class="ic br"><i class="ph-fill ph-identification-card"></i></div>
+                <div style="flex:1"><div class="ttl">Alana — Passport</div><div class="meta">Expired 4 days ago</div></div>
+                <span class="pill br">Overdue</span>
+                <span class="hot" style="right:8px; top:14px"><span class="dot">1</span></span>
+              </div>
+              <div class="card row">
+                <div class="ic am"><i class="ph-fill ph-car-profile"></i></div>
+                <div style="flex:1"><div class="ttl">Car insurance</div><div class="meta">Expires in 12 days</div></div>
+                <span class="pill am">Soon</span>
+              </div>
+              <div class="card row">
+                <div class="ic am"><i class="ph-fill ph-graduation-cap"></i></div>
+                <div style="flex:1"><div class="ttl">Bella — trip form</div><div class="meta">Due in 3 days</div></div>
+                <span class="pill am">Task</span>
+              </div>
+            </div>
+            <div class="navbar"><div class="lab on"><i class="ph-fill ph-house on"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">2</span><span class="t"><b>Document detail</b>Deep-links straight to the passport with the renewal steps. Or tap the bell to tune reminders.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 10px"><i class="ph ph-arrow-left" style="font-size:18px"></i><div class="ttl" style="flex:1; text-align:center">Passport</div><i class="ph ph-bell-ringing" style="font-size:18px; color:var(--cobalt); position:relative">
+                <span class="hot" style="right:-3px; top:-3px"><span class="dot">2</span></span></i></div>
+              <div class="focus">
+                <div class="k">Worth a look today</div>
+                <div class="h">Alana's passport<br>expired 4 days ago</div>
+                <div class="p">Renewals take a few weeks. Start now.</div>
+                <div class="go">Start renewal <i class="ph-bold ph-arrow-right"></i></div>
+              </div>
+              <div class="seclab">Details</div>
+              <div class="card"><div class="meta">Number</div><div class="ttl">N1234567</div></div>
+              <div class="card"><div class="meta">Expiry</div><div class="ttl" style="color:var(--brick)">15 May 2026</div></div>
+            </div>
+            <div class="navbar"><div class="lab on"><i class="ph-fill ph-house on"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">3</span><span class="t"><b>Reminder settings</b>Toggle channels + lead time. Persists to <i>preferences</i>. The Sunday digest is generated by a Vercel Cron.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 10px"><i class="ph ph-arrow-left" style="font-size:18px"></i><div class="ttl" style="flex:1; text-align:center">Reminders</div><span style="width:18px"></span></div>
+              <div class="card row"><div style="flex:1"><div class="ttl">Document expiries</div><div class="meta">Warn before they lapse</div></div><div style="width:38px;height:22px;border-radius:999px;background:var(--cobalt);position:relative"><div style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;right:2px;top:2px"></div></div></div>
+              <div class="card row"><div style="flex:1"><div class="ttl">Weekly digest</div><div class="meta">Sunday morning summary</div></div><div style="width:38px;height:22px;border-radius:999px;background:var(--cobalt);position:relative;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;right:2px;top:2px"></div>
+                <span class="hot" style="right:-4px; top:-6px"><span class="dot">3</span></span></div></div>
+              <div class="seclab">Lead time</div>
+              <div class="row" style="gap:7px"><span class="pill cob" style="padding:7px 12px">7d</span><span class="pill cob" style="padding:7px 12px">14d</span><span class="pill" style="padding:7px 12px;background:var(--cobalt);color:#fff">30d</span></div>
+              <div class="card" style="margin-top:12px; background:var(--sage-wash); border-color:var(--sage)"><div class="meta" style="color:var(--sage)"><i class="ph-fill ph-check-circle"></i> Saved — you're notified 30 days ahead.</div></div>
+            </div>
+            <div class="navbar"><div class="lab on"><i class="ph-fill ph-house on"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note"><b>Under the hood:</b> feed computed client-side from existing document/task stores (ships instantly, no native build). Weekly digest = Vercel Cron → <code>api/cron/digest.ts</code> with a <b>service-role family loop that pins family_id on every query</b> (P0). Push/Telegram delivery is a later layer.</p>
+  </section>
+
+  <!-- ============ FEATURE 2 ============ -->
+  <section class="feat" id="f2">
+    <div class="feat-head">
+      <div class="feat-num">02</div>
+      <div>
+        <div class="feat-title">Family calendar + appointments</div>
+        <div class="feat-sub">Surfaces the already-built <i>appointments</i> table as a shared agenda. Feeds the reminder feed and unlocks "when's Bella's dentist?" for the agent.</div>
+        <div class="feat-tags"><span class="tag now">Now / Next</span><span class="tag">Effort M</span><span class="tag">no migration</span></div>
+      </div>
+    </div>
+    <div class="rail">
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">1</span><span class="t"><b>Calendar tab</b>Agenda grouped by day, member-colour-coded. Tap + to add an appointment.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="greet">Calendar</div>
+              <div class="seclab">Tomorrow · 21 May</div>
+              <div class="card row"><div class="meta" style="width:44px">10:00</div><div style="flex:1"><div class="ttl">Bella — Dentist</div><div class="meta">Bright Smiles</div></div><span class="av" style="background:var(--amber)">B</span></div>
+              <div class="card row"><div class="meta" style="width:44px">15:30</div><div style="flex:1"><div class="ttl">Noah — Football</div><div class="meta">School pitch</div></div><span class="av" style="background:var(--sage)">N</span></div>
+              <div class="seclab">Fri · 24 May</div>
+              <div class="card row"><div class="meta" style="width:44px">09:00</div><div style="flex:1"><div class="ttl">Visa renewal</div><div class="meta">Al Manara Centre</div></div><span class="av" style="background:var(--cobalt)">F</span></div>
+            </div>
+            <div class="fab"><i class="ph-bold ph-plus"></i><span class="hot" style="right:-4px; top:-6px"><span class="dot">1</span></span></div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab on"><i class="ph-fill ph-calendar-blank on"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">2</span><span class="t"><b>New appointment</b>Modal: title, date/time, which child, place. Tap Save — appears instantly (optimistic).</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 12px"><span class="pill ghost" style="box-shadow:inset 0 0 0 1.5px var(--hair); color:var(--soft); padding:6px 11px">Cancel</span><div class="ttl" style="flex:1; text-align:center">New appointment</div><span style="width:44px"></span></div>
+              <div class="card"><div class="meta">Title</div><div class="ttl">Bella — Orthodontist</div></div>
+              <div class="row" style="gap:9px"><div class="card" style="flex:1"><div class="meta">Date</div><div class="ttl">28 May</div></div><div class="card" style="flex:1"><div class="meta">Time</div><div class="ttl">14:00</div></div></div>
+              <div class="seclab">Who</div>
+              <div class="row" style="gap:8px"><span class="av" style="width:34px;height:34px;background:var(--amber);font-size:13px">B</span><span class="av" style="width:34px;height:34px;background:var(--sunk);color:var(--faint);font-size:13px">N</span><span class="av" style="width:34px;height:34px;background:var(--sunk);color:var(--faint);font-size:13px">A</span></div>
+              <div class="card" style="margin-top:9px"><div class="meta">Location</div><div class="ttl">Al Manara Dental</div></div>
+              <div class="btn" style="position:relative">Save appointment<span class="hot" style="right:12px; top:8px"><span class="dot">2</span></span></div>
+            </div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab on"><i class="ph-fill ph-calendar-blank on"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">3</span><span class="t"><b>Ask the agent</b>The new <code>get_appointments</code> tool means the assistant can now answer scheduling questions from real data.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="greet" style="font-size:17px">Ask</div>
+              <div style="margin-top:12px">
+                <div class="bub me">When is Bella's dentist?</div>
+                <div class="ailab">Concierge</div>
+                <div class="bub ai">Bella has the <b>dentist tomorrow at 10:00</b> at Bright Smiles, and a new orthodontist appointment on 28 May.</div>
+              </div>
+            </div>
+            <div style="padding:8px 14px"><div class="card row" style="margin:0; border-radius:999px; padding:9px 14px"><div class="meta" style="flex:1">Ask anything…</div><i class="ph-fill ph-microphone" style="color:var(--cobalt)"></i></div></div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab on"><i class="ph-fill ph-sparkle on"></i>Ask</div></div>
+          </div></div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note"><b>Under the hood:</b> new <code>api/appointments.ts</code> CRUD (cloned from documents), a <code>get_appointments</code> agent tool, and an <code>AppointmentsProvider</code> store. Table + RLS already exist — no migration.</p>
+  </section>
+
+  <!-- ============ FEATURE 3 ============ -->
+  <section class="feat" id="f3">
+    <div class="feat-head">
+      <div class="feat-num">03</div>
+      <div>
+        <div class="feat-title">Grounded source cards</div>
+        <div class="feat-sub">Under each AI answer, tappable cards link to the exact document / task / appointment it drew from. "Prove it" — the trust differentiator vs a generic chatbot.</div>
+        <div class="feat-tags"><span class="tag now">Now</span><span class="tag">Effort S–M</span><span class="tag">no migration</span></div>
+      </div>
+    </div>
+    <div class="rail">
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">1</span><span class="t"><b>Ask a grounded question</b>The answer now carries source cards (cobalt chips) for every row the tools read. Tap the passport card.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="greet" style="font-size:17px">Ask</div>
+              <div style="margin-top:12px">
+                <div class="bub me">What expires soon?</div>
+                <div class="ailab">Concierge</div>
+                <div class="bub ai">Two things need attention: <b>Alana's passport</b> (expired) and <b>car insurance</b> (12 days).</div>
+                <div style="display:flex; flex-wrap:wrap; margin-top:2px; position:relative">
+                  <span class="srccard"><i class="ph-fill ph-identification-card"></i><span><span class="st">Alana — Passport</span><br><span class="sk">document</span></span>
+                    <span class="hot" style="right:-4px; top:-6px"><span class="dot">1</span></span></span>
+                  <span class="srccard"><i class="ph-fill ph-car-profile"></i><span><span class="st">Car insurance</span><br><span class="sk">document</span></span></span>
+                </div>
+              </div>
+            </div>
+            <div style="padding:8px 14px"><div class="card row" style="margin:0; border-radius:999px; padding:9px 14px"><div class="meta" style="flex:1">Ask anything…</div><i class="ph-fill ph-microphone" style="color:var(--cobalt)"></i></div></div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab on"><i class="ph-fill ph-sparkle on"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">2</span><span class="t"><b>Jumps to the source</b>The card deep-links to the exact document — verifiable proof, not a guess. Every id came from an RLS-scoped read.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 10px"><i class="ph ph-arrow-left" style="font-size:18px"></i><div class="ttl" style="flex:1; text-align:center">Passport</div><span style="width:18px"></span></div>
+              <div class="card row"><div class="ic cob"><i class="ph-fill ph-identification-card"></i></div><div style="flex:1"><div class="ttl">Alana — Passport</div><div class="meta">Identity · expired</div></div></div>
+              <div class="seclab">Details</div>
+              <div class="card"><div class="meta">Number</div><div class="ttl">N1234567</div></div>
+              <div class="card"><div class="meta">Expiry</div><div class="ttl" style="color:var(--brick)">15 May 2026</div></div>
+              <div class="card"><div class="meta">Owner</div><div class="ttl">Alana Pacheco</div></div>
+            </div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab on"><i class="ph-fill ph-folders on"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note"><b>Under the hood:</b> tools add <code>id</code> to their SELECTs; <code>api/ai/ask.ts</code> accumulates a deduped <code>sources[]</code> and returns it with the answer. No new data, no migration — every id is RLS-guaranteed same-family.</p>
+  </section>
+
+  <!-- ============ FEATURE 4 ============ -->
+  <section class="feat" id="f4">
+    <div class="feat-head">
+      <div class="feat-num">04</div>
+      <div>
+        <div class="feat-title">Auto-memory proposals</div>
+        <div class="feat-sub">The agent <i>proposes</i> durable facts it learns; nothing is remembered until you confirm. The assistant visibly learns your family — with consent.</div>
+        <div class="feat-tags"><span class="tag now">Now / Next</span><span class="tag">Effort S–M</span><span class="tag">no migration</span></div>
+      </div>
+    </div>
+    <div class="rail">
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">1</span><span class="t"><b>A chat reveals a fact</b>You mention the dog. Profile shows "1 waiting". Tap "What I've learned".</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="greet" style="font-size:17px">You &amp; family</div>
+              <div class="card row" style="margin-top:8px"><span class="av" style="width:44px;height:44px;background:var(--cobalt);font-size:16px">P</span><div><div class="ttl">Pacheco Pedro</div><div class="meta">diogo@family.ai</div></div></div>
+              <div class="seclab">Manage</div>
+              <div class="card row"><div class="ic cob"><i class="ph-duotone ph-brain"></i></div><div style="flex:1"><div class="ttl">What I've learned</div><div class="meta">3 facts · 1 waiting</div></div><span class="pill am">1</span>
+                <span class="hot amber" style="right:8px; top:16px"><span class="dot amber">1</span></span></div>
+              <div class="card row"><div class="ic cob"><i class="ph-duotone ph-bell-ringing"></i></div><div style="flex:1"><div class="ttl">Reminders</div><div class="meta">Digests, quiet hours</div></div><i class="ph ph-caret-right" style="color:var(--faint)"></i></div>
+              <div class="card row"><div class="ic cob"><i class="ph-duotone ph-paper-plane-tilt"></i></div><div style="flex:1"><div class="ttl">Telegram</div><div class="meta">Connected</div></div><i class="ph ph-caret-right" style="color:var(--faint)"></i></div>
+            </div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot amber">2</span><span class="t"><b>Confirm-before-remember</b>An amber proposal waits at the top. Tap <b>Remember</b> to keep it (or Dismiss).</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 8px"><i class="ph ph-arrow-left" style="font-size:18px"></i><div class="ttl" style="flex:1; text-align:center">What I've learned</div><span style="width:18px"></span></div>
+              <div class="seclab">Waiting for you</div>
+              <div class="card" style="background:var(--amber-wash); border-color:var(--amber)">
+                <div class="ttl" style="font-weight:500">The family dog is called <span class="mark">Pixel</span>.</div>
+                <div class="meta" style="margin-top:6px"><i class="ph-fill ph-sparkle" style="color:var(--amber)"></i> I picked this up from your last chat</div>
+                <div class="row" style="gap:8px; margin-top:10px"><div class="btn sage" style="flex:1; margin:0; padding:8px; position:relative"><i class="ph-bold ph-check"></i> Remember<span class="hot sage" style="right:10px; top:6px"><span class="dot sage">2</span></span></div><div class="btn ghost" style="flex:1; margin:0; padding:8px">Dismiss</div></div>
+              </div>
+              <div class="seclab">Active</div>
+              <div class="card"><div class="ttl" style="font-weight:500">Renewals should start three weeks early.</div><div class="meta"><i class="ph ph-check-circle" style="color:var(--sage)"></i> Added by you · 12 May</div></div>
+            </div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot sage">✓</span><span class="t"><b>Now it's remembered</b>Toast confirms; the fact moves to Active and starts personalising answers.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 8px"><i class="ph ph-arrow-left" style="font-size:18px"></i><div class="ttl" style="flex:1; text-align:center">What I've learned</div><span style="width:18px"></span></div>
+              <div class="seclab">Active</div>
+              <div class="card"><div class="ttl" style="font-weight:500">The family dog is called Pixel.</div><div class="meta"><i class="ph ph-check-circle" style="color:var(--sage)"></i> Added just now</div></div>
+              <div class="card"><div class="ttl" style="font-weight:500">Renewals should start three weeks early.</div><div class="meta"><i class="ph ph-check-circle" style="color:var(--sage)"></i> Added by you · 12 May</div></div>
+              <div class="card"><div class="ttl" style="font-weight:500">School emails come from St. Mary's.</div><div class="meta"><i class="ph ph-check-circle" style="color:var(--sage)"></i> Added by you · 8 May</div></div>
+            </div>
+            <div class="toast"><i class="ph-fill ph-check-circle"></i> Added to memory.</div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note"><b>Under the hood:</b> a post-answer inference pass writes <code>family_memory</code> rows as <code>status='proposed'</code>. Proposed facts <b>never</b> enter the prompt until confirmed — <code>PATCH status='active'</code>. Schema already supports it; no migration.</p>
+  </section>
+
+  <!-- ============ FEATURE 5 ============ -->
+  <section class="feat" id="f5">
+    <div class="feat-head">
+      <div class="feat-num">05</div>
+      <div>
+        <div class="feat-title">Telegram ingestion — drop → auto-file</div>
+        <div class="feat-sub">Forward a doc to the bot; the server extracts and files it into the right family's vault. The founding promise: the vault fills itself. <b>Isolation-critical.</b></div>
+        <div class="feat-tags"><span class="tag big">Later · build last</span><span class="tag">Effort L</span><span class="tag">migration · telegram verify</span></div>
+      </div>
+    </div>
+    <div class="rail">
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">1</span><span class="t"><b>Connect once</b>Profile → Telegram → Connect. Issues a single-use token + opens the bot deep link.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="row" style="margin:4px 0 12px"><i class="ph ph-arrow-left" style="font-size:18px"></i><div class="ttl" style="flex:1; text-align:center">Telegram</div><span style="width:18px"></span></div>
+              <div class="card" style="text-align:center; padding:20px 14px"><div class="ic cob" style="width:56px;height:56px;margin:0 auto 10px;font-size:26px"><i class="ph-fill ph-paper-plane-tilt"></i></div><div class="ttl" style="font-size:16px">Not connected</div><div class="meta" style="margin-top:4px">Forward docs, photos & school emails to the bot and I'll file them automatically.</div></div>
+              <div class="btn" style="position:relative">Connect Telegram<span class="hot" style="right:12px; top:8px"><span class="dot">1</span></span></div>
+              <div class="card" style="margin-top:12px; background:var(--wash); border-color:var(--cobalt)"><div class="meta" style="color:var(--cobalt)"><i class="ph-fill ph-lock-key"></i> Each chat is bound to your family by a verified token. Nothing files without it.</div></div>
+            </div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab"><i class="ph ph-folders"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot">2</span><span class="t"><b>Forward a doc in Telegram</b>Send the passport photo to the bot. The verified chat → family binding is set on /start.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="tg">
+              <div class="tbar"><i class="ph-fill ph-robot"></i> Family Almanac Bot</div>
+              <div class="m in">✅ Linked. Forward docs and I'll file them.</div>
+              <div class="doc"><i class="ph-fill ph-file-image" style="color:var(--cobalt);font-size:20px"></i> passport_bella.jpg
+                <span class="hot" style="right:-4px; top:-6px"><span class="dot">2</span></span></div>
+              <div class="m out">For Bella 🛂</div>
+              <div class="m in"><i class="ph-fill ph-check-circle" style="color:var(--sage)"></i> Filed <b>Bella — Passport</b> ✓<br><span style="color:#527da0">Identity · expires Aug 2029</span></div>
+            </div>
+          </div></div>
+        </div>
+        <i class="ph ph-arrow-right arrow"></i>
+      </div>
+
+      <div class="stepwrap">
+        <div class="step">
+          <div class="cap"><span class="dot sage">✓</span><span class="t"><b>It's in the vault</b>Open the app — the extracted doc is filed under Bella, categorised, expiry parsed. Zero manual entry.</span></div>
+          <div class="phone"><div class="scr">
+            <div class="statusbar"><span>9:41</span><span class="r"><i class="ph-fill ph-cell-signal-full"></i><i class="ph-fill ph-wifi-high"></i><i class="ph-fill ph-battery-high"></i></span></div>
+            <div class="body">
+              <div class="greet" style="font-size:17px">Documents</div>
+              <div class="card row" style="margin-top:8px; border-color:var(--sage); background:var(--sage-wash)"><div class="ic sg"><i class="ph-fill ph-identification-card"></i></div><div style="flex:1"><div class="ttl">Bella — Passport</div><div class="meta">Identity · via Telegram · just now</div></div><span class="pill sg">New</span></div>
+              <div class="card row"><div class="ic cob"><i class="ph-fill ph-car-profile"></i></div><div style="flex:1"><div class="ttl">Car insurance</div><div class="meta">Insurance · 12 days</div></div></div>
+              <div class="card row"><div class="ic am"><i class="ph-fill ph-airplane"></i></div><div style="flex:1"><div class="ttl">Alana — Passport</div><div class="meta">Identity · expired</div></div></div>
+            </div>
+            <div class="navbar"><div class="lab"><i class="ph ph-house"></i>Today</div><div class="lab on"><i class="ph-fill ph-folders on"></i>Docs</div><div class="lab"><i class="ph ph-calendar-blank"></i>Cal</div><div class="lab"><i class="ph ph-list-checks"></i>Actions</div><div class="lab"><i class="ph ph-sparkle"></i>Ask</div></div>
+          </div></div>
+        </div>
+      </div>
+
+    </div>
+    <p class="note"><b>P0 isolation:</b> the webhook resolves <code>chat_id → family_id</code> ONLY from a <b>verified</b> <code>telegram_links</code> row and pins that family_id on every service-role write. No token → no ingest. Caption "for family X" is ignored — the binding is the only truth. Webhook is secret-token authed against forgery.</p>
+  </section>
+
+  <footer>
+    <b>Family AI Assistant · Almanac design system.</b> Mockups only — planned features, not yet built. Full specs: <code>documentation/feature-plans/01…05.md</code> + <code>README.md</code>.
+    Cobalt <code>#2A4FC4</code> on cream <code>#F1EFE7</code> · Bricolage Grotesque + Hanken Grotesk · Phosphor icons.
+  </footer>
+
+</div>
+</body>
+</html>
