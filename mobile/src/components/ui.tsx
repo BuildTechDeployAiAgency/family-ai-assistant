@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 import { Brand } from '@/constants/theme';
-import { FAMILY_MEMBERS, type MemberKey } from '@/data/fixtures';
+import { useMembers } from '@/store/members';
 
 export function Card({
   children,
@@ -41,8 +41,9 @@ export function Pill({
   );
 }
 
-export function Avatar({ owner, size = 40 }: { owner: MemberKey; size?: number }) {
-  const m = FAMILY_MEMBERS[owner];
+export function Avatar({ owner, size = 40 }: { owner: string; size?: number }) {
+  const { resolve } = useMembers();
+  const m = resolve(owner);
   return (
     <View
       style={[

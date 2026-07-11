@@ -1,5 +1,4 @@
 import {
-  REFERENCE_DATE,
   FAMILY_MEMBERS,
   INITIAL_EMAILS,
   MOCK_AI_RESPONSES,
@@ -7,6 +6,16 @@ import {
   type Deadline,
   type MemberKey,
 } from '@/data/fixtures';
+
+// Real "today" as YYYY-MM-DD — the single source of now for urgency math
+// (replaces the fixed POC REFERENCE_DATE).
+export const todayISO = (): string => {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
 
 export interface DocStatus {
   label: string;
@@ -23,7 +32,7 @@ export const getDaysDifference = (futureStr: string, baseStr: string): number =>
 };
 
 export const getDocumentStatus = (expiryDate: string): DocStatus => {
-  const diff = getDaysDifference(expiryDate, REFERENCE_DATE);
+  const diff = getDaysDifference(expiryDate, todayISO());
   if (diff < 0) return { label: 'Expired', color: '#fb7185', bg: 'rgba(244,63,94,0.14)', icon: '🔴', urgency: 0 };
   if (diff <= 90) return { label: `Soon · ${diff}d`, color: '#fbbf24', bg: 'rgba(245,158,11,0.14)', icon: '🟡', urgency: 1 };
   return { label: 'Valid', color: '#34d399', bg: 'rgba(16,185,129,0.14)', icon: '🟢', urgency: 2 };

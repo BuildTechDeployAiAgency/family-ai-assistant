@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
+import { Tabs, useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 
 import { Brand } from '@/constants/theme';
-import { useAuth } from '@/store/auth';
 
 export default function TabsLayout() {
-  const { signOut } = useAuth();
+  const router = useRouter();
   return (
     <Tabs
       screenOptions={{
@@ -20,8 +19,8 @@ export default function TabsLayout() {
           borderTopColor: Brand.border,
         },
         headerRight: () => (
-          <Pressable onPress={signOut} hitSlop={12} style={{ marginRight: 16 }}>
-            <Ionicons name="log-out-outline" size={22} color={Brand.muted} />
+          <Pressable onPress={() => router.push('/settings')} hitSlop={12} style={{ marginRight: 16 }}>
+            <Ionicons name="settings-outline" size={22} color={Brand.muted} />
           </Pressable>
         ),
       }}>

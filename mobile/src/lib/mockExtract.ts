@@ -1,10 +1,10 @@
-import { REFERENCE_DATE, type MemberKey } from '@/data/fixtures';
+import { todayISO } from '@/lib/helpers';
 
 export interface Extraction {
   name: string;
   number: string;
   category: string;
-  owner: MemberKey;
+  owner: string;
   expiryDate: string;
   confidence: number; // 0-1
 }
@@ -39,12 +39,12 @@ export function extractFromImage(): Promise<Extraction> {
   const i = cursor;
   cursor += 1;
   const tpl = TEMPLATES[i % TEMPLATES.length];
-  // expiry between 1 and 24 months out from the reference "now"
+  // expiry between 1 and 24 months out from today
   const months = 1 + ((i * 7) % 24);
   const result: Extraction = {
     ...tpl,
     number: randNumber(i),
-    expiryDate: addMonths(REFERENCE_DATE, months),
+    expiryDate: addMonths(todayISO(), months),
   };
   return new Promise((resolve) => setTimeout(() => resolve(result), 1600));
 }

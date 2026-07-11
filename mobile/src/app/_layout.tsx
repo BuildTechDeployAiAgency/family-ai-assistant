@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Brand } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/store/auth';
 import { DocumentsProvider } from '@/store/documents';
+import { MembersProvider } from '@/store/members';
 
 const navTheme = {
   ...DarkTheme,
@@ -57,6 +58,8 @@ function RootNav() {
       <Stack.Screen name="document/[id]" options={{ title: 'Document' }} />
       <Stack.Screen name="email/[id]" options={{ title: 'Communication' }} />
       <Stack.Screen name="scan" options={{ presentation: 'modal', title: 'Scan document' }} />
+      <Stack.Screen name="settings/index" options={{ title: 'Settings' }} />
+      <Stack.Screen name="settings/member/[id]" options={{ title: 'Family member' }} />
     </Stack>
   );
 }
@@ -68,9 +71,11 @@ export default function RootLayout() {
         <ThemeProvider value={navTheme}>
           <StatusBar style="light" />
           <AuthProvider>
-            <DocumentsProvider>
-              <RootNav />
-            </DocumentsProvider>
+            <MembersProvider>
+              <DocumentsProvider>
+                <RootNav />
+              </DocumentsProvider>
+            </MembersProvider>
           </AuthProvider>
         </ThemeProvider>
       </SafeAreaProvider>

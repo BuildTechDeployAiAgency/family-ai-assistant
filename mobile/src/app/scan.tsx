@@ -17,13 +17,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { FAMILY_MEMBERS, type MemberKey } from '@/data/fixtures';
 import { categoryColor } from '@/lib/helpers';
 import { extractFromImage, type Extraction } from '@/lib/mockExtract';
 import { useDocuments } from '@/store/documents';
+import { useMembers } from '@/store/members';
 
 const CATEGORIES = ['Identity', 'Driving', 'Education', 'Health', 'Finance', 'Insurance', 'Travel', 'Admin'];
-const OWNERS = Object.keys(FAMILY_MEMBERS) as MemberKey[];
 
 type Phase = 'capture' | 'analyzing' | 'review';
 
@@ -31,6 +30,7 @@ export default function ScanScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { addDocument } = useDocuments();
+  const { members } = useMembers();
 
   const [phase, setPhase] = useState<Phase>('capture');
   const [image, setImage] = useState<string | null>(null);
@@ -166,11 +166,10 @@ export default function ScanScreen() {
 
               <Field label="Owner">
                 <View style={styles.chipWrap}>
-                  {OWNERS.map((o) => {
-                    const active = draft.owner === o;
-                    const m = FAMILY_MEMBERS[o];
+                  {members.map((m) => {
+                    const active = draft.owner === m.name;
                     return (
-                      <Pressable key={o} onPress={() => patch({ owner: o })}>
+                      <Pressable key={m.id} onPress={() => patch({ owner: m.name })}>
                         <View style={[styles.ownerChip, active && { backgroundColor: m.color, borderColor: m.color }]}>
                           <Text style={styles.ownerEmoji}>{m.avatar}</Text>
                           <Text style={[styles.ownerName, active && { color: '#04121f' }]}>{m.name}</Text>

@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { query } from './db.js';
 import { authenticateToken } from './middleware.js';
+import { progressFromExpiry, statusFromExpiry } from './lib/dates.js';
+import membersRouter from './routes/members.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -42,6 +44,18 @@ app.post('/api/auth/register', async (req, res) => {
     );
 
     const userId = result.id;
+
+    // Seed starter members so assignee/owner pickers are never empty.
+    await query.run(
+      `INSERT INTO family_members (user_id, name, role, color, avatar, is_child, aliases)
+       VALUES (?, ?, ?, ?, ?, 0, '[]')`,
+      [userId, 'Parent 1', 'Parent', '#6366f1', '👤']
+    );
+    await query.run(
+      `INSERT INTO family_members (user_id, name, role, color, avatar, is_child, aliases)
+       VALUES (?, ?, ?, ?, ?, 0, '[]')`,
+      [userId, 'Family', 'Household', '#14b8a6', '🏡']
+    );
 
     // Sign token
     const token = jwt.sign(
@@ -119,12 +133,7 @@ app.get('/api/documents', authenticateToken, async (req, res) => {
     const documents = await query.all('SELECT * FROM documents WHERE user_id = ?', [req.user.id]);
     
     const formattedDocs = documents.map(doc => {
-      const REFERENCE_DATE = '2026-05-19';
-      const d1 = new Date(doc.expiry_date);
-      const d2 = new Date(REFERENCE_DATE);
-      const diffTime = d1.getTime() - d2.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      const progress = diffDays < 0 ? 0 : diffDays <= 90 ? Math.round((diffDays / 90) * 100) : 100;
+      const progress = progressFromExpiry(doc.expiry_date);
 
       return {
         id: doc.id,
@@ -159,12 +168,7 @@ app.post('/api/documents', authenticateToken, async (req, res) => {
   
   let finalStatus = status;
   if (!finalStatus && finalExpiryDate) {
-    const REFERENCE_DATE = '2026-05-19';
-    const d1 = new Date(finalExpiryDate);
-    const d2 = new Date(REFERENCE_DATE);
-    const diffTime = d1.getTime() - d2.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    finalStatus = diffDays < 0 ? 'Expired' : diffDays <= 90 ? 'Expiring' : 'Valid';
+    finalStatus = statusFromExpiry(finalExpiryDate);
   }
   if (!finalStatus) finalStatus = 'Valid';
 
@@ -401,6 +405,12 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete task' });
   }
 });
+
+
+// -------------------------------------------------------------
+// Family Members Endpoints (Authenticated)
+// -------------------------------------------------------------
+app.use('/api/members', membersRouter);
 
 
 // -------------------------------------------------------------

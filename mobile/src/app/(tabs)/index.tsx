@@ -6,14 +6,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar, Card, Pill, ProgressBar, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
-import { FAMILY_MEMBERS } from '@/data/fixtures';
 import { categoryColor, getDocumentStatus } from '@/lib/helpers';
 import { useDocuments } from '@/store/documents';
+import { useMembers } from '@/store/members';
 
 export default function DocumentsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { documents } = useDocuments();
+  const { resolve } = useMembers();
 
   const docs = useMemo(
     () =>
@@ -44,7 +45,7 @@ export default function DocumentsScreen() {
 
       {docs.map((doc) => {
         const status = getDocumentStatus(doc.expiryDate);
-        const member = FAMILY_MEMBERS[doc.owner];
+        const member = resolve(doc.owner);
         return (
           <Link key={doc.id} href={`/document/${doc.id}`} asChild>
             <Pressable>

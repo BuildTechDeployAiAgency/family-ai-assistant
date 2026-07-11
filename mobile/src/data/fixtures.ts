@@ -20,7 +20,7 @@ export interface FamilyDocument {
   name: string;
   number: string;
   expiryDate: string; // YYYY-MM-DD
-  owner: MemberKey;
+  owner: string; // family member name (see store/members)
   category: string;
   progress: number; // 0-100 renewal progress
 }
