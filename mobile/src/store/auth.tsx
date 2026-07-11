@@ -1,12 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+
+import { api, setAuthToken, ApiError } from '@/lib/api';
 
 export interface Session {
   email: string;
   familyName: string;
-  // Placeholder token. Real Supabase access_token replaces this when the
-  // backend is wired in — swap the body of signIn/signUp/restore only.
-  token: string;
+  token: string; // JWT issued by the Express backend (30-day expiry)
 }
 
 interface AuthContextValue {
@@ -17,21 +17,40 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
+interface AuthResponse {
+  token: string;
+  user: { id: number; email: string; familyName: string };
+}
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 const KEY = 'familyai.session';
-
-const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore persisted session on mount.
+  // Restore persisted session on mount, validating the token against the API.
   useEffect(() => {
     (async () => {
       try {
         const raw = await SecureStore.getItemAsync(KEY);
-        if (raw) setSession(JSON.parse(raw) as Session);
+        if (!raw) return;
+        const stored = JSON.parse(raw) as Session;
+        setAuthToken(stored.token);
+        try {
+          const { user } = await api.get<{ user: AuthResponse['user'] }>('/api/auth/me');
+          setSession({ email: user.email, familyName: user.familyName, token: stored.token });
+        } catch (err) {
+          if (err instanceof ApiError && err.status === 0) {
+            // Server unreachable — keep the stored session so the app works
+            // offline; requests will surface errors until the server is back.
+            setSession(stored);
+          } else {
+            // Token rejected — treat as signed out.
+            setAuthToken(null);
+            await SecureStore.deleteItemAsync(KEY);
+          }
+        }
       } catch {
         // ignore — treat as logged out
       } finally {
@@ -41,25 +60,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const persist = async (s: Session) => {
+    setAuthToken(s.token);
     setSession(s);
     await SecureStore.setItemAsync(KEY, JSON.stringify(s));
   };
 
-  // Local/mock auth — no backend. Validates shape, accepts any credentials.
   const signIn = async (email: string, password: string) => {
-    if (!isEmail(email)) throw new Error('Enter a valid email address.');
-    if (password.length < 6) throw new Error('Password must be at least 6 characters.');
-    await persist({ email: email.trim(), familyName: email.split('@')[0], token: 'local-dev' });
+    const { token, user } = await api.post<AuthResponse>('/api/auth/login', {
+      email: email.trim(),
+      password,
+    });
+    await persist({ email: user.email, familyName: user.familyName, token });
   };
 
   const signUp = async (email: string, password: string, familyName: string) => {
-    if (!isEmail(email)) throw new Error('Enter a valid email address.');
-    if (password.length < 6) throw new Error('Password must be at least 6 characters.');
     if (!familyName.trim()) throw new Error('Enter a family name.');
-    await persist({ email: email.trim(), familyName: familyName.trim(), token: 'local-dev' });
+    const { token, user } = await api.post<AuthResponse>('/api/auth/register', {
+      email: email.trim(),
+      password,
+      familyName: familyName.trim(),
+    });
+    await persist({ email: user.email, familyName: user.familyName, token });
   };
 
   const signOut = async () => {
+    setAuthToken(null);
     setSession(null);
     await SecureStore.deleteItemAsync(KEY);
   };
