@@ -7,6 +7,7 @@ import { authenticateToken } from './middleware.js';
 import { progressFromExpiry, statusFromExpiry } from './lib/dates.js';
 import membersRouter from './routes/members.js';
 import aiRouter from './routes/ai.js';
+import chatRouter from './routes/chat.js';
 import remindersRouter from './routes/reminders.js';
 import { startReminderScheduler } from './reminders/scheduler.js';
 
@@ -458,6 +459,7 @@ app.use('/api/members', membersRouter);
 // -------------------------------------------------------------
 // AI Endpoints (Authenticated, server-side OpenRouter proxy)
 // -------------------------------------------------------------
+app.use('/api/ai/chat', chatRouter);
 app.use('/api/ai', aiRouter);
 
 // -------------------------------------------------------------

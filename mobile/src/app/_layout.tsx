@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { Brand } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/store/auth';
+import { ChatProvider } from '@/store/chat';
 import { DocumentsProvider } from '@/store/documents';
 import { EmailsProvider } from '@/store/emails';
 import { MembersProvider } from '@/store/members';
@@ -78,7 +79,9 @@ export default function RootLayout() {
               <DocumentsProvider>
                 <TasksProvider>
                   <EmailsProvider>
-                    <RootNav />
+                    <ChatProvider>
+                      <RootNav />
+                    </ChatProvider>
                   </EmailsProvider>
                 </TasksProvider>
               </DocumentsProvider>
