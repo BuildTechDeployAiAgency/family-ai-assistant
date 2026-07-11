@@ -6,6 +6,7 @@ import { query } from './db.js';
 import { authenticateToken } from './middleware.js';
 import { progressFromExpiry, statusFromExpiry } from './lib/dates.js';
 import membersRouter from './routes/members.js';
+import aiRouter from './routes/ai.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -411,6 +412,11 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
 // Family Members Endpoints (Authenticated)
 // -------------------------------------------------------------
 app.use('/api/members', membersRouter);
+
+// -------------------------------------------------------------
+// AI Endpoints (Authenticated, server-side OpenRouter proxy)
+// -------------------------------------------------------------
+app.use('/api/ai', aiRouter);
 
 
 // -------------------------------------------------------------

@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card, Pill, SectionLabel } from '@/components/ui';
 import { Brand } from '@/constants/theme';
+import { api } from '@/lib/api';
 import { categoryColor } from '@/lib/helpers';
 import { extractFromImage, type Extraction } from '@/lib/mockExtract';
 import { useDocuments } from '@/store/documents';
@@ -35,14 +36,31 @@ export default function ScanScreen() {
   const [phase, setPhase] = useState<Phase>('capture');
   const [image, setImage] = useState<string | null>(null);
   const [draft, setDraft] = useState<Extraction | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
 
-  const runExtraction = async (uri: string) => {
-    setImage(uri);
+  const runExtraction = async (asset: ImagePicker.ImagePickerAsset) => {
+    setImage(asset.uri);
     setPhase('analyzing');
-    const result = await extractFromImage();
-    setDraft(result);
+    setIsDemo(false);
+    try {
+      if (!asset.base64) throw new Error('No image data');
+      const result = await api.post<Extraction>('/api/ai/scan-document', {
+        imageBase64: asset.base64,
+        mimeType: asset.mimeType || 'image/jpeg',
+      });
+      setDraft(result);
+    } catch (err) {
+      // Server AI unconfigured/unreachable — fall back to demo extraction so
+      // the flow stays usable offline; label it clearly in the review step.
+      console.error('Scan failed, using demo extraction:', err);
+      setDraft(await extractFromImage());
+      setIsDemo(true);
+    }
     setPhase('review');
   };
+
+  // Low quality keeps the base64 payload well under the server's 10mb cap.
+  const pickerOptions = { quality: 0.4, base64: true } as const;
 
   const takePhoto = async () => {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -50,17 +68,21 @@ export default function ScanScreen() {
       Alert.alert('Camera access needed', 'Enable camera access to scan a document.');
       return;
     }
-    const res = await ImagePicker.launchCameraAsync({ quality: 0.6 });
-    if (!res.canceled) runExtraction(res.assets[0].uri);
+    const res = await ImagePicker.launchCameraAsync(pickerOptions);
+    if (!res.canceled) runExtraction(res.assets[0]);
   };
 
   const pickImage = async () => {
-    const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.6, mediaTypes: ['images'] });
-    if (!res.canceled) runExtraction(res.assets[0].uri);
+    const res = await ImagePicker.launchImageLibraryAsync({ ...pickerOptions, mediaTypes: ['images'] });
+    if (!res.canceled) runExtraction(res.assets[0]);
   };
 
   const save = () => {
     if (!draft) return;
+    if (!draft.expiryDate) {
+      Alert.alert('Expiry needed', 'Enter the expiry or due date (YYYY-MM-DD) before saving.');
+      return;
+    }
     addDocument({
       name: draft.name,
       number: draft.number,
@@ -112,11 +134,15 @@ export default function ScanScreen() {
           <>
             {image && <Image source={{ uri: image }} style={styles.preview} contentFit="cover" />}
             <View style={styles.confidenceRow}>
-              <Pill
-                label={`AI confidence ${(draft.confidence * 100).toFixed(0)}%`}
-                color={Brand.green}
-                bg="rgba(16,185,129,0.14)"
-              />
+              {isDemo ? (
+                <Pill label="Demo extraction — AI offline" color={Brand.amber} bg="rgba(245,158,11,0.14)" />
+              ) : (
+                <Pill
+                  label={`AI confidence ${(draft.confidence * 100).toFixed(0)}%`}
+                  color={Brand.green}
+                  bg="rgba(16,185,129,0.14)"
+                />
+              )}
               <Text style={styles.reviewHint}>Check & edit before saving</Text>
             </View>
 
