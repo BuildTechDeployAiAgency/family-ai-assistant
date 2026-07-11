@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Brand } from '@/constants/theme';
 
@@ -19,9 +19,14 @@ export default function TabsLayout() {
           borderTopColor: Brand.border,
         },
         headerRight: () => (
-          <Pressable onPress={() => router.push('/settings')} hitSlop={12} style={{ marginRight: 16 }}>
-            <Ionicons name="settings-outline" size={22} color={Brand.muted} />
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 18, marginRight: 16 }}>
+            <Pressable onPress={() => router.push('/recipes')} hitSlop={12}>
+              <Ionicons name="restaurant-outline" size={21} color={Brand.muted} />
+            </Pressable>
+            <Pressable onPress={() => router.push('/settings')} hitSlop={12}>
+              <Ionicons name="settings-outline" size={22} color={Brand.muted} />
+            </Pressable>
+          </View>
         ),
       }}>
       <Tabs.Screen

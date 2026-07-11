@@ -14,7 +14,7 @@ export default function DocumentsScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { documents } = useDocuments();
-  const { resolve } = useMembers();
+  const { resolve, members } = useMembers();
 
   const docs = useMemo(
     () =>
@@ -46,12 +46,18 @@ export default function DocumentsScreen() {
       {docs.map((doc) => {
         const status = getDocumentStatus(doc.expiryDate);
         const member = resolve(doc.owner);
+        const memberId = members.find((m) => m.name.toLowerCase() === doc.owner.toLowerCase())?.id;
         return (
           <Link key={doc.id} href={`/document/${doc.id}`} asChild>
             <Pressable>
               {({ pressed }) => (
                 <Card style={[styles.docCard, pressed && styles.pressed]}>
-                  <Avatar owner={doc.owner} />
+                  <Pressable
+                    disabled={!memberId}
+                    onPress={() => memberId && router.push(`/member/${memberId}`)}
+                    hitSlop={6}>
+                    <Avatar owner={doc.owner} />
+                  </Pressable>
                   <View style={styles.docBody}>
                     <View style={styles.docTitleRow}>
                       <Text style={styles.docName} numberOfLines={1}>

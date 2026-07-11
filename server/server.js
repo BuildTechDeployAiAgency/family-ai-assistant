@@ -9,6 +9,7 @@ import membersRouter from './routes/members.js';
 import aiRouter from './routes/ai.js';
 import chatRouter from './routes/chat.js';
 import remindersRouter from './routes/reminders.js';
+import recipesRouter from './routes/recipes.js';
 import { startReminderScheduler } from './reminders/scheduler.js';
 
 const app = express();
@@ -466,6 +467,11 @@ app.use('/api/ai', aiRouter);
 // Reminders Endpoints (Authenticated)
 // -------------------------------------------------------------
 app.use('/api/reminders', remindersRouter);
+
+// -------------------------------------------------------------
+// Recipes Endpoints (Authenticated)
+// -------------------------------------------------------------
+app.use('/api/recipes', recipesRouter);
 
 
 // -------------------------------------------------------------

@@ -12,6 +12,7 @@ import { ChatProvider } from '@/store/chat';
 import { DocumentsProvider } from '@/store/documents';
 import { EmailsProvider } from '@/store/emails';
 import { MembersProvider } from '@/store/members';
+import { RecipesProvider } from '@/store/recipes';
 import { TasksProvider } from '@/store/tasks';
 
 const navTheme = {
@@ -64,6 +65,10 @@ function RootNav() {
       <Stack.Screen name="create" options={{ presentation: 'modal', title: 'New item' }} />
       <Stack.Screen name="settings/index" options={{ title: 'Settings' }} />
       <Stack.Screen name="settings/member/[id]" options={{ title: 'Family member' }} />
+      <Stack.Screen name="member/[id]" options={{ title: 'Profile' }} />
+      <Stack.Screen name="recipes/index" options={{ title: 'Recipes' }} />
+      <Stack.Screen name="recipes/[id]" options={{ title: 'Recipe' }} />
+      <Stack.Screen name="recipes/import" options={{ presentation: 'modal', title: 'Import recipe' }} />
     </Stack>
   );
 }
@@ -79,9 +84,11 @@ export default function RootLayout() {
               <DocumentsProvider>
                 <TasksProvider>
                   <EmailsProvider>
-                    <ChatProvider>
-                      <RootNav />
-                    </ChatProvider>
+                    <RecipesProvider>
+                      <ChatProvider>
+                        <RootNav />
+                      </ChatProvider>
+                    </RecipesProvider>
                   </EmailsProvider>
                 </TasksProvider>
               </DocumentsProvider>

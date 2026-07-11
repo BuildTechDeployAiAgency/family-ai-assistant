@@ -250,4 +250,88 @@ ${email.body}`,
   }
 });
 
+// Fetch a web page and reduce it to readable text for recipe extraction.
+async function fetchPageText(url) {
+  const res = await fetch(url, {
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; FamilyAI/1.0)' },
+    redirect: 'follow',
+  });
+  if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
+  const html = await res.text();
+
+  const ogImage = html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/i)?.[1]
+    ?? html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/i)?.[1]
+    ?? '';
+
+  const text = html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&#?\w+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 15000);
+
+  return { text, ogImage };
+}
+
+// POST /api/ai/extract-recipe - Structure a recipe from a URL, pasted text, or photo
+router.post('/extract-recipe', requireAI, async (req, res) => {
+  const { url, text, imageBase64, mimeType } = req.body;
+
+  if (!url && !text && !imageBase64) {
+    return res.status(400).json({ error: 'Provide a url, text, or imageBase64' });
+  }
+
+  try {
+    const instruction = `You extract recipes for a family cookbook. Reply with ONLY a JSON object:
+{
+  "title": "<recipe name>",
+  "ingredients": ["<one ingredient per entry, with quantity>"],
+  "steps": ["<one concise step per entry, in order>"]
+}
+If the content is not a recipe, return { "title": "", "ingredients": [], "steps": [] }.`;
+
+    let messages;
+    let image = '';
+
+    if (imageBase64) {
+      messages = [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: instruction },
+            { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } },
+          ],
+        },
+      ];
+    } else if (url) {
+      const page = await fetchPageText(url);
+      image = page.ogImage;
+      messages = [{ role: 'user', content: `${instruction}\n\nPage content from ${url}:\n\n${page.text}` }];
+    } else {
+      messages = [{ role: 'user', content: `${instruction}\n\nRecipe text:\n\n${String(text).slice(0, 15000)}` }];
+    }
+
+    const result = await callOpenRouterJSON({ messages, maxTokens: 3000 });
+
+    if (!result.title) {
+      return res.status(422).json({ error: "Couldn't find a recipe in that content" });
+    }
+
+    res.json({
+      title: result.title,
+      ingredients: Array.isArray(result.ingredients) ? result.ingredients : [],
+      steps: Array.isArray(result.steps) ? result.steps : [],
+      image,
+      sourceUrl: url || '',
+    });
+  } catch (err) {
+    console.error('Recipe extraction error:', err);
+    res.status(500).json({ error: 'Failed to extract the recipe' });
+  }
+});
+
 export default router;
