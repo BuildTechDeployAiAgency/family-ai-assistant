@@ -7,6 +7,8 @@ import { authenticateToken } from './middleware.js';
 import { progressFromExpiry, statusFromExpiry } from './lib/dates.js';
 import membersRouter from './routes/members.js';
 import aiRouter from './routes/ai.js';
+import remindersRouter from './routes/reminders.js';
+import { startReminderScheduler } from './reminders/scheduler.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -320,27 +322,40 @@ app.put('/api/emails/:id', authenticateToken, async (req, res) => {
 // Tasks Endpoints (Authenticated)
 // -------------------------------------------------------------
 
+// Map a tasks row to the camelCase shape the clients use.
+const mapTask = (task) => ({
+  id: task.id,
+  title: task.title,
+  assignee: task.assignee,
+  dueDate: task.due_date,
+  completed: !!task.completed,
+  category: task.category,
+  type: task.type || 'task',
+  memberId: task.member_id ?? null,
+  sourceEmailId: task.source_email_id || null,
+  urgency: task.urgency || 'medium',
+  notes: task.notes || '',
+  startAt: task.start_at || null,
+  endAt: task.end_at || null,
+});
+
 // GET /api/tasks - Get user tasks
 app.get('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const tasks = await query.all('SELECT * FROM tasks WHERE user_id = ?', [req.user.id]);
-    
-    // Map completed from 0/1 back to boolean for React
-    const formattedTasks = tasks.map(task => ({
-      ...task,
-      completed: !!task.completed
-    }));
-
-    res.json(formattedTasks);
+    res.json(tasks.map(mapTask));
   } catch (err) {
     console.error('Error fetching tasks:', err);
     res.status(500).json({ error: 'Failed to fetch tasks' });
   }
 });
 
-// POST /api/tasks - Add or replace a task
+// POST /api/tasks - Add or replace a task/reminder/meeting
 app.post('/api/tasks', authenticateToken, async (req, res) => {
-  const { id, title, assignee, dueDate, completed, category } = req.body;
+  const {
+    id, title, assignee, dueDate, completed, category,
+    type, memberId, sourceEmailId, urgency, notes, startAt, endAt,
+  } = req.body;
 
   if (!id || !title || !assignee || !dueDate || !category) {
     return res.status(400).json({ error: 'Missing required task fields' });
@@ -348,38 +363,65 @@ app.post('/api/tasks', authenticateToken, async (req, res) => {
 
   try {
     await query.run(
-      `INSERT OR REPLACE INTO tasks (id, user_id, title, assignee, due_date, completed, category)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, req.user.id, title, assignee, dueDate, completed ? 1 : 0, category]
+      `INSERT OR REPLACE INTO tasks
+         (id, user_id, title, assignee, due_date, completed, category,
+          type, member_id, source_email_id, urgency, notes, start_at, end_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id, req.user.id, title, assignee, dueDate, completed ? 1 : 0, category,
+        type || 'task', memberId ?? null, sourceEmailId || null,
+        urgency || 'medium', notes || '', startAt || null, endAt || null,
+      ]
     );
 
-    res.status(201).json({ id, title, assignee, dueDate, completed, category });
+    const row = await query.get('SELECT * FROM tasks WHERE id = ? AND user_id = ?', [id, req.user.id]);
+    res.status(201).json(mapTask(row));
   } catch (err) {
     console.error('Error saving task:', err);
     res.status(500).json({ error: 'Failed to save task' });
   }
 });
 
-// PUT /api/tasks/:id - Update complete or content status
+// PUT /api/tasks/:id - Update completion or content
 app.put('/api/tasks/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { completed, title, assignee, dueDate, category } = req.body;
+  const { completed, title, assignee, dueDate, category, urgency, notes, startAt, endAt } = req.body;
 
   try {
-    if (completed !== undefined) {
+    if (completed !== undefined && title === undefined) {
       await query.run(
         'UPDATE tasks SET completed = ? WHERE id = ? AND user_id = ?',
         [completed ? 1 : 0, id, req.user.id]
       );
     } else {
+      const existing = await query.get('SELECT * FROM tasks WHERE id = ? AND user_id = ?', [id, req.user.id]);
+      if (!existing) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
       await query.run(
-        `UPDATE tasks SET title = ?, assignee = ?, due_date = ?, category = ? 
+        `UPDATE tasks SET title = ?, assignee = ?, due_date = ?, category = ?,
+           completed = ?, urgency = ?, notes = ?, start_at = ?, end_at = ?
          WHERE id = ? AND user_id = ?`,
-        [title, assignee, dueDate, category, id, req.user.id]
+        [
+          title ?? existing.title,
+          assignee ?? existing.assignee,
+          dueDate ?? existing.due_date,
+          category ?? existing.category,
+          completed !== undefined ? (completed ? 1 : 0) : existing.completed,
+          urgency ?? existing.urgency,
+          notes ?? existing.notes,
+          startAt ?? existing.start_at,
+          endAt ?? existing.end_at,
+          id, req.user.id,
+        ]
       );
     }
 
-    res.json({ message: 'Task updated successfully', id });
+    const row = await query.get('SELECT * FROM tasks WHERE id = ? AND user_id = ?', [id, req.user.id]);
+    if (!row) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    res.json(mapTask(row));
   } catch (err) {
     console.error('Error updating task:', err);
     res.status(500).json({ error: 'Failed to update task' });
@@ -418,6 +460,11 @@ app.use('/api/members', membersRouter);
 // -------------------------------------------------------------
 app.use('/api/ai', aiRouter);
 
+// -------------------------------------------------------------
+// Reminders Endpoints (Authenticated)
+// -------------------------------------------------------------
+app.use('/api/reminders', remindersRouter);
+
 
 // -------------------------------------------------------------
 // Serve static client bundle in production
@@ -427,4 +474,5 @@ app.use(express.static('dist'));
 // Server listening
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  startReminderScheduler();
 });
